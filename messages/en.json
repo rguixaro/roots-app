@@ -26,6 +26,7 @@
   "errors": {
     "family-name-too-short": "Family name is too short.",
     "family-type-required": "Family type must be selected.",
+    "family-option-required": "An option must be selected.",
     "username-required": "Username is required.",
     "username-too-long": "Username cannot be longer than 40 characters.",
     "email-invalid": "Invalid email address."

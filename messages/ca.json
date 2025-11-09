@@ -26,6 +26,7 @@
   "errors": {
     "family-name-too-short": "El nom de la família és massa curt.",
     "family-type-required": "Cal seleccionar una tipus de familia.",
+    "family-option-required": "Cal seleccionar una opció.",
     "username-required": "El nom d'usuari és obligatori.",
     "username-too-long": "El nom d'usuari no pot tenir més de 40 caràcters.",
     "email-invalid": "L'adreça de correu electrònic no és vàlida."

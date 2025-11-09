@@ -6,24 +6,25 @@ import type { z } from 'zod'
 
 import { auth } from '@/auth'
 import { db } from '@/server/db'
-import type { CreateFamilySchema, FamilySchema, FamilyRoles } from '@/server/schemas'
+import type { CreateFamilySchema, FamilyRoles } from '@/server/schemas'
 import { slugify } from '@/server/utils'
 import { Family } from '@/types'
 
-interface createFamilyResult {
+interface FamilyResult {
   error: boolean
   message?: string
+  family?: Family
 }
 
 /**
  * Create new family.
  * Auth required.
  * @param values {z.infer<typeof CreateFamilySchema>}
- * @returns Promise<createFamilyResult>
+ * @returns Promise<FamilyResult>
  */
 export const createFamily = async (
   values: z.infer<typeof CreateFamilySchema>
-): Promise<createFamilyResult> => {
+): Promise<FamilyResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -31,7 +32,7 @@ export const createFamily = async (
   if (!userId) return { error: true }
 
   try {
-    await db.family.create({
+    const family = await db.family.create({
       data: {
         slug: slugify(values.name),
         name: values.name,
@@ -40,7 +41,13 @@ export const createFamily = async (
         nodeGallery: values.nodeGallery ?? false,
         accesses: { create: { userId, role: 'ADMIN' } },
       },
+      include: { accesses: { include: { user: true } } },
     })
+
+    revalidatePath('/')
+    revalidatePath('/families')
+
+    return { error: false, family: family || undefined }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') {
@@ -49,11 +56,6 @@ export const createFamily = async (
     }
     return { error: true, message: 'error' }
   }
-
-  revalidatePath('/')
-  revalidatePath('/families')
-
-  return { error: false }
 }
 
 /**
@@ -61,13 +63,13 @@ export const createFamily = async (
  * Auth required.
  * Only users with ADMIN or EDITOR role can update.
  * @param values {z.infer<typeof CreateFamilySchema>}
- * @returns Promise<{ error: boolean; message?: string; family?: Family }>
+ * @returns Promise<FamilyResult>
  */
 export const updateFamily = async (
   id: string,
   userId: string,
   values: z.infer<typeof CreateFamilySchema>
-): Promise<{ error: boolean; message?: string; family?: Family }> => {
+): Promise<FamilyResult> => {
   const currentUser = await auth()
 
   // Not authenticated
@@ -111,13 +113,13 @@ export const updateFamily = async (
  * @param familyId Family ID
  * @param email User email
  * @param role FamilyRoles
- * @returns Promise<{ error: boolean; message?: string }>
+ * @returns Promise<FamilyResult>
  */
 export const inviteMember = async (
   familyId: string,
   email: string,
   role: FamilyRoles
-): Promise<{ error: boolean; message?: string; family?: Family }> => {
+): Promise<FamilyResult> => {
   const currentUser = await auth()
 
   // Not authenticated
@@ -141,6 +143,9 @@ export const inviteMember = async (
       include: { accesses: { include: { user: true } } },
     })
 
+    revalidatePath('/')
+    revalidatePath('/families')
+
     return { error: false, family: family || undefined }
   } catch (e) {
     return { error: true, message: 'error' }
@@ -153,12 +158,9 @@ export const inviteMember = async (
  * Only users with ADMIN or EDITOR role can remove members.
  * @param familyId Family ID
  * @param memberId User ID to remove
- * @returns Promise<{ error: boolean; message?: string }>
+ * @returns Promise<FamilyResult>
  */
-export const removeMember = async (
-  familyId: string,
-  memberId: string
-): Promise<{ error: boolean; message?: string; family?: Family }> => {
+export const removeMember = async (familyId: string, memberId: string): Promise<FamilyResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user.id
 
@@ -168,12 +170,15 @@ export const removeMember = async (
   try {
     await db.familyAccess.delete({ where: { familyId_userId: { familyId, userId: memberId } } })
 
-    const updatedFamily = await db.family.findUnique({
+    const family = await db.family.findUnique({
       where: { id: familyId },
       include: { accesses: { include: { user: true } } },
     })
 
-    return { error: false, family: updatedFamily ?? undefined }
+    revalidatePath('/')
+    revalidatePath('/families')
+
+    return { error: false, family: family ?? undefined }
   } catch (e) {
     return { error: true, message: 'error' }
   }

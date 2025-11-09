@@ -10,8 +10,8 @@ export type FamilyRoles = (typeof FamilyRoles)[number]
 export const CreateFamilySchema = z.object({
   name: z.string().min(3, { message: 'family-name-too-short' }),
   type: z.enum(FamilyTypes, { required_error: 'family-type-required' }),
-  nodeImage: z.boolean().default(false).optional(),
-  nodeGallery: z.boolean().default(false).optional(),
+  nodeImage: z.boolean({ required_error: 'family-option-required' }),
+  nodeGallery: z.boolean({ required_error: 'family-option-required' }),
   members: z
     .array(
       z.object({

@@ -23,13 +23,24 @@
     "error-user-already-in-family": "L'usuari ja forma part de la família.",
     "family-member-added": "Usuari afegit a la família amb èxit.",
     "family-member-updated": "Usuari actualitzat amb èxit.",
-    "family-member-removed": "Usuari eliminat de la família amb èxit."
+    "family-member-removed": "Usuari eliminat de la família amb èxit.",
+    "node-created": "Membre afegit amb èxit.",
+    "edge-created": "Relació creada amb èxit.",
+    "edge-deleted": "Relació eliminada amb èxit.",
+    "error-nodes-not-found": "Un o més membres no trobats.",
+    "error-edge-not-found": "Relació no trobada.",
+    "error-relationship-already-exists": "Ja existeix una relació entre aquests membres.",
+    "error-cannot-connect-to-self": "No es pot crear una relació amb el mateix membre.",
+    "error-would-create-cycle": "Aquesta relació crearia un cicle familiar.",
+    "error-cannot-connect-siblings": "No es pot crear una relació pare-fill entre germans.",
+    "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares."
   },
   "errors": {
     "family-name-too-short": "El nom de la família és massa curt.",
     "family-type-required": "Cal seleccionar una tipus de familia.",
     "family-option-required": "Cal seleccionar una opció.",
     "full-name-required": "El nom complet és obligatori.",
+    "gender-required": "El gènere és obligatori.",
     "username-required": "El nom d'usuari és obligatori.",
     "username-too-long": "El nom d'usuari no pot tenir més de 40 caràcters.",
     "email-invalid": "L'adreça de correu electrònic no és vàlida."
@@ -79,8 +90,9 @@
     "more-on": "Més famílies a"
   },
   "TreePage": {
-    "node-create": "Nou membre",
-    "node-created": "Membre afegit amb èxit.",
+    "node-new": "Nou membre",
+    "node-create": "Crear",
+    "node-creating": "Creant membre...",
     "node-general-info": "Informació general",
     "node-fullname": "Nom complet",
     "node-birth-date": "Data de naixement",
@@ -93,7 +105,8 @@
     "node-ancestry-info": "Detalls d'ascendència",
     "node-mother": "Mare",
     "node-father": "Pare",
-    "node-search": "Cerca"
+    "node-search": "Cerca",
+    "cancel": "Cancel·lar"
   },
   "EnumTypes": {
     "human": "Humana",

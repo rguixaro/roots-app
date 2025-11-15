@@ -23,13 +23,24 @@
     "error-user-already-in-family": "User is already a member of the family.",
     "family-member-added": "User added to family successfully.",
     "family-member-updated": "User updated successfully.",
-    "family-member-removed": "User removed from family successfully."
+    "family-member-removed": "User removed from family successfully.",
+    "node-created": "Member added successfully.",
+    "edge-created": "Relationship created successfully.",
+    "edge-deleted": "Relationship deleted successfully.",
+    "error-nodes-not-found": "One or more members not found.",
+    "error-edge-not-found": "Relationship not found.",
+    "error-relationship-already-exists": "A relationship already exists between these members.",
+    "error-cannot-connect-to-self": "Cannot create a relationship with the same member.",
+    "error-would-create-cycle": "This relationship would create a family cycle.",
+    "error-cannot-connect-siblings": "Cannot create a parent-child relationship between siblings.",
+    "error-child-has-max-parents": "A child cannot have more than 2 parents."
   },
   "errors": {
     "family-name-too-short": "Family name is too short.",
     "family-type-required": "Family type must be selected.",
     "family-option-required": "An option must be selected.",
     "full-name-required": "Full name is required",
+    "gender-required": "Gender is required.",
     "username-required": "Username is required.",
     "username-too-long": "Username cannot be longer than 40 characters.",
     "email-invalid": "Invalid email address."
@@ -79,8 +90,9 @@
     "more-on": "More families on"
   },
   "TreePage": {
-    "node-create": "New member",
-    "node-created": "Member added successfully.",
+    "node-new": "New member",
+    "node-create": "Create",
+    "node-creating": "Creating member...",
     "node-general-info": "General information",
     "node-fullname": "Full name",
     "node-birth-date": "Birth date",
@@ -93,7 +105,8 @@
     "node-ancestry-info": "Ancestry details",
     "node-mother": "Mother",
     "node-father": "Father",
-    "node-search": "Search"
+    "node-search": "Search",
+    "cancel": "Cancelar"
   },
   "EnumTypes": {
     "human": "Human",

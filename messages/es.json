@@ -23,13 +23,24 @@
     "error-user-already-in-family": "El usuario ya forma parte de la familia.",
     "family-member-added": "Usuario añadido a la familia con éxito.",
     "family-member-updated": "Usuario actualizado con éxito.",
-    "family-member-removed": "Usuario eliminado de la familia con éxito."
+    "family-member-removed": "Usuario eliminado de la familia con éxito.",
+    "node-created": "Miembro añadido con éxito.",
+    "edge-created": "Relación creada con éxito.",
+    "edge-deleted": "Relación eliminada con éxito.",
+    "error-nodes-not-found": "Uno o más miembros no encontrados.",
+    "error-edge-not-found": "Relación no encontrada.",
+    "error-relationship-already-exists": "Ya existe una relación entre estos miembros.",
+    "error-cannot-connect-to-self": "No se puede crear una relación con el mismo miembro.",
+    "error-would-create-cycle": "Esta relación crearía un ciclo familiar.",
+    "error-cannot-connect-siblings": "No se puede crear una relación padre-hijo entre hermanos.",
+    "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres."
   },
   "errors": {
     "family-name-too-short": "El nombre de la familia es demasiado corto.",
     "family-type-required": "Es necesario seleccionar una tipo de familia.",
     "family-option-required": "Se debe seleccionar una opción.",
     "full-name-required": "El nombre completo es obligatorio.",
+    "gender-required": "El género es obligatorio.",
     "username-required": "El nombre de usuario es obligatorio.",
     "username-too-long": "El nombre de usuario no puede tener más de 40 caracteres.",
     "email-invalid": "La dirección de correo electrónico no es válida."
@@ -79,8 +90,9 @@
     "more-on": "Más familias en"
   },
   "TreePage": {
-    "node-create": "Nuevo miembro",
-    "node-created": "Miembro añadido con éxito.",
+    "node-new": "Nuevo miembro",
+    "node-create": "Crear",
+    "node-creating": "Creando miembro...",
     "node-general-info": "Información general",
     "node-fullname": "Nombre completo",
     "node-birth-date": "Fecha de nacimiento",
@@ -93,7 +105,8 @@
     "node-ancestry-info": "Ascendencia",
     "node-mother": "Madre",
     "node-father": "Padre",
-    "node-search": "Buscar"
+    "node-search": "Buscar",
+    "cancel": "Cancelar"
   },
   "EnumTypes": {
     "human": "Humana",

@@ -20,7 +20,7 @@ export const StyledSelector = <T extends string>({
   setValue,
   disabled,
 }: StyledSelectorProps<T>) => {
-  const t = useTranslations('EnumTypes')
+  const t_enums = useTranslations('enums')
 
   return (
     <div className="no-scrollbar flex snap-x overflow-x-scroll py-2">
@@ -41,8 +41,8 @@ export const StyledSelector = <T extends string>({
             )}
           >
             <Icon type={name} size={24} />
-            {t(name.toLocaleLowerCase()).length > 0 && (
-              <span className="text-ocean-200/75 pt-3 text-xs">{t(name.toLowerCase())}</span>
+            {t_enums(name.toLocaleLowerCase()).length > 0 && (
+              <span className="text-ocean-200/75 pt-3 text-xs">{t_enums(name.toLowerCase())}</span>
             )}
             <div
               className={cn(

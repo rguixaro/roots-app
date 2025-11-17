@@ -27,7 +27,7 @@ export const ConfirmDialog = ({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
-  const t = useTranslations('common')
+  const t_common = useTranslations('common')
 
   return (
     <Dialog
@@ -43,10 +43,10 @@ export const ConfirmDialog = ({
         </DialogHeader>
         <DialogFooter>
           <Button variant="ghost" onClick={onCancel} className="my-2">
-            {t('cancel')}
+            {t_common('cancel')}
           </Button>
           <Button variant="destructive" onClick={onConfirm} className="my-2">
-            {t('confirm')}
+            {t_common('confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

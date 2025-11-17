@@ -1,20 +1,24 @@
+import { TreeEdge, TreeNode } from './tree.type'
 import { User } from './user.type'
 
-export const FamilyTypes = ['HUMAN', 'ANIMAL'] as const
-export type FamilyTypes = (typeof FamilyTypes)[number]
+export const FamilyType = ['HUMAN', 'ANIMAL'] as const
+export type FamilyType = (typeof FamilyType)[number]
 
-export const FamilyRoles = ['VIEWER', 'EDITOR', 'ADMIN'] as const
-export type FamilyRoles = (typeof FamilyRoles)[number]
+export const FamilyRole = ['VIEWER', 'EDITOR', 'ADMIN'] as const
+export type FamilyRole = (typeof FamilyRole)[number]
 
 export interface Family {
   id: string
   slug: string
   name: string
-  type: FamilyTypes
+  type: FamilyType
   nodeImage: boolean
   nodeGallery: boolean
   createdAt: Date
   updatedAt: Date
+
+  nodes?: TreeNode[]
+  edges?: TreeEdge[]
   accesses?: FamilyAccess[]
 }
 
@@ -23,6 +27,6 @@ export interface FamilyAccess {
   familyId: string
   userId: string
   user: User
-  role: FamilyRoles
+  role: FamilyRole
   createdAt: Date
 }

@@ -1,0 +1,359 @@
+'use client'
+
+import React, { useEffect, useState, useRef, useCallback } from 'react'
+import { LoaderIcon, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { UseFormReturn } from 'react-hook-form'
+import { type z } from 'zod'
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  TypographyH4,
+  TypographyH5,
+} from '@/ui'
+import { checkKeyDown, cn } from '@/utils'
+import { CreateTreeNodeSchema } from '@/server/schemas'
+
+interface NodeFormModalProps {
+  showModal: boolean
+  loading: boolean
+  form: UseFormReturn<z.infer<typeof CreateTreeNodeSchema>>
+  onSubmit: (values: z.infer<typeof CreateTreeNodeSchema>) => Promise<void>
+  onClose: () => void
+}
+
+export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: NodeFormModalProps) {
+  const t_common = useTranslations('common')
+  const t_tree = useTranslations('tree')
+
+  const [modalHeight, setModalHeight] = useState(90)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const dragStartRef = useRef({ x: 0, y: 0, startHeight: 0 })
+
+  /**
+   * Effect to check if the device is mobile based on window width
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  /**
+   * Handle drag start for mobile modal resizing
+   * @param e React.MouseEvent | React.TouchEvent
+   */
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
+      if (!isMobile) return
+
+      e.preventDefault()
+      setIsDragging(true)
+
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+
+      dragStartRef.current = { x: 0, y: clientY, startHeight: modalHeight }
+    },
+    [modalHeight, isMobile]
+  )
+
+  /**
+   * Handle drag move for mobile modal resizing
+   * @param e MouseEvent | TouchEvent
+   */
+  const handleDragMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      if (!isDragging || !isMobile) return
+
+      const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+      const deltaY = clientY - dragStartRef.current.y
+
+      const heightDelta = -(deltaY / window.innerHeight) * 100
+      const newHeight = Math.min(95, Math.max(30, dragStartRef.current.startHeight + heightDelta))
+      setModalHeight(newHeight)
+    },
+    [isDragging, isMobile]
+  )
+
+  /**
+   * Handle drag end for mobile modal resizing
+   */
+  const handleDragEnd = useCallback(() => setIsDragging(false), [])
+
+  /**
+   * Effect to handle adding/removing event listeners for dragging on mobile modal resizing
+   */
+  useEffect(() => {
+    if (isDragging) {
+      const handleMouseMove = (e: MouseEvent) => handleDragMove(e)
+      const handleTouchMove = (e: TouchEvent) => handleDragMove(e)
+      const handleMouseUp = () => handleDragEnd()
+      const handleTouchEnd = () => handleDragEnd()
+
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('touchmove', handleTouchMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('touchend', handleTouchEnd)
+
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('touchmove', handleTouchMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+        document.removeEventListener('touchend', handleTouchEnd)
+      }
+    }
+  }, [isDragging, handleDragMove, handleDragEnd])
+
+  /**
+   * Effect to disable background scrolling when modal is open
+   */
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+
+    if (showModal) {
+      const originalHtmlOverflow = html.style.overflow
+      const originalBodyOverflow = body.style.overflow
+
+      html.style.overflow = 'hidden'
+      body.style.overflow = 'hidden'
+
+      return () => {
+        html.style.overflow = originalHtmlOverflow
+        body.style.overflow = originalBodyOverflow
+      }
+    }
+  }, [showModal])
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={cn(
+          'fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity duration-300',
+          showModal ? 'opacity-100' : 'pointer-events-none opacity-0'
+        )}
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div
+        className={cn(
+          'text-ocean-400 fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out sm:top-0 sm:right-0 sm:h-full',
+          isDragging ? 'transition-none' : 'transition-transform duration-300',
+          showModal
+            ? 'translate-y-0 sm:translate-x-3/5 sm:translate-y-0'
+            : 'translate-y-full sm:translate-x-full sm:translate-y-0'
+        )}
+        style={{
+          height: isMobile ? `${modalHeight}vh` : '100vh',
+          transform: showModal
+            ? !isMobile
+              ? ''
+              : 'translateY(0)'
+            : !isMobile
+              ? ''
+              : 'translateY(100%)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            onKeyDown={(e) => checkKeyDown(e)}
+            className="flex h-full w-full flex-col sm:w-2/5"
+          >
+            <div className="bg-pale-ocean shadow-2l h-full flex-col overflow-hidden sm:flex sm:flex-row">
+              {/* Mobile drag handle */}
+              <div
+                className="flex cursor-row-resize justify-center pt-3 pb-2 select-none sm:hidden"
+                onMouseDown={handleDragStart}
+                onTouchStart={handleDragStart}
+              >
+                <div
+                  className={cn(
+                    'bg-ocean-100 h-1.5 w-12 rounded-full transition-colors',
+                    isDragging ? 'bg-ocean-200' : 'hover:bg-ocean-200'
+                  )}
+                />
+              </div>
+              <div className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6">
+                <div className="mb-6 flex items-center justify-between">
+                  <TypographyH4 className="mt-5">{t_tree('node-new')}</TypographyH4>
+                  <button
+                    onClick={onClose}
+                    className="hover:bg-ocean-200/15 rounded p-1 transition-colors duration-300"
+                  >
+                    <X size={24} className="text-ocean-200" />
+                  </button>
+                </div>
+
+                {/* General Information Section */}
+                <TypographyH5 className="text-start">{t_tree('node-general-info')}</TypographyH5>
+                <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
+                  <FormField
+                    control={form.control}
+                    name="fullName"
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormLabel>{t_tree('node-fullname')}</FormLabel>
+                        <FormControl>
+                          <div className="py-2">
+                            <Input
+                              {...field}
+                              autoComplete="off"
+                              className="w-full"
+                              placeholder={t_tree('node-fullname')}
+                              disabled={loading}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
+
+                  <FormField
+                    control={form.control}
+                    name="birthDate"
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormLabel>{t_tree('node-birth-date')}</FormLabel>
+                        <FormControl>
+                          <div className="py-2">
+                            <Input
+                              {...field}
+                              value={
+                                field.value ? new Date(field.value).toISOString().split('T')[0] : ''
+                              }
+                              onChange={(e) =>
+                                field.onChange(e.target.value ? new Date(e.target.value) : null)
+                              }
+                              type="date"
+                              autoComplete="off"
+                              placeholder={t_tree('node-birth-date')}
+                              disabled={loading}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="deathDate"
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormLabel>{t_tree('node-death-date')}</FormLabel>
+                        <FormControl>
+                          <div className="py-2">
+                            <Input
+                              {...field}
+                              value={
+                                field.value ? new Date(field.value).toISOString().split('T')[0] : ''
+                              }
+                              onChange={(e) =>
+                                field.onChange(e.target.value ? new Date(e.target.value) : null)
+                              }
+                              type="date"
+                              autoComplete="off"
+                              placeholder={t_tree('node-death-date')}
+                              disabled={loading}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
+
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem className="">
+                        <FormLabel>{t_tree('node-gender')}</FormLabel>
+                        <FormControl>
+                          <div className="py-2">
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value || ''}
+                              disabled={loading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={'-'} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="MALE">{t_tree('node-gender-male')}</SelectItem>
+                                <SelectItem value="FEMALE">
+                                  {t_tree('node-gender-female')}
+                                </SelectItem>
+                                <SelectItem value="OTHER">{t_tree('node-gender-other')}</SelectItem>
+                                <SelectItem value="UNSPECIFIED">
+                                  {t_tree('node-gender-unspecified')}
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={onClose}
+                    className="bg-ocean-100/50 hover:bg-ocean-100 rounded px-5 py-2 transition-colors duration-300"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm font-bold">{t_common('cancel')}</span>
+                    </div>
+                  </button>
+                  <button
+                    type="submit"
+                    /* className="bg-ocean-300 hover:bg-ocean-400 flex-1 rounded-lg px-4 py-2 text-white transition-colors" */
+                    className="bg-ocean-200 hover:bg-ocean-300 rounded px-5 py-2 text-white shadow transition-colors duration-300"
+                    disabled={loading}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {loading && <LoaderIcon size={16} className="animate-spin" />}
+                      <span className="text-sm font-bold">
+                        {loading ? t_common('creating') : t_common('create')}
+                      </span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </>
+  )
+}

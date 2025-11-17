@@ -2,6 +2,7 @@ import { cache } from 'react'
 
 import { auth } from '@/auth'
 import { db } from '@/server/db'
+import { Family, TreeEdge, TreeNode } from '@/types'
 
 /**
  * Get families that a user has access to.
@@ -43,19 +44,46 @@ export const getFamily = cache(async (slug: string) => {
   try {
     const family = await db.family.findFirst({
       where: { slug, accesses: { some: { userId } } },
-      include: {
-        accesses: {
-          include: {
-            user: true,
-          },
-        },
-      },
+      include: { accesses: { include: { user: true } } },
     })
 
     return family
   } catch (error) {
     throw error
   }
+})
+
+/**
+ * Get a family tree by its slug.
+ * Auth required.
+ * @param slug Family slug
+ * @returns Promise<TreeResult>
+ */
+export const getFamilyTree = cache(async (slug: string) => {
+  const currentUser = await auth()
+  const userId = currentUser?.user?.id
+
+  /** Not authenticated */
+  if (!userId) return null
+
+  try {
+    const family = await db.family.findFirst({
+      where: { slug, accesses: { some: { userId } } },
+      include: { accesses: { include: { user: true } } },
+    })
+
+    if (!family) return { error: true, message: 'error-family-not-found' }
+
+    const nodes = await db.treeNode.findMany({
+      where: { familyId: family.id },
+    })
+
+    const edges = await db.treeEdge.findMany({
+      where: { familyId: family.id },
+    })
+
+    return { family, nodes, edges }
+  } catch (error) {}
 })
 
 /**

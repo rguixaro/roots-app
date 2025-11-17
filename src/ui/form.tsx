@@ -135,7 +135,7 @@ const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, children, ...props }, ref) => {
-  const t = useTranslations('errors')
+  const t_errors = useTranslations('errors')
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message) : children
 
@@ -149,7 +149,7 @@ const FormMessage = React.forwardRef<
       {...props}
     >
       {/* @ts-expect-error: Unnecessary message type */}
-      {t(body)}
+      {t_errors(body)}
     </p>
   )
 })

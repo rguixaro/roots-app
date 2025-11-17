@@ -6,7 +6,7 @@ import type { z } from 'zod'
 
 import { auth } from '@/auth'
 import { db } from '@/server/db'
-import type { CreateFamilySchema, FamilyRoles } from '@/server/schemas'
+import type { CreateFamilySchema, FamilyRole } from '@/server/schemas'
 import { slugify } from '@/server/utils'
 import { Family } from '@/types'
 
@@ -50,9 +50,7 @@ export const createFamily = async (
     return { error: false, family: family || undefined }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      if (e.code === 'P2002') {
-        return { error: true, message: 'error-family-exists' }
-      }
+      if (e.code === 'P2002') return { error: true, message: 'error-family-exists' }
     }
     return { error: true, message: 'error' }
   }
@@ -76,7 +74,6 @@ export const updateFamily = async (
   if (!currentUser) return { error: true }
 
   try {
-    // Check if the user has permission to edit
     const access = await db.familyAccess.findFirst({
       where: { familyId: id, userId, role: { in: ['ADMIN', 'EDITOR'] } },
     })
@@ -98,9 +95,7 @@ export const updateFamily = async (
     return { error: false, family: family || undefined }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      if (e.code === 'P2002') {
-        return { error: true, message: 'error-family-exists' }
-      }
+      if (e.code === 'P2002') return { error: true, message: 'error-family-exists' }
     }
     return { error: true, message: 'error' }
   }
@@ -110,15 +105,15 @@ export const updateFamily = async (
  * Invite a user to a family.
  * Auth required.
  * Only users with ADMIN or EDITOR role can invite.
- * @param familyId Family ID
- * @param email User email
- * @param role FamilyRoles
+ * @param familyId {string} Family ID
+ * @param email {string} User email
+ * @param role {FamilyRole} Family role
  * @returns Promise<FamilyResult>
  */
 export const inviteMember = async (
   familyId: string,
   email: string,
-  role: FamilyRoles
+  role: FamilyRole
 ): Promise<FamilyResult> => {
   const currentUser = await auth()
 
@@ -126,13 +121,10 @@ export const inviteMember = async (
   if (!currentUser) return { error: true }
 
   try {
-    // Find the user by email
     const user = await db.user.findUnique({ where: { email } })
     if (!user) return { error: true, message: 'error-user-not-found' }
 
-    const existing = await db.familyAccess.findFirst({
-      where: { familyId, userId: user.id },
-    })
+    const existing = await db.familyAccess.findFirst({ where: { familyId, userId: user.id } })
 
     if (existing) return { error: true, message: 'error-user-already-in-family' }
 
@@ -153,11 +145,49 @@ export const inviteMember = async (
 }
 
 /**
+ * Update a family member's role.
+ * @param familyId {string} Family ID
+ * @param memberId {string} User ID of the member
+ * @param role {FamilyRole} New role
+ * @returns Promise<FamilyResult>
+ */
+export const updateMember = async (
+  familyId: string,
+  memberId: string,
+  role: FamilyRole
+): Promise<FamilyResult> => {
+  const currentUser = await auth()
+  const userId = currentUser?.user.id
+
+  // Not authenticated
+  if (!userId) return { error: true }
+
+  try {
+    await db.familyAccess.update({
+      where: { familyId_userId: { familyId, userId: memberId } },
+      data: { role },
+    })
+
+    const family = await db.family.findUnique({
+      where: { id: familyId },
+      include: { accesses: { include: { user: true } } },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/families')
+
+    return { error: false, family: family ?? undefined }
+  } catch (e) {
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
  * Remove a user from a family.
  * Auth required.
  * Only users with ADMIN or EDITOR role can remove members.
- * @param familyId Family ID
- * @param memberId User ID to remove
+ * @param familyId {string} Family ID
+ * @param memberId {string} User ID to remove
  * @returns Promise<FamilyResult>
  */
 export const removeMember = async (familyId: string, memberId: string): Promise<FamilyResult> => {

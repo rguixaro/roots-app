@@ -11,17 +11,18 @@ export default async function EditFamilyPage({ params }: { params: Promise<{ slu
   const session = await auth()
   if (!session) return null
 
+  const t_common = await getTranslations('common')
+
   const { slug } = await params
   const family = await getFamily(slug)
-  const t = await getTranslations('common')
 
   if (!family) {
     return (
       <div className="text-ocean-200 mt-32 flex flex-col items-center justify-center">
         <FileQuestion size={24} />
-        <TypographyH4 className="mt-2 mb-5">{t('family-not-found')}</TypographyH4>
+        <TypographyH4 className="mt-2 mb-5">{t_common('family-not-found')}</TypographyH4>
         <Link href="/" className="mt-5 font-medium underline">
-          {t('return')}
+          {t_common('return')}
         </Link>
       </div>
     )

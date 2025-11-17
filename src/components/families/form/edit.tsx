@@ -10,7 +10,7 @@ import { type z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
 import { CreateFamilySchema, FamilyTypes } from '@/server/schemas'
-import { updateFamily, inviteMember, removeMember } from '@/server/actions'
+import { updateFamily, inviteMember, updateMember, removeMember } from '@/server/actions'
 
 import { GoBack } from '@/components/layout'
 import { StyledSelector } from '@/components/families/form'
@@ -37,9 +37,12 @@ interface MemberItemProps {
   index: number
   form: UseFormReturn<FormValues>
   loading: boolean
+  loadingUpdate: boolean
   currentUserId: string
   currentUserRole: FamilyRoles
+  currentMemberRole: FamilyRoles
   inviteUser: (email: string, role: FamilyRoles) => void
+  updateUser: (userId: string, role: FamilyRoles) => void
   setCurrMember: (value: { index: number; memberId?: string } | null) => void
   setDialogOpen: (open: boolean) => void
   remove: (index: number) => void
@@ -54,9 +57,12 @@ const MemberItem = ({
   index,
   form,
   loading,
+  loadingUpdate,
   currentUserId,
   currentUserRole,
+  currentMemberRole,
   inviteUser,
+  updateUser,
   setCurrMember,
   setDialogOpen,
   remove,
@@ -70,6 +76,7 @@ const MemberItem = ({
   const memberId = form.watch(`members.${index}.userId`) || ''
 
   const canInvite = isValidEmail(memberEmail)
+  const canUpdate = memberRole !== currentMemberRole
   const isNew = !memberId
 
   return (
@@ -103,18 +110,35 @@ const MemberItem = ({
                 </FormLabel>
               )}
             </div>
-            {currentUserRole === 'ADMIN' && currentUserId !== memberId && (
-              <button
-                type="button"
-                onClick={() => {
-                  if (memberId) (setCurrMember({ index, memberId }), setDialogOpen(true))
-                  else remove(index)
-                }}
-                className="bg-ocean-500 hover:bg-ocean-600 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
-              >
-                {t('family-member-remove')}
-              </button>
-            )}
+            <div className="flex space-x-2">
+              {!isNew && currentUserRole === 'ADMIN' && currentUserId !== memberId && (
+                <button
+                  type="button"
+                  disabled={!canUpdate || loadingUpdate}
+                  onClick={() => updateUser(memberId!, memberRole!)}
+                  className="bg-ocean-300 disabled:bg-ocean-100 hover:bg-ocean-400 hidden h-8 rounded px-2 py-1 text-white transition-colors duration-300 sm:block"
+                >
+                  <div className="flex items-center justify-center space-x-3">
+                    {loadingUpdate && <LoaderIcon size={16} className="animate-spin" />}
+                    <span className="text-center text-xs font-bold">
+                      {loadingUpdate ? t('updating') : t('update')}
+                    </span>
+                  </div>
+                </button>
+              )}
+              {currentUserRole === 'ADMIN' && currentUserId !== memberId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (memberId) (setCurrMember({ index, memberId }), setDialogOpen(true))
+                    else remove(index)
+                  }}
+                  className="bg-ocean-500 hover:bg-ocean-600 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
+                >
+                  {t('family-member-remove')}
+                </button>
+              )}
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <FormControl>
@@ -147,6 +171,21 @@ const MemberItem = ({
                 className="bg-ocean-200 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:hidden sm:w-auto"
               >
                 {t('family-member-invite')}
+              </button>
+            )}
+            {!isNew && currentUserRole === 'ADMIN' && currentUserId != memberId && (
+              <button
+                type="button"
+                disabled={!canUpdate || loadingUpdate}
+                onClick={() => updateUser(memberId!, memberRole!)}
+                className="bg-ocean-200 disabled:bg-ocean-100 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-white transition-colors duration-300 sm:hidden sm:w-auto"
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  {loadingUpdate && <LoaderIcon size={16} className="animate-spin" />}
+                  <span className="text-xs font-bold">
+                    {loadingUpdate ? t('updating') : t('update')}
+                  </span>
+                </div>
               </button>
             )}
             {currentUserRole === 'ADMIN' && currentUserId != memberId && (
@@ -182,6 +221,8 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
   const t_toasts = useTranslations('toasts')
 
   const [loading, setLoading] = useState<boolean>(false)
+  const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false)
+
   const [currentFamily, setCurrentFamily] = useState<Family>(family)
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -210,12 +251,14 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
    * Handle async operations with loading state
    * @param fn
    */
-  const withAsync = async <T,>(fn: () => Promise<T>) => {
+  const withAsync = async <T,>(fn: () => Promise<T>, isUpdate?: boolean) => {
     try {
-      setLoading(true)
+      if (isUpdate) setLoadingUpdate(true)
+      else setLoading(true)
       await fn()
     } finally {
-      setLoading(false)
+      if (isUpdate) setLoadingUpdate(false)
+      else setLoading(false)
     }
   }
 
@@ -245,6 +288,20 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
       toast.success(t_toasts('family-member-added'))
       if (family) resetFamily(family)
     })
+
+  /**
+   * Update user role
+   * @param memberId {string}
+   * @param role  {FamilyRoles}
+   */
+  const updateUser = (memberId: string, role: FamilyRoles) =>
+    withAsync(async () => {
+      if (!currentFamily) return
+      const { error, message, family } = await updateMember(currentFamily.id, memberId, role)
+      if (error) return toast.error(t_toasts(message || 'error'))
+      toast.success(t_toasts('family-member-updated'))
+      if (family) resetFamily(family)
+    }, true)
 
   /**
    * Remove user from family
@@ -371,7 +428,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
                     <span className="text-sm font-bold">
-                      {loading ? t('updating') : t('update')}
+                      {loading ? t('updating-family') : t('update')}
                     </span>
                   </div>
                 </button>
@@ -432,7 +489,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
                     <span className="text-sm font-bold">
-                      {loading ? t('updating') : t('update')}
+                      {loading ? t('updating-family') : t('update')}
                     </span>
                   </div>
                 </button>
@@ -455,9 +512,12 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                     index={index}
                     form={form}
                     loading={loading}
+                    loadingUpdate={loadingUpdate}
                     currentUserId={currentUserId}
                     currentUserRole={currentUserRole}
+                    currentMemberRole={field.role}
                     inviteUser={inviteUser}
+                    updateUser={updateUser}
                     setCurrMember={setCurrMember}
                     setDialogOpen={setDialogOpen}
                     remove={remove}

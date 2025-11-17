@@ -13,7 +13,7 @@ interface GoBackProps {
 }
 
 export const GoBack = ({ to = '/', text = 'return', className, children }: GoBackProps) => {
-  const t = useTranslations('common')
+  const t_common = useTranslations('common')
 
   return (
     <div className={cn('flex w-full items-center justify-between', className)}>
@@ -47,7 +47,7 @@ export const GoBack = ({ to = '/', text = 'return', className, children }: GoBac
             className="translate-x-0 transition-all duration-300 ease-in-out group-hover:-translate-x-1"
           />
         </svg>
-        {t(text)}
+        {t_common(text)}
       </Link>
       {children}
     </div>

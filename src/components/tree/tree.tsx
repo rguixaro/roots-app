@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import ReactFlow, { Controls, Background, ConnectionLineType } from 'reactflow'
+import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
 import { useTranslations } from 'next-intl'
 
 import { Family, TreeEdge, TreeNode } from '@/types'
@@ -19,12 +19,13 @@ import {
 import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
+  readonly: boolean
   family: Family
   nodes: TreeNode[]
   edges: TreeEdge[]
 }
 
-export default function StyledTree({ family, nodes, edges }: StyledTreeProps) {
+export default function StyledTree({ readonly, family, nodes, edges }: StyledTreeProps) {
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
   const treeState = useTreeState(family, nodes, edges)
@@ -35,9 +36,14 @@ export default function StyledTree({ family, nodes, edges }: StyledTreeProps) {
   const nodeOperations = useNodeOperations(family, nodes)
 
   return (
-    <div className="relative h-[90vh] w-full overflow-hidden bg-slate-100">
+    <div className="relative h-screen w-full overflow-hidden bg-slate-100">
       {/* Toolbar */}
-      <TreeToolbar onCreateNode={treeState.createNode} onResetView={treeState.resetView} />
+      <TreeToolbar
+        family={family}
+        readonly={readonly}
+        onCreateNode={treeState.createNode}
+        onResetView={treeState.resetView}
+      />
 
       {/* Node Creation Modal */}
       <NodeFormModal
@@ -77,7 +83,6 @@ export default function StyledTree({ family, nodes, edges }: StyledTreeProps) {
         fitView
         fitViewOptions={{ padding: 0.2 }}
       >
-        <Controls />
         <Background gap={24} size={1} color="#2e6b74" />
       </ReactFlow>
 

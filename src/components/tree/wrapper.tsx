@@ -7,10 +7,12 @@ import { Family, TreeEdge, TreeNode } from '@/types'
 import StyledTree from './tree'
 
 export const TreeWrapper = ({
+  readonly,
   family,
   nodes,
   edges,
 }: {
+  readonly: boolean
   family: Family
   nodes: TreeNode[]
   edges: TreeEdge[]
@@ -28,7 +30,7 @@ export const TreeWrapper = ({
 
   return (
     <ReactFlowProvider>
-      <StyledTree family={family} nodes={nodes} edges={edges} />
+      <StyledTree readonly={readonly} family={family} nodes={nodes} edges={edges} />
     </ReactFlowProvider>
   )
 }

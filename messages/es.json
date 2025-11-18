@@ -28,6 +28,7 @@
     "family-member-added": "Usuario añadido a la familia con éxito.",
     "family-member-updated": "Usuario actualizado con éxito.",
     "family-member-removed": "Usuario eliminado de la familia con éxito.",
+    "profile-updated": "Perfil actualizado con éxito.",
     "node-created": "Miembro añadido con éxito.",
     "node-deleted": "Miembro eliminado con éxito.",
     "edge-created": "Relación creada con éxito.",
@@ -44,6 +45,7 @@
     "family-option-required": "Se debe seleccionar una opción.",
     "error-family-exists": "Ya existe una familia con este nombre.",
     "error-family-admin-required": "Se requiere al menos un usuario administrador.",
+    "error-family-not-found": "Familia no encontrada",
     "error-no-permission": "No tienes permiso para realizar esta acción.",
     "error-user-not-found": "Usuario no encontrado.",
     "error-user-already-in-family": "El usuario ya forma parte de la familia.",
@@ -81,7 +83,6 @@
   "family": {
     "title": "Familias",
     "add": "Añadir una familia",
-    "not-found": "Familia no encontrada",
     "general-tab": "Detalles",
     "general-tab-label": "General",
     "family-name": "Nombre de la familia",

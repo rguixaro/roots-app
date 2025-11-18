@@ -9,10 +9,19 @@ interface GoBackProps {
   to?: string
   text?: string
   className?: string
+  classNameSvg?: string
+  classNameHover?: string
   children?: React.ReactNode
 }
 
-export const GoBack = ({ to = '/', text = 'return', className, children }: GoBackProps) => {
+export const GoBack = ({
+  to = '/',
+  text = 'return',
+  className,
+  classNameSvg,
+  classNameHover,
+  children,
+}: GoBackProps) => {
   const t_common = useTranslations('common')
 
   return (
@@ -21,7 +30,8 @@ export const GoBack = ({ to = '/', text = 'return', className, children }: GoBac
         href={to}
         className={cn(
           'text-ocean-300 flex w-fit items-center rounded-[5px] p-1 px-3 text-sm font-bold md:text-base',
-          'hover:bg-ocean-200/15 group transition-all duration-300'
+          'hover:bg-ocean-200/15 group transition-all duration-300',
+          classNameHover
         )}
       >
         <svg
@@ -33,7 +43,7 @@ export const GoBack = ({ to = '/', text = 'return', className, children }: GoBac
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="stroke-ocean-200"
+          className={cn('stroke-ocean-200', classNameSvg)}
         >
           <line
             x1="5"
@@ -47,7 +57,7 @@ export const GoBack = ({ to = '/', text = 'return', className, children }: GoBac
             className="translate-x-0 transition-all duration-300 ease-in-out group-hover:-translate-x-1"
           />
         </svg>
-        {t_common(text)}
+        <span className="transition-all duration-300">{t_common(text)}</span>
       </Link>
       {children}
     </div>

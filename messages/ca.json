@@ -28,6 +28,7 @@
     "family-member-added": "Usuari afegit a la família amb èxit.",
     "family-member-updated": "Usuari actualitzat amb èxit.",
     "family-member-removed": "Usuari eliminat de la família amb èxit.",
+    "profile-updated": "Perfil actualitzat amb èxit.",
     "node-created": "Membre afegit amb èxit.",
     "node-deleted": "Membre eliminat amb èxit.",
     "edge-created": "Relació creada amb èxit.",
@@ -44,6 +45,7 @@
     "family-option-required": "Cal seleccionar una opció.",
     "error-family-exists": "Ja existeix una família amb aquest nom.",
     "error-family-admin-required": "Cal que hi hagi almenys un usuari administrador.",
+    "error-family-not-found": "Família no trobada",
     "error-no-permission": "No tens permís per realitzar aquesta acció.",
     "error-user-not-found": "Usuari no trobat.",
     "error-user-already-in-family": "L'usuari ja forma part de la família.",
@@ -81,7 +83,6 @@
   "family": {
     "title": "Famílies",
     "add": "Afegeix una família",
-    "not-found": "Família no trobada",
     "general-tab": "Detalls",
     "general-tab-label": "General",
     "family-name": "Nom de la família",

@@ -28,6 +28,7 @@
     "family-member-added": "User added to family successfully.",
     "family-member-updated": "User updated successfully.",
     "family-member-removed": "User removed from family successfully.",
+    "profile-updated": "Profile updated successfully.",
     "node-created": "Member added successfully.",
     "node-deleted": "Member deleted successfully.",
     "edge-created": "Relationship created successfully.",
@@ -44,6 +45,7 @@
     "family-option-required": "An option must be selected.",
     "error-family-exists": "A family with this name already exists.",
     "error-family-admin-required": "At least one admin user is required.",
+    "error_family_not-found": "Family not found",
     "error-no-permission": "You do not have permission to perform this action.",
     "error-user-not-found": "User not found.",
     "error-user-already-in-family": "User is already a member of the family.",
@@ -81,7 +83,6 @@
   "family": {
     "title": "Families",
     "add": "Add a family",
-    "not-found": "Family not found",
     "general-tab": "Details",
     "general-tab-label": "General",
     "family-name": "Family name",

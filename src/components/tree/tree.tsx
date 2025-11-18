@@ -36,7 +36,7 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
   const nodeOperations = useNodeOperations(family, nodes)
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-slate-100">
+    <div className="relative h-full w-full overflow-hidden">
       {/* Toolbar */}
       <TreeToolbar
         family={family}

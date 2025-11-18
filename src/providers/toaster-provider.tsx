@@ -10,9 +10,12 @@ export const ToasterProvider = () => (
   <Toaster
     position="bottom-center"
     theme={'light'}
+    duration={100000}
     toastOptions={{
       classNames: {
-        toast: 'font-sans font-bold bg-ocean-200 border-ocean-200/15 text-white',
+        title: 'font-sans! font-bold! text-pale-ocean!',
+        toast: 'bg-ocean-200/80! border-ocean-200! border-2! text-pale-ocean!',
+        icon: 'text-pale-ocean! ',
       },
     }}
   />

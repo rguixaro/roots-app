@@ -9,11 +9,12 @@ import { toast } from 'sonner'
 import { type z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
-import { CreateFamilySchema, FamilyTypes } from '@/server/schemas'
+import { CreateFamilySchema, FamilyType } from '@/server/schemas'
 import { createFamily, inviteMember, removeMember } from '@/server/actions'
 
 import { GoBack } from '@/components/layout'
 import { StyledSelector } from '@/components/families/form'
+
 import {
   Form,
   FormControl,
@@ -25,8 +26,11 @@ import {
   Input,
   ConfirmDialog,
   TypographyH5,
+  TypographyH4,
 } from '@/ui'
-import { Family, FamilyRoles } from '@/types'
+
+import { Family, FamilyRole } from '@/types'
+
 import { checkKeyDown, isValidEmail } from '@/utils'
 
 interface CreateFamilyProps {
@@ -34,7 +38,9 @@ interface CreateFamilyProps {
 }
 
 export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
-  const t = useTranslations('FamiliesPage')
+  const t_common = useTranslations('common')
+  const t_family = useTranslations('family')
+  const t_errors = useTranslations('errors')
   const t_toasts = useTranslations('toasts')
 
   const [loading, setLoading] = useState<boolean>(false)
@@ -71,7 +77,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
   const onSubmit = async (values: z.infer<typeof CreateFamilySchema>) =>
     withAsync(async () => {
       const { error, message, family } = await createFamily(values)
-      if (error) return toast.error(t_toasts(message || 'error'))
+      if (error) return toast.error(t_errors(message || 'error'))
 
       toast.success(t_toasts('family-created'))
       if (family) resetFamily(family)
@@ -82,13 +88,13 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
   /**
    * Invite user to family
    * @param email {string}
-   * @param role {FamilyRoles}
+   * @param role {FamilyRole}
    */
-  const inviteUser = (email: string, role: FamilyRoles) =>
+  const inviteUser = (email: string, role: FamilyRole) =>
     withAsync(async () => {
       if (!currentFamily) return
       const { error, message, family } = await inviteMember(currentFamily.id, email, role)
-      if (error) return toast.error(t_toasts(message || 'error'))
+      if (error) return toast.error(t_errors(message || 'error'))
       toast.success(t_toasts('family-member-added'))
       if (family) resetFamily(family)
     })
@@ -104,7 +110,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
       if (!currentFamily) return
 
       const { error, message, family } = await removeMember(currentFamily.id, memberId)
-      if (error) return toast.error(t_toasts(message || 'error'))
+      if (error) return toast.error(t_errors(message || 'error'))
       toast.success(t_toasts('family-member-removed'))
       if (family) resetFamily(family)
     })
@@ -153,7 +159,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   <div className="flex w-full sm:space-x-5">
                     <Input
                       {...form.register(`members.${index}.email`)}
-                      placeholder={t('family-member-email')}
+                      placeholder={t_family('family-member-email')}
                       className="w-full"
                       disabled={loading}
                     />
@@ -163,7 +169,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                       onClick={() => inviteUser(memberEmail!, memberRole!)}
                       className="bg-ocean-200 hover:bg-ocean-300 disabled:bg-ocean-100 hidden h-9 w-64 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
                     >
-                      {t('family-member-invite')}
+                      {t_family('family-member-invite')}
                     </button>
                   </div>
                 ) : (
@@ -183,21 +189,21 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   }}
                   className="bg-ocean-500 hover:bg-ocean-600 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
                 >
-                  {t('family-member-remove')}
+                  {t_family('family-member-remove')}
                 </button>
               )}
             </div>
             <div className="flex items-center space-x-2">
               <FormControl>
                 <StyledSelector
-                  types={FamilyRoles}
+                  types={FamilyRole}
                   value={memberRole}
                   disabled={currentUserId === field.userId}
                   setValue={(value) => {
                     if (memberRole === 'ADMIN' && value !== 'ADMIN') {
                       const admins = form.getValues('members')?.filter((m) => m.role === 'ADMIN')
                       if (admins && admins.length <= 1)
-                        return toast.error(t_toasts('error-family-admin-required'))
+                        return toast.error(t_errors('error-family-admin-required'))
                     }
                     form.setValue(`members.${index}.role`, value)
                     fields[index].role = value
@@ -213,7 +219,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   onClick={() => inviteUser(memberEmail!, memberRole!)}
                   className="bg-ocean-200 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:hidden sm:w-auto"
                 >
-                  {t('family-member-invite')}
+                  {t_family('family-member-invite')}
                 </button>
               )}
               {currentUserId != field.userId && (
@@ -229,7 +235,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   }}
                   className="text-ocean-500 visible h-9 rounded px-2 py-1 text-xs font-bold underline sm:hidden"
                 >
-                  {t('family-member-remove')}
+                  {t_family('family-member-remove')}
                 </button>
               )}
             </div>
@@ -245,6 +251,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
         text={currentFamily ? 'family' : 'families'}
         to={currentFamily ? `/families/${currentFamily.slug}` : '/'}
       />
+      <TypographyH4 className="mt-4">{t_family('family-create')}</TypographyH4>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -254,7 +261,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
           <Tabs.Root
             value={currentTab}
             onValueChange={(value) => setCurrentTab(value as 'general' | 'members')}
-            className="mt-2 w-full"
+            className="w-full"
           >
             <Tabs.List className="border-ocean-200/50 mb-4 flex border-b-2">
               <Tabs.Trigger
@@ -262,33 +269,33 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                 disabled={canAccessMembers}
                 className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2"
               >
-                {t('general-tab-label')}
+                {t_family('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
                 disabled={!canAccessMembers}
                 className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2"
               >
-                {t('family-members-tab-label')}
+                {t_family('family-members-tab-label')}
               </Tabs.Trigger>
             </Tabs.List>
             {/* --- GENERAL & SETTINGS TAB --- */}
             <Tabs.Content value="general" className="space-y-4">
-              <TypographyH5 className="mt-5">{t('general-tab')}</TypographyH5>
+              <TypographyH5 className="mt-5">{t_family('general-tab')}</TypographyH5>
               <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem className="">
-                      <FormLabel>{t('family-name')}</FormLabel>
+                      <FormLabel>{t_family('family-name')}</FormLabel>
                       <FormControl>
                         <div className="py-2">
                           <Input
                             {...field}
                             autoComplete="off"
                             className="w-full"
-                            placeholder={t('name')}
+                            placeholder={t_family('name')}
                             disabled={loading}
                           />
                         </div>
@@ -303,26 +310,26 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   name="type"
                   render={() => (
                     <FormItem>
-                      <FormLabel>{t('family-types')}</FormLabel>
+                      <FormLabel>{t_family('family-types')}</FormLabel>
                       <FormDescription className="mb-2 text-sm opacity-70">
-                        {t('family-types-info')}
+                        {t_family('family-types-info')}
                       </FormDescription>
                       <FormControl>
                         <StyledSelector
-                          types={FamilyTypes}
+                          types={FamilyType}
                           value={form.getValues('type')}
-                          setValue={(value) => form.setValue('type', value as FamilyTypes)}
+                          setValue={(value) => form.setValue('type', value as FamilyType)}
                         />
                       </FormControl>
                       <FormMessage />
                       <FormDescription className="opacity-70">
-                        {t('family-types-alert')}
+                        {t_family('family-types-alert')}
                       </FormDescription>
                     </FormItem>
                   )}
                 />
               </div>
-              <TypographyH5 className="mt-5">{t('settings-tab')}</TypographyH5>
+              <TypographyH5 className="mt-5">{t_family('settings-tab')}</TypographyH5>
               <div className='border-ocean-200/50 shadow-lg" flex-col items-start rounded border-2 bg-white px-3 py-2'>
                 <FormField
                   control={form.control}
@@ -331,9 +338,9 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                     const value = form.getValues('nodeImage')
                     return (
                       <FormItem>
-                        <FormLabel>{t('family-node-image')}</FormLabel>
+                        <FormLabel>{t_family('family-node-image')}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t('family-node-image-info')}
+                          {t_family('family-node-image-info')}
                         </FormDescription>
                         <FormControl>
                           <StyledSelector
@@ -355,9 +362,9 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                     const value = form.getValues('nodeGallery')
                     return (
                       <FormItem>
-                        <FormLabel>{t('family-node-gallery')}</FormLabel>
+                        <FormLabel>{t_family('family-node-gallery')}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t('family-node-gallery-info')}
+                          {t_family('family-node-gallery-info')}
                         </FormDescription>
                         <FormControl>
                           <StyledSelector
@@ -381,7 +388,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
                     <span className="text-sm font-bold">
-                      {loading ? t('creating') : t('create')}
+                      {loading ? t_common('creating') : t_common('create')}
                     </span>
                   </div>
                 </button>
@@ -389,14 +396,14 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
             </Tabs.Content>
             {/* --- MEMBERS TAB --- */}
             <Tabs.Content value="members" className="space-y-4">
-              <TypographyH5 className="mt-2">{t('family-members-tab')}</TypographyH5>
+              <TypographyH5 className="mt-2">{t_family('family-members-tab')}</TypographyH5>
               <div className="border-ocean-200/50 flex-col items-start rounded border-2 bg-white p-3 shadow-lg">
-                <FormLabel>{t('family-members')}</FormLabel>
+                <FormLabel>{t_family('family-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
-                  {t('family-members-info')}
+                  {t_family('family-members-info')}
                 </FormDescription>
                 <FormDescription className="my-4 text-sm opacity-70">
-                  {t('family-member-role')}
+                  {t_family('family-member-role')}
                 </FormDescription>
                 {fields.map((field, index) => (
                   <MemberItem key={field.id} field={field} index={index} />
@@ -411,7 +418,7 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                 >
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
-                    <span className="text-sm font-bold">{t('family-member-add')}</span>
+                    <span className="text-sm font-bold">{t_family('family-member-add')}</span>
                   </div>
                 </button>
               </div>
@@ -420,8 +427,8 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
 
           <ConfirmDialog
             open={dialogOpen}
-            title={t('family-member-remove-confirm')}
-            description={t('family-member-remove-confirm-description')}
+            title={t_family('family-member-remove-confirm')}
+            description={t_family('family-member-remove-confirm-description')}
             onCancel={() => setDialogOpen(false)}
             onConfirm={() => {
               if (currMember) removeUser(currMember.index, currMember.memberId)

@@ -17,7 +17,8 @@
     "deleting": "Deleting...",
     "search": "Search",
     "searching": "Searching...",
-    "share": "Share"
+    "share": "Share",
+    "recent-activity": "Recent activity"
   },
   "toasts": {
     "family-created": "Family created successfully.",
@@ -82,7 +83,9 @@
   },
   "family": {
     "title": "Families",
-    "add": "Add a family",
+    "family-new": "New Family",
+    "family-create": "Create new family",
+    "family-edit": "Edit family",
     "general-tab": "Details",
     "general-tab-label": "General",
     "family-name": "Family name",

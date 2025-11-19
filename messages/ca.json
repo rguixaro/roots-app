@@ -17,7 +17,8 @@
     "deleting": "Eliminant...",
     "search": "Cerca",
     "searching": "Buscant...",
-    "share": "Compartir"
+    "share": "Compartir",
+    "recent-activity": "Activitat recent"
   },
   "toasts": {
     "family-created": "Família creada amb èxit.",
@@ -82,8 +83,9 @@
   },
   "family": {
     "title": "Famílies",
-    "add": "Afegeix una família",
-    "general-tab": "Detalls",
+    "family-new": "Nova família",
+    "family-create": "Crear nova família",
+    "family-edit": "Editar família",
     "general-tab-label": "General",
     "family-name": "Nom de la família",
     "name": "Nom",

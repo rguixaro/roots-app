@@ -1,11 +1,12 @@
 import { icons, LucideIcon } from 'lucide-react'
 
-import { FamilyTypes, FamilyRoles } from '@/types'
+import { FamilyType, FamilyRole } from '@/types'
 
-type BuiltInType = FamilyTypes | FamilyRoles | 'Filled' | 'Empty' | 'Enabled' | 'Disabled' | string
+type BuiltInType = FamilyType | FamilyRole | 'Filled' | 'Empty' | 'Enabled' | 'Disabled' | string
 
 type IconProps = {
   type: BuiltInType
+  className?: string
   color?: string
   size?: number
   customIcons?: Record<string, keyof typeof icons>
@@ -31,6 +32,7 @@ const otherDefaultIcons: Record<string, keyof typeof icons> = {
 
 export const Icon: React.FC<IconProps> = ({
   type,
+  className,
   color = '#78a9af',
   size = 18,
   customIcons = {},
@@ -45,5 +47,5 @@ export const Icon: React.FC<IconProps> = ({
 
   const LucideIcon = icons[iconName as keyof typeof icons] as LucideIcon
 
-  return <LucideIcon color={color} size={size} />
+  return <LucideIcon color={color} size={size} className={className} />
 }

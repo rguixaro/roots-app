@@ -41,7 +41,6 @@ export default async function FamilyPage({ params }: { params: Promise<{ slug: s
       {!family ? (
         <div className="text-ocean-200 mt-10 flex h-32 flex-col items-center justify-center">
           <TypographyH4>{t_errors('error-family-not-found')}</TypographyH4>
-          <Utensils size={24} className="mt-2 mb-5" />
         </div>
       ) : (
         <div className="bg-ocean-200/15 border-ocean-100 h-full w-full border-12 shadow-inner">

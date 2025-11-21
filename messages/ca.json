@@ -2,6 +2,7 @@
   "common": {
     "return": "Tornar",
     "families": "Famílies",
+    "families-description": "Aquí tens totes les teves famílies. Pots crear-ne de noves o gestionar les existents",
     "page-not-found": "Pàgina no trobada",
     "family-not-found": "Família no trobada",
     "no-families": "No s'han trobat famílies",
@@ -17,7 +18,9 @@
     "deleting": "Eliminant...",
     "search": "Cerca",
     "searching": "Buscant...",
-    "share": "Compartir"
+    "share": "Compartir",
+    "recent-activity": "Activitat recent",
+    "recent-activity-description": "Qualsevol acció rellevant realitzada dins de les teves famílies apareixerà aquí"
   },
   "toasts": {
     "family-created": "Família creada amb èxit.",
@@ -71,7 +74,9 @@
     "disabled": "Desactivat",
     "admin": "Administrador",
     "editor": "Editor",
-    "viewer": "Espectador"
+    "viewer": "Espectador",
+    "public": "Públic",
+    "private": "Privat"
   },
   "login": {
     "login-to": "Accedeix al teu ",
@@ -82,10 +87,14 @@
   },
   "family": {
     "title": "Famílies",
-    "add": "Afegeix una família",
-    "general-tab": "Detalls",
+    "family-new": "Nova família",
+    "family-create": "Crear nova família",
+    "family-create-description": "Omple les dades següents per crear una nova família.",
+    "family-edit": "Editar família",
+    "family-edit-description": "Modifica les dades i la configuració de la teva família a continuació.",
     "general-tab-label": "General",
     "family-name": "Nom de la família",
+    "family-name-description": "Aquest és el nom que identificarà la teva família dins de l'aplicació.",
     "name": "Nom",
     "family-types": "Tipus de família",
     "family-types-info": "L'estil i les funcionalitats poden variar en funció del tipus seleccionat.",
@@ -122,12 +131,18 @@
     "node-gender-unspecified": "No especificat"
   },
   "profile": {
-    "title": "Perfil",
+    "title": "Preferències",
     "description": "Aquí pots veure i modificar la teva informació personal.",
-    "private": "Perfil private",
+    "profile-tab": "Perfil públic",
+    "profile-tab-label": "Perfil",
+    "account-tab": "Detalls del compte",
+    "account-tab-label": "Compte",
+    "private": "Perfil privat",
     "private-description": "Activa aquesta opció per fer que el teu perfil i les teves famílies siguin visibles només per a tu i els teus familiars.",
     "name": "Nom",
+    "name-description": "Aquest nom es mostrarà al teu perfil i es compartirà amb les teves famílies.",
     "email": "Correu electrònic",
+    "email-description": "Aquesta adreça de correu electrònic està associada amb el teu perfil i no es pot canviar.",
     "email-hint": "L'adreça de correu electrònic està gestionada pel teu proveïdor OAuth.",
     "email-unmatched": "L'adreça de correu no coincideix.",
     "account-delete": "Esborra el compte",

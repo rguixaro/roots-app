@@ -4,9 +4,8 @@ import React from 'react'
 import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
 import { useTranslations } from 'next-intl'
 
-import { Family, TreeEdge, TreeNode } from '@/types'
 import { useTreeState, useNodeForm, useEdgeOperations, useNodeOperations } from './hooks'
-import { TreeToolbar, NodeFormModal, EdgeContextMenu, NodeContextMenu } from './ui'
+
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,13 @@ import {
   DialogFooter,
   Button,
 } from '@/ui'
+
+import { TreeToolbar, NodeFormModal, EdgeContextMenu, NodeContextMenu } from './ui'
+
+import { Family, TreeEdge, TreeNode } from '@/types'
+
+import { ocean } from '@/styles/colors'
+
 import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
@@ -28,10 +34,11 @@ interface StyledTreeProps {
 export default function StyledTree({ readonly, family, nodes, edges }: StyledTreeProps) {
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
+
   const treeState = useTreeState(family, nodes, edges)
-  const nodeForm = useNodeForm(family, () => {
-    treeState.setShowModal(false)
-  })
+
+  const nodeForm = useNodeForm(family, () => treeState.setShowModal(false))
+
   const edgeOperations = useEdgeOperations(family, edges, treeState.treeEdges, treeState.setEdges)
   const nodeOperations = useNodeOperations(family, nodes)
 
@@ -67,23 +74,18 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
         onNodeContextMenu={treeState.onNodeContextMenu}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
-        defaultEdgeOptions={{
-          type: 'smoothstep',
-          animated: true,
-          style: { stroke: '#2e6b74', strokeWidth: 1 },
-        }}
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
         nodesDraggable={true}
         snapGrid={[15, 15]}
-        className="bg-pale-ocean h-full w-full shadow-inner"
+        className="bg-ocean-50 h-full w-full shadow-inner"
         onlyRenderVisibleElements
         proOptions={{ hideAttribution: true }}
         fitView
         fitViewOptions={{ padding: 0.2 }}
       >
-        <Background gap={24} size={1} color="#2e6b74" />
+        <Background gap={32} size={1} color={ocean[300]} />
       </ReactFlow>
 
       {/* Edge Context Menu */}
@@ -132,7 +134,7 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => treeState.closeDeleteConfirmation()}
               disabled={treeState.loading}
             >

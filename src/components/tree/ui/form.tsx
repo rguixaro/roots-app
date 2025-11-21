@@ -6,7 +6,10 @@ import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { type z } from 'zod'
 
+import { CreateTreeNodeSchema } from '@/server/schemas'
+
 import {
+  Button,
   Form,
   FormControl,
   FormField,
@@ -22,8 +25,8 @@ import {
   TypographyH4,
   TypographyH5,
 } from '@/ui'
+
 import { checkKeyDown, cn } from '@/utils'
-import { CreateTreeNodeSchema } from '@/server/schemas'
 
 interface NodeFormModalProps {
   showModal: boolean
@@ -142,24 +145,30 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
     }
   }, [showModal])
 
+  /**
+   * Effect to reset form when modal is closed
+   */
+  useEffect(() => {
+    if (!showModal) form.reset()
+  }, [showModal, form])
+
   return (
     <>
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity duration-300',
+          'bg-ocean-100/50 fixed inset-0 z-50 backdrop-blur-xs transition-opacity duration-300',
           showModal ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={onClose}
       />
-
       {/* Modal */}
       <div
         className={cn(
           'text-ocean-400 fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out sm:top-0 sm:right-0 sm:h-full',
           isDragging ? 'transition-none' : 'transition-transform duration-300',
           showModal
-            ? 'translate-y-0 sm:translate-x-3/5 sm:translate-y-0'
+            ? 'border-ocean-200/50 translate-y-0 border-l-8 sm:translate-x-3/5 sm:translate-y-0'
             : 'translate-y-full sm:translate-x-full sm:translate-y-0'
         )}
         style={{
@@ -204,7 +213,6 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                     <X size={24} className="text-ocean-200" />
                   </button>
                 </div>
-
                 {/* General Information Section */}
                 <TypographyH5 className="text-start">{t_tree('node-general-info')}</TypographyH5>
                 <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
@@ -219,7 +227,7 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                             <Input
                               {...field}
                               autoComplete="off"
-                              className="w-full"
+                              className="w-fit"
                               placeholder={t_tree('node-fullname')}
                               disabled={loading}
                             />
@@ -229,9 +237,7 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                       </FormItem>
                     )}
                   />
-
                   <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
-
                   <FormField
                     control={form.control}
                     name="birthDate"
@@ -242,6 +248,7 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                           <div className="py-2">
                             <Input
                               {...field}
+                              className="w-fit"
                               value={
                                 field.value ? new Date(field.value).toISOString().split('T')[0] : ''
                               }
@@ -259,7 +266,6 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name="deathDate"
@@ -270,6 +276,7 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                           <div className="py-2">
                             <Input
                               {...field}
+                              className="w-fit"
                               value={
                                 field.value ? new Date(field.value).toISOString().split('T')[0] : ''
                               }
@@ -287,9 +294,7 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                       </FormItem>
                     )}
                   />
-
                   <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
-
                   <FormField
                     control={form.control}
                     name="gender"
@@ -324,30 +329,19 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                     )}
                   />
                 </div>
-
                 {/* Action Buttons */}
                 <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={onClose}
-                    className="bg-ocean-100/50 hover:bg-ocean-100 rounded px-5 py-2 transition-colors duration-300"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm font-bold">{t_common('cancel')}</span>
-                    </div>
-                  </button>
-                  <button
-                    type="submit"
-                    /* className="bg-ocean-300 hover:bg-ocean-400 flex-1 rounded-lg px-4 py-2 text-white transition-colors" */
-                    className="bg-ocean-200 hover:bg-ocean-300 rounded px-5 py-2 text-white shadow transition-colors duration-300"
-                    disabled={loading}
-                  >
+                  <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+                    <span className="text-sm font-bold">{t_common('cancel')}</span>
+                  </Button>
+                  <Button type="submit" disabled={loading && !form.formState.isValid}>
                     <div className="flex items-center space-x-3">
                       {loading && <LoaderIcon size={16} className="animate-spin" />}
                       <span className="text-sm font-bold">
                         {loading ? t_common('creating') : t_common('create')}
                       </span>
                     </div>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

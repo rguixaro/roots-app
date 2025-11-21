@@ -1,8 +1,24 @@
-// Type declarations for importing CSS files in TypeScript
-declare module '*.css'
-declare module '*.scss'
-declare module '*.sass'
-declare module '*.module.css'
-declare module '*.module.scss'
+declare module '*.css' {
+  const content: string
+  export default content
+}
 
-export {}
+declare module '*.scss' {
+  const content: string
+  export default content
+}
+
+declare module '*.sass' {
+  const content: string
+  export default content
+}
+
+declare module '*.module.css' {
+  const classes: { readonly [key: string]: string }
+  export default classes
+}
+
+declare module '*.module.scss' {
+  const classes: { readonly [key: string]: string }
+  export default classes
+}

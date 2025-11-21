@@ -3,6 +3,8 @@ import { Node, Edge, Position } from 'reactflow'
 
 import { TreeEdge, TreeNode } from '@/types'
 
+import { ocean } from '@/styles/colors'
+
 const nodeWidth = 160
 const nodeHeight = 60
 
@@ -67,7 +69,7 @@ export function computedLayout(
       animated: true,
       sourceHandle: isSpouse ? 'right' : 'bottom',
       targetHandle: isSpouse ? 'left' : 'top',
-      style: { stroke: '#2e6b74', strokeWidth: 1 },
+      style: { stroke: ocean[100], strokeWidth: 2 },
     }
   })
 

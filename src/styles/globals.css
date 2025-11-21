@@ -24,6 +24,13 @@
   .shadow-center-lg {
     box-shadow: 0 0 20px 4px rgba(0, 0, 0, 0.1);
   }
+
+  /* Prevent the icon from jumping to its own line */
+  .flex-wrap-break {
+    display: inline-flex;
+    flex-wrap: nowrap; /* keep text + icon together */
+    white-space: normal; /* allow text to wrap */
+  }
 }
 
 @font-face {

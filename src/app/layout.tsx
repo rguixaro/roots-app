@@ -5,8 +5,10 @@ import { getLocale, getMessages } from 'next-intl/server'
 import { SessionProvider } from 'next-auth/react'
 
 import { auth } from '@/auth'
-import { ToasterProvider, ProfileProvider } from '@/providers'
+import { ToasterProvider } from '@/providers'
+
 import { Header } from '@/components/layout/header'
+
 import '@/styles/globals.css'
 import 'reactflow/dist/style.css'
 
@@ -52,17 +54,15 @@ export default async function RootLayout({
       <body
         className={cn(
           `font-sans ${montserrat.variable} ${guavine.variable} antialiased`,
-          'bg-pale-ocean selection:bg-ocean-200/15 overflow-x-hidden'
+          'bg-ocean-50 selection:bg-ocean-200/15 flex justify-center overflow-x-hidden'
         )}
       >
-        <div className="h-full w-full overflow-x-hidden">
+        <div className="h-screen w-full">
           <SessionProvider>
             <NextIntlClientProvider messages={messages}>
-              <ProfileProvider initialName={userName || ''}>
-                <Header />
-                {children}
-                <ToasterProvider />
-              </ProfileProvider>
+              <Header username={userName || ''} />
+              {children}
+              <ToasterProvider />
             </NextIntlClientProvider>
           </SessionProvider>
         </div>

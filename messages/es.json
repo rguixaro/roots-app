@@ -2,6 +2,7 @@
   "common": {
     "return": "Volver",
     "families": "Familias",
+    "families-description": "Aquí están todas tus familias. Puedes crear nuevas o gestionar las existentes",
     "page-not-found": "Página no encontrada",
     "family-not-found": "Familia no encontrada",
     "no-families": "No se han encontrado familias",
@@ -17,7 +18,9 @@
     "deleting": "Eliminando...",
     "search": "Buscar",
     "searching": "Buscando...",
-    "share": "Compartir"
+    "share": "Compartir",
+    "recent-activity": "Actividad reciente",
+    "recent-activity-description": "Cualquier acción relevante realizada dentro de tus familias aparecerá aquí"
   },
   "toasts": {
     "family-created": "Familia creada con éxito.",
@@ -71,7 +74,9 @@
     "disabled": "Desactivado",
     "admin": "Administrador",
     "editor": "Editor",
-    "viewer": "Espectador"
+    "viewer": "Espectador",
+    "public": "Público",
+    "private": "Privado"
   },
   "login": {
     "login-to": "Acceder a tu ",
@@ -82,10 +87,15 @@
   },
   "family": {
     "title": "Familias",
-    "add": "Añadir una familia",
+    "family-new": "Nueva familia",
+    "family-create-description": "Rellena los datos a continuación para crear una nueva familia.",
+    "family-create": "Crear nueva familia",
+    "family-edit": "Editar familia",
+    "family-edit-description": "Modifica los datos y la configuración de tu familia a continuación.",
     "general-tab": "Detalles",
     "general-tab-label": "General",
     "family-name": "Nombre de la familia",
+    "family-name-description": "Este es el nombre que identificará a tu familia dentro de la aplicación.",
     "name": "Nombre",
     "family-types": "Tipos de familia",
     "family-types-info": "El estilo y las funcionalidades pueden variar en función del tipo seleccionado.",
@@ -122,12 +132,18 @@
     "node-gender-unspecified": "No especificado"
   },
   "profile": {
-    "title": "Perfil",
+    "title": "Configuración",
     "description": "Aquí puedes ver y modificar tu información personal.",
+    "profile-tab": "Perfil público",
+    "profile-tab-label": "Perfil",
+    "account-tab": "Detalles de la cuenta",
+    "account-tab-label": "Cuenta",
     "private": "Perfil privado",
     "private-description": "Activa esta opción para que tu perfil y tus familias sean visibles solo para ti y tus familiares.",
     "name": "Nombre",
+    "name-description": "Este nombre se mostrará en tu perfil y se compartirá con tus familias.",
     "email": "Correo electrónico",
+    "email-description": "Esta dirección de correo electrónico está asociada con tu perfil y no se puede cambiar.",
     "email-hint": "La dirección de correo electrónico está gestionada por tu proveedor OAuth.",
     "email-unmatched": "La dirección de correo no coincide.",
     "account-delete": "Eliminar la cuenta",

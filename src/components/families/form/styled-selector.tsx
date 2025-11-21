@@ -42,7 +42,14 @@ export const StyledSelector = <T extends string>({
           >
             <Icon type={name} size={24} />
             {t_enums(name.toLocaleLowerCase()).length > 0 && (
-              <span className="text-ocean-200/75 pt-3 text-xs">{t_enums(name.toLowerCase())}</span>
+              <span
+                className={cn(
+                  'text-ocean-200/75 pt-3 text-xs font-medium',
+                  isActive && 'text-ocean-200 font-bold'
+                )}
+              >
+                {t_enums(name.toLowerCase())}
+              </span>
             )}
             <div
               className={cn(
@@ -51,7 +58,7 @@ export const StyledSelector = <T extends string>({
                 isActive ? 'opacity-100' : 'opacity-0'
               )}
             >
-              <Check size={14} color={'#789B84'} />
+              <Check size={14} className="stroke-ocean-200" />
             </div>
           </button>
         )

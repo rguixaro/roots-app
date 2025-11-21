@@ -23,8 +23,8 @@ export const StyledEdge: React.FC<ConnectionLineComponentProps> = ({
       <path
         fill="none"
         d={path}
-        stroke={ocean[300]}
-        strokeWidth={1}
+        stroke={ocean[200]}
+        strokeWidth={3}
         strokeDasharray="8 4"
         style={connectionLineStyle}
       />

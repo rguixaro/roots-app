@@ -26,7 +26,7 @@ const buttonVariants = cva(
         destructive: 'bg-red-500 text-neutral-50 shadow-sm hover:bg-red-500/90',
         outline:
           'bg-ocean-200/15 border-2 border-ocean-200/15 shadow-sm hover:bg-ocean-200/60 text-ocean-400 shadow',
-        ghost: 'hover:bg-ocean-200/15 hover:text-neutral-900',
+        ghost: 'hover:bg-ocean-200/15 hover:text-ocean-400',
       },
       size: {
         default: 'h-9 px-4 py-2',

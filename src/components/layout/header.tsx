@@ -22,22 +22,20 @@ export const Header = ({ username }: { username: string }) => {
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="w-10/12 sm:w-2/4 lg:w-3/4">
-        <Link
-          href="/"
-          className="bg-pale-ocean border-ocean-300 sticky top-0 z-50 flex h-24 cursor-pointer items-center justify-center border-b-4"
-        >
-          <div className="w-full text-center">
-            <TypographyH1 className="font-title text-ocean-300 pb-5">
-              {displayName ? (
-                <span className="text-ocean-200 text-4xl">{`${displayName}'s `}</span>
-              ) : null}
-              {'Roots'}
-            </TypographyH1>
-          </div>
-        </Link>
-      </div>
+    <div className="bg-ocean-100 w-full">
+      <Link
+        href="/"
+        className="bg-ocean-100 border-ocean-200/50 sticky top-0 z-50 flex h-24 cursor-pointer items-center justify-center border-b-8 shadow-lg"
+      >
+        <div className="w-full text-center">
+          <TypographyH1 className="font-title text-pale-ocean pb-5 font-bold">
+            {displayName ? (
+              <span className="text-3xl font-bold tracking-wide">{`${displayName}'s `}</span>
+            ) : null}
+            {'Roots'}
+          </TypographyH1>
+        </div>
+      </Link>
     </div>
   )
 }

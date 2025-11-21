@@ -14,7 +14,7 @@ export const FamiliesFeed = async () => {
 
   return (
     <div className="mb-5 flex h-full w-full flex-col">
-      <p className="mb-4">{t_common('families-description')} </p>
+      <p className="mt-2 mb-4">{t_common('families-description')} </p>
       <div className="no-scrollbar flex w-full justify-start overflow-x-auto">
         <div className="flex w-max flex-row gap-2">
           {familiesWithAdd.map((item, i) => (

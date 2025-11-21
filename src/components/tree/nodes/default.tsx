@@ -5,6 +5,7 @@ import { Position, Handle, NodeProps } from 'reactflow'
 import { Info, Images } from 'lucide-react'
 
 import { cn } from '@/utils'
+
 import { TreeNode } from '@/types'
 
 interface StyledNodeProps {
@@ -15,8 +16,10 @@ interface StyledNodeProps {
 /**
  * Global styles for node handles
  */
-const NodeGlobalStyles =
-  'bg-pale-ocean! h-px! w-px! rounded-full! border-2! border-white! opacity-0 transition-all duration-200'
+const NodeGlobalStyles = cn(
+  'h-px! w-px! rounded-full! border-3! border-white! opacity-0 transition-all duration-200',
+  'bg-pale-ocean! group-hover:border-ocean-100! group-hover:bg-pale-ocean!'
+)
 
 /**
  * A styled node in the tree.
@@ -74,10 +77,10 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     const hasConnectionInExpandedState = expanded && hasConnection
 
     return cn(NodeGlobalStyles, {
-      'bg-ocean-100! w-1.5! opacity-100': isVisible,
-      'bg-ocean-300! h-4! w-1.5! opacity-100': showAsConnected,
-      'h-4!': showOnHover,
-      'border-ocean-50! bg-ocean-200!': isInExpandedState,
+      'bg-ocean-100! w-2! opacity-100 ': isVisible,
+      'bg-ocean-200! h-6! w-2! opacity-100 group-hover:bg-ocean-200!': showAsConnected,
+      'h-6!': showOnHover,
+      'border-ocean-50!': isInExpandedState,
       'bg-ocean-300!': hasConnectionInExpandedState,
     })
   }
@@ -95,10 +98,10 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     const hasConnectionInExpandedState = expanded && hasConnection
 
     return cn(NodeGlobalStyles, {
-      'bg-ocean-100! h-1.5! opacity-100': isVisible,
-      'bg-ocean-300! h-1.5! w-6! opacity-100': showAsConnected,
-      'w-6!': showOnHover,
-      'border-ocean-50! bg-ocean-200! w-16!': isInExpandedState,
+      'bg-ocean-100! h-2! opacity-100': isVisible,
+      'bg-ocean-200! h-2! w-8! opacity-100 group-hover:bg-ocean-200!': showAsConnected,
+      'w-8!': showOnHover,
+      'border-ocean-50! w-16!': isInExpandedState,
       'bg-ocean-300!': hasConnectionInExpandedState,
     })
   }
@@ -109,14 +112,22 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        'text-ocean-400 relative h-15 w-40 cursor-pointer rounded-xl',
-        'shadow-center cursor-pointer bg-white p-3 transition-all duration-200 select-none',
+        'text-ocean-400 group relative flex h-15 w-40 cursor-pointer flex-col items-center justify-center rounded-lg',
+        'shadow-center hover:bg-ocean-100 hover:text-pale-ocean cursor-pointer bg-white p-5 transition-all duration-200 select-none',
         expanded && 'bg-ocean-50 rounded-b-none'
       )}
     >
       <strong>{fullName}</strong>
-      {birthYear && <p className="text-xs">{birthYear}</p>}
-      {deathYear && <p className="text-xs">{deathYear}</p>}
+      <div
+        className={cn(
+          'flex w-full justify-center space-x-2 text-xs font-medium',
+          'opacity-70 group-hover:opacity-100'
+        )}
+      >
+        {birthYear && <p>{birthYear}</p>}
+        {deathYear && birthYear && <span>-</span>}
+        {deathYear && <p>{deathYear}</p>}
+      </div>
 
       {/* Right handle (spouse relationships) */}
       <Handle
@@ -152,21 +163,27 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       <div
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'absolute top-full left-1/2 flex w-full justify-evenly bg-white px-3 py-3',
-          'origin-top -translate-x-1/2 scale-y-0 overflow-hidden rounded-b-xl shadow-xl',
+          'absolute top-full left-1/2 flex w-full justify-evenly bg-white',
+          'shadow-center origin-top -translate-x-1/2 scale-y-0 overflow-hidden rounded-b-xl',
           'cursor-default transition-transform duration-300 ease-out',
           expanded ? 'pointer-events-auto scale-y-100' : 'pointer-events-none'
         )}
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="hover:bg-ocean-50 cursor-pointer rounded bg-white p-1 transition-colors duration-300"
+          className={cn(
+            'flex w-full cursor-pointer items-center justify-center bg-white p-2',
+            'hover:bg-ocean-50 transition-colors duration-300'
+          )}
         >
           <Info size={16} className="text-ocean-400" />
         </div>
         <div
           onClick={(e) => e.stopPropagation()}
-          className="hover:bg-ocean-50 cursor-pointer rounded bg-white p-1 transition-colors duration-300"
+          className={cn(
+            'flex w-full cursor-pointer items-center justify-center bg-white p-2',
+            'hover:bg-ocean-50 transition-colors duration-300'
+          )}
         >
           <Images size={16} className="text-ocean-400" />
         </div>

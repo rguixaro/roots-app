@@ -2,8 +2,11 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
+
 import { Family, TreeNode, TreeEdge } from '@/types'
+
 import { createTreeLayout, computedLayout, positionCoupleNodes } from '../layout'
+
 import { StyledNode, VoidNode } from '../nodes'
 
 export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[]) {
@@ -169,34 +172,38 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    * Close the edge context menu
    * @return void
    */
-  const closeEdgeContextMenu = useCallback(() => {
-    setEdgeContextMenu({ visible: false, x: 0, y: 0, edgeId: null })
-  }, [])
+  const closeEdgeContextMenu = useCallback(
+    () => setEdgeContextMenu({ visible: false, x: 0, y: 0, edgeId: null }),
+    []
+  )
 
   /**
    * Close the node context menu
    * @return void
    */
-  const closeNodeContextMenu = useCallback(() => {
-    setNodeContextMenu({ visible: false, x: 0, y: 0, nodeId: null })
-  }, [])
+  const closeNodeContextMenu = useCallback(
+    () => setNodeContextMenu({ visible: false, x: 0, y: 0, nodeId: null }),
+    []
+  )
 
   /**
    * Show confirmation dialog for node deletion
    * @param nodeId - The id of the node to delete
    * @return void
    */
-  const showDeleteConfirmation = useCallback((nodeId: string) => {
-    setConfirmDelete({ open: true, nodeId })
-  }, [])
+  const showDeleteConfirmation = useCallback(
+    (nodeId: string) => setConfirmDelete({ open: true, nodeId }),
+    []
+  )
 
   /**
    * Close confirmation dialog
    * @return void
    */
-  const closeDeleteConfirmation = useCallback(() => {
-    setConfirmDelete({ open: false, nodeId: null })
-  }, [])
+  const closeDeleteConfirmation = useCallback(
+    () => setConfirmDelete({ open: false, nodeId: null }),
+    []
+  )
 
   return {
     loading,

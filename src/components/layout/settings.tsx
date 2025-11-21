@@ -1,6 +1,6 @@
 'use client'
 
-import { User } from 'lucide-react'
+import { Settings as SettingsIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import { cn } from '@/utils'
@@ -19,7 +19,7 @@ export function Settings({ className }: SettingsProps) {
         className
       )}
     >
-      <User
+      <SettingsIcon
         size={24}
         className="stroke-pale-ocean group-hover:stroke-ocean-300 transition-colors duration-300"
       />

@@ -6,7 +6,10 @@ import { toast } from 'sonner'
 import { Connection, Edge, addEdge } from 'reactflow'
 
 import { createTreeEdge, deleteTreeEdge } from '@/server/actions'
+
 import { TreeEdge, TreeEdgeType, Family } from '@/types'
+
+import { ocean } from '@/styles/colors'
 
 export function useEdgeOperations(
   family: Family,
@@ -144,7 +147,7 @@ export function useEdgeOperations(
         ...conn,
         animated: true,
         type: 'smoothstep',
-        style: { stroke: '#2e6b74', strokeWidth: 1 },
+        style: { stroke: ocean[400], strokeWidth: 2 },
       }
 
       try {

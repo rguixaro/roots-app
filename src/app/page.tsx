@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { getTranslations } from 'next-intl/server'
 import { Loader } from 'lucide-react'
 
-import { FamiliesFeed, Toolbar } from '@/components/families'
+import { FamiliesFeed, ActivityFeed, Toolbar } from '@/components/families'
 
 export default async function FamiliesPage() {
   const t_common = await getTranslations('common')
@@ -18,10 +18,14 @@ export default async function FamiliesPage() {
 
   return (
     <main className="text-ocean-400 flex h-full items-center justify-center">
-      <div className="w-3/4">
-        <Toolbar withSearch={false} />
+      <div className="h-full w-3/4">
+        <Toolbar />
         <Suspense fallback={<LoadingSkeleton />}>
           <FamiliesFeed />
+          <div className="mx-auto mb-5 w-5/6 items-center justify-center">
+            <div className="bg-ocean-100 h-1 rounded shadow-lg" />
+          </div>
+          <ActivityFeed />
         </Suspense>
       </div>
     </main>

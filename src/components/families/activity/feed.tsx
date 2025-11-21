@@ -14,10 +14,9 @@ export const ActivityFeed = async () => {
   const families = (await getFamilies())?.families
 
   return (
-    <div>
-      <div className="border-ocean-400 mt-5 w-fit border-b-2 font-bold">
-        <TypographyH5>{t_common('recent-activity')}</TypographyH5>
-      </div>
+    <div className="mt-5">
+      <TypographyH5>{t_common('recent-activity')}</TypographyH5>
+      <p className="mb-5">{t_common('recent-activity-description')} </p>
       {[FamilyType[0], FamilyType[1], FamilyType[0], FamilyType[1]]?.map((item, i) => {
         return (
           <div key={i}>

@@ -29,25 +29,20 @@ export function ActivityItem({ item, index }: { item: FamilyType; index: number 
     >
       <div
         className={cn(
-          'group transition-colors duration-300',
-          'my-4 rounded-lg border-2 px-3 py-2 sm:px-5 sm:py-3',
+          'group transition-all duration-300',
+          'my-4 rounded-lg border-4 px-3 py-2 sm:px-5 sm:py-3',
           'flex flex-col items-start justify-start space-y-2',
           'sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:space-x-5',
-          'border-ocean-50 bg-ocean-50/50 hover:shadow-md',
-          'hover:bg-ocean-50 hover:border-ocean-100/50'
+          'border-ocean-100 hover:bg-pale-ocean bg-ocean-100 hover:shadow-md',
+          'hover:text-ocean-300 text-pale-ocean'
         )}
       >
         <div className={cn('flex min-w-0 items-center space-x-3')}>
-          <div
-            className={cn(
-              'rounded p-1 transition-colors duration-300 sm:p-2',
-              'bg-ocean-100/50 group-hover:bg-ocean-200/50'
-            )}
-          >
+          <div className="bg-pale-ocean rounded p-1 sm:p-2">
             <Icon
               type={item}
               size={24}
-              className="stroke-pale-ocean transition-colors duration-300"
+              className="stroke-ocean-100 group-hover:stroke-ocean-300 transition-colors duration-300"
             />
           </div>
 
@@ -58,17 +53,14 @@ export function ActivityItem({ item, index }: { item: FamilyType; index: number 
         </div>
         <Link
           href={`/families/${'guixaro-trancho'}`}
-          className={cn(
-            'max-w-full min-w-0 text-xs font-bold transition-colors duration-300',
-            'text-ocean-300'
-          )}
+          className="max-w-full min-w-0 text-xs font-bold"
         >
           <span className="flex-wrap-break inline-flex items-center gap-2 hover:underline">
             Guixaró-Trancho 2ekm12 12
             <SquareArrowOutUpRight size={16} />
           </span>
         </Link>
-        <span className="text-ocean-300 text-xs">{new Date().toISOString().split('T')[0]}</span>
+        <span className="text-xs">{new Date().toISOString().split('T')[0]}</span>
       </div>
     </motion.div>
   )

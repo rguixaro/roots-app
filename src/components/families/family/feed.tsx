@@ -1,19 +1,22 @@
+import { getTranslations } from 'next-intl/server'
+
 import { getFamilies } from '@/server/queries'
 
 import { ItemFamily } from '@/components/families'
 
-import { cn } from '@/utils/cn'
-
 import { Family } from '@/types'
 
 export const FamiliesFeed = async () => {
+  const t_common = await getTranslations('common')
+
   const families = (await getFamilies())?.families
   const familiesWithAdd = [...(families ?? []), null as Family | null]
 
   return (
-    <div className={cn('flex h-full w-full flex-col rounded-lg py-5')}>
-      <div className={cn('no-scrollbar flex w-full justify-start overflow-x-auto')}>
-        <div className="flex w-max flex-row gap-4">
+    <div className="mb-5 flex h-full w-full flex-col">
+      <p className="mb-4">{t_common('families-description')} </p>
+      <div className="no-scrollbar flex w-full justify-start overflow-x-auto">
+        <div className="flex w-max flex-row gap-2">
           {familiesWithAdd.map((item, i) => (
             <ItemFamily key={i} family={item} index={i} />
           ))}

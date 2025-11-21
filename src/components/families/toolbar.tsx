@@ -9,13 +9,9 @@ export const Toolbar = ({ withAvatar = true }: { withAvatar?: boolean }) => {
   const t_common = useTranslations('common')
 
   return (
-    <div className="my-2 flex w-full items-center justify-between">
+    <div className="mt-5 flex w-full items-center justify-between">
       <TypographyH4>{t_common('families')}</TypographyH4>
-      {withAvatar && (
-        <div className="flex flex-row">
-          <ProfileLink />
-        </div>
-      )}
+      {withAvatar &&  <ProfileLink />}
     </div>
   )
 }

@@ -2,7 +2,16 @@ import { icons, LucideIcon } from 'lucide-react'
 
 import { FamilyType, FamilyRole } from '@/types'
 
-type BuiltInType = FamilyType | FamilyRole | 'Filled' | 'Empty' | 'Enabled' | 'Disabled' | string
+type BuiltInType =
+  | FamilyType
+  | FamilyRole
+  | 'Filled'
+  | 'Empty'
+  | 'Enabled'
+  | 'Disabled'
+  | 'Public'
+  | 'Private'
+  | string
 
 type IconProps = {
   type: BuiltInType
@@ -28,6 +37,8 @@ const otherDefaultIcons: Record<string, keyof typeof icons> = {
   empty: 'CircleDashed',
   enabled: 'Images',
   disabled: 'X',
+  public: 'LockKeyholeOpen',
+  private: 'UserLock',
 }
 
 export const Icon: React.FC<IconProps> = ({

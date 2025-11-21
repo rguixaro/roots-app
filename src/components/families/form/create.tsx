@@ -252,29 +252,25 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
         to={currentFamily ? `/families/${currentFamily.slug}` : '/'}
       />
       <TypographyH4 className="mt-4">{t_family('family-create')}</TypographyH4>
+      <p className="mb-4">{t_family('family-create-description')} </p>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          onKeyDown={(e) => checkKeyDown(e)}
-          className="w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)}>
           <Tabs.Root
             value={currentTab}
             onValueChange={(value) => setCurrentTab(value as 'general' | 'members')}
-            className="w-full"
           >
             <Tabs.List className="border-ocean-200/50 mb-4 flex border-b-2">
               <Tabs.Trigger
                 value="general"
                 disabled={canAccessMembers}
-                className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
                 {t_family('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
                 disabled={!canAccessMembers}
-                className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
                 {t_family('family-members-tab-label')}
               </Tabs.Trigger>
@@ -287,18 +283,19 @@ export const CreateFamily = ({ userId: currentUserId }: CreateFamilyProps) => {
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="">
+                    <FormItem className="w-fit">
                       <FormLabel>{t_family('family-name')}</FormLabel>
-                      <FormControl>
-                        <div className="py-2">
-                          <Input
-                            {...field}
-                            autoComplete="off"
-                            className="w-full"
-                            placeholder={t_family('name')}
-                            disabled={loading}
-                          />
-                        </div>
+                      <FormDescription className="mb-2 text-sm opacity-70">
+                        {t_family('family-name-description')}
+                      </FormDescription>
+                      <FormControl className="mb-5 flex w-max">
+                        <Input
+                          {...field}
+                          autoComplete="off"
+                          className="w-auto"
+                          placeholder={t_family('name')}
+                          disabled={loading}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -30,7 +30,7 @@ export function TreeToolbar({ readonly, family, onCreateNode, onResetView }: Tre
           text={'families'}
           className={cn(
             'bg-ocean-100 rounded-lg rounded-t-none rounded-l-none py-1 ps-0 pe-4 pb-2',
-            'hover:bg-ocean-100 group bg-none transition-all duration-300'
+            'hover:bg-ocean-100 group bg-none shadow-lg transition-all duration-300'
           )}
           classNameSvg="group-hover:stroke-ocean-300 stroke-pale-ocean"
           classNameHover="group-hover:text-ocean-300 text-pale-ocean hover:bg-transparent"

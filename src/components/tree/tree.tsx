@@ -4,9 +4,8 @@ import React from 'react'
 import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
 import { useTranslations } from 'next-intl'
 
-import { Family, TreeEdge, TreeNode } from '@/types'
 import { useTreeState, useNodeForm, useEdgeOperations, useNodeOperations } from './hooks'
-import { TreeToolbar, NodeFormModal, EdgeContextMenu, NodeContextMenu } from './ui'
+
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,11 @@ import {
   DialogFooter,
   Button,
 } from '@/ui'
+
+import { TreeToolbar, NodeFormModal, EdgeContextMenu, NodeContextMenu } from './ui'
+
+import { Family, TreeEdge, TreeNode } from '@/types'
+
 import { StyledEdge } from './edge'
 
 interface StyledTreeProps {

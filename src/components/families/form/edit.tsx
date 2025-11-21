@@ -26,6 +26,7 @@ import {
   ConfirmDialog,
   TypographyH5,
   TypographyH4,
+  Button,
 } from '@/ui'
 
 import { Family, FamilyRole } from '@/types'
@@ -251,6 +252,10 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
 
+  const familyName = form.watch('name')
+  const nodeImage = form.watch('nodeImage')
+  const nodeGallery = form.watch('nodeGallery')
+
   /**
    * Handle async operations with loading state
    * @param fn
@@ -347,29 +352,26 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
     <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
       <GoBack to={`/families/${currentFamily.slug}`} />
       <TypographyH4 className="mt-4">{t_family('family-edit')}</TypographyH4>
+      <p className="mb-4">{t_family('family-edit-description')} </p>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          onKeyDown={(e) => checkKeyDown(e)}
-          className="w-full"
-        >
-          <Tabs.Root defaultValue="general" className="w-full">
+        <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)}>
+          <Tabs.Root defaultValue="general">
             <Tabs.List className="border-ocean-200/50 mb-4 flex border-b-2">
               <Tabs.Trigger
                 value="general"
-                className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
                 {t_family('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="settings"
-                className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
                 {t_family('settings-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
-                className="data-[state=active]:border-ocean-200 data-[state=active]:text-ocean-400 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
                 {t_family('family-members-tab-label')}
               </Tabs.Trigger>
@@ -384,15 +386,16 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   render={({ field }) => (
                     <FormItem className="">
                       <FormLabel>{t_family('family-name')}</FormLabel>
-                      <FormControl>
-                        <div className="flex w-max py-2">
-                          <Input
-                            {...field}
-                            placeholder={t_family('name')}
-                            className="w-full"
-                            disabled={loading}
-                          />
-                        </div>
+                      <FormDescription className="text-sm opacity-70">
+                        {t_family('family-name-description')}
+                      </FormDescription>
+                      <FormControl className="mb-5 flex w-max">
+                        <Input
+                          {...field}
+                          placeholder={t_family('name')}
+                          className="w-auto"
+                          disabled={loading}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -405,7 +408,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   render={() => (
                     <FormItem>
                       <FormLabel>{t_family('family-types')}</FormLabel>
-                      <FormDescription className="mb-2 text-sm opacity-70">
+                      <FormDescription className="text-sm opacity-70">
                         {t_family('family-types-info')}
                       </FormDescription>
                       <FormControl>
@@ -425,9 +428,9 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                 />
               </div>
               <div className="my-5">
-                <button
+                <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || familyName === currentFamily.name}
                   className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
                 >
                   <div className="flex items-center space-x-3">
@@ -436,7 +439,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                       {loading ? t_common('updating') : t_common('update')}
                     </span>
                   </div>
-                </button>
+                </Button>
               </div>
             </Tabs.Content>
             {/* --- SETTINGS TAB --- */}
@@ -486,9 +489,13 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                 />
               </div>
               <div className="my-5">
-                <button
+                <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={
+                    loading ||
+                    (nodeImage === currentFamily.nodeImage &&
+                      nodeGallery === currentFamily.nodeGallery)
+                  }
                   className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
                 >
                   <div className="flex items-center space-x-3">
@@ -497,7 +504,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                       {loading ? t_common('updating') : t_common('update')}
                     </span>
                   </div>
-                </button>
+                </Button>
               </div>
             </Tabs.Content>
             {/* --- MEMBERS TAB --- */}

@@ -33,6 +33,7 @@
     "family-member-removed": "User removed from family successfully.",
     "profile-updated": "Profile updated successfully.",
     "node-created": "Member added successfully.",
+    "node-updated": "Member updated successfully.",
     "node-deleted": "Member deleted successfully.",
     "edge-created": "Relationship created successfully.",
     "edge-deleted": "Relationship deleted successfully.",
@@ -57,6 +58,7 @@
     "username-required": "Username is required.",
     "username-too-long": "Username cannot be longer than 40 characters.",
     "email-invalid": "Invalid email address.",
+    "error-node-not-found": "Member not found.",
     "error-nodes-not-found": "One or more members not found.",
     "error-edge-not-found": "Relationship not found.",
     "error-relationship-already-exists": "A relationship already exists between these members.",
@@ -134,7 +136,9 @@
     "node-gender-male": "Male",
     "node-gender-female": "Female",
     "node-gender-other": "Other",
-    "node-gender-unspecified": "Unspecified"
+    "node-gender-unspecified": "Unspecified",
+    "node-info-edit": "Edit information",
+    "node-info-description": "Here you can view and modify the personal information of this family member."
   },
   "profile": {
     "title": "Settings",

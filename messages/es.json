@@ -33,6 +33,7 @@
     "family-member-removed": "Usuario eliminado de la familia con éxito.",
     "profile-updated": "Perfil actualizado con éxito.",
     "node-created": "Miembro añadido con éxito.",
+    "node-updated": "Miembro actualizado con éxito.",
     "node-deleted": "Miembro eliminado con éxito.",
     "edge-created": "Relación creada con éxito.",
     "edge-deleted": "Relación eliminada con éxito.",
@@ -57,6 +58,7 @@
     "username-required": "El nombre de usuario es obligatorio.",
     "username-too-long": "El nombre de usuario no puede tener más de 40 caracteres.",
     "email-invalid": "La dirección de correo electrónico no es válida.",
+    "error-node-not-found": "Miembro no encontrado.",
     "error-nodes-not-found": "Uno o más miembros no encontrados.",
     "error-edge-not-found": "Relación no encontrada.",
     "error-relationship-already-exists": "Ya existe una relación entre estos miembros.",
@@ -134,7 +136,9 @@
     "node-gender-male": "Hombre",
     "node-gender-female": "Mujer",
     "node-gender-other": "Otro",
-    "node-gender-unspecified": "No especificado"
+    "node-gender-unspecified": "No especificado",
+    "node-info-edit": "Editar la información",
+    "node-info-description": "Aquí puedes ver y modificar la información personal de este miembro de la familia."
   },
   "profile": {
     "title": "Configuración",

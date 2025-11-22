@@ -33,6 +33,7 @@
     "family-member-removed": "Usuari eliminat de la família amb èxit.",
     "profile-updated": "Perfil actualitzat amb èxit.",
     "node-created": "Membre afegit amb èxit.",
+    "node-updated": "Membre actualitzat amb èxit.",
     "node-deleted": "Membre eliminat amb èxit.",
     "edge-created": "Relació creada amb èxit.",
     "edge-deleted": "Relació eliminada amb èxit.",
@@ -57,6 +58,7 @@
     "username-required": "El nom d'usuari és obligatori.",
     "username-too-long": "El nom d'usuari no pot tenir més de 40 caràcters.",
     "email-invalid": "L'adreça de correu electrònic no és vàlida.",
+    "error-node-not-found": "Membre no trobat.",
     "error-nodes-not-found": "Un o més membres no trobats.",
     "error-edge-not-found": "Relació no trobada.",
     "error-relationship-already-exists": "Ja existeix una relació entre aquests membres.",
@@ -133,7 +135,9 @@
     "node-gender-male": "Home",
     "node-gender-female": "Dona",
     "node-gender-other": "Altre",
-    "node-gender-unspecified": "No especificat"
+    "node-gender-unspecified": "No especificat",
+    "node-info-edit": "Editar la informació",
+    "node-info-description": "Aquí pots veure i modificar la informació personal d'aquest membre de la família."
   },
   "profile": {
     "title": "Preferències",

@@ -88,6 +88,18 @@ export const CreateTreeNodeSchema = z.object({
 
 export type CreateTreeMemberInput = z.TypeOf<typeof CreateTreeNodeSchema>
 
+export const UpdateTreeNodeSchema = z.object({
+  id: z.string(),
+  familyId: z.string().min(1, { message: 'family-id-required' }),
+  fullName: z.string().min(1, { message: 'full-name-required' }),
+  birthDate: z.coerce.date().optional().nullable(),
+  deathDate: z.coerce.date().optional().nullable(),
+  photoUrl: z.string().url().optional().nullable(),
+  gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
+})
+
+export type UpdateTreeNodeInput = z.TypeOf<typeof UpdateTreeNodeSchema>
+
 export const CreateTreeEdgeSchema = z.object({
   familyId: z.string().min(1, { message: 'family-id-required' }),
   fromNodeId: z.string().min(1, { message: 'from-node-required' }),

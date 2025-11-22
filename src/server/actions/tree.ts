@@ -5,32 +5,30 @@ import { revalidatePath } from 'next/cache'
 import type { z } from 'zod'
 
 import { auth } from '@/auth'
+
 import { db } from '@/server/db'
-import type { CreateTreeNodeSchema, CreateTreeEdgeSchema } from '@/server/schemas'
-import { TreeNode, TreeEdgeType, TreeEdge } from '@/types'
+import type {
+  CreateTreeNodeSchema,
+  CreateTreeEdgeSchema,
+  UpdateTreeNodeSchema,
+} from '@/server/schemas'
 
-interface TreeNodeResult {
+import { TreeEdgeType } from '@/types'
+
+interface TreeResult {
   error: boolean
   message?: string
-  node?: TreeNode
-  edges?: TreeEdge[]
-}
-
-interface TreeEdgeResult {
-  error: boolean
-  message?: string
-  edge?: TreeEdge
 }
 
 /**
  * Create new tree node.
  * Auth required.
  * @param values {z.infer<typeof CreateTreeNodeSchema>}
- * @returns Promise<TreeNodeResult>
+ * @returns Promise<TreeResult>
  */
 export const createTreeNode = async (
   values: z.infer<typeof CreateTreeNodeSchema>
-): Promise<TreeNodeResult> => {
+): Promise<TreeResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -88,13 +86,11 @@ export const createTreeNode = async (
       )
     }
 
-    const createdEdges = edgePromises.length > 0 ? await Promise.all(edgePromises) : []
-
     revalidatePath('/')
     revalidatePath('/families')
     revalidatePath(`/families/${values.familyId}`)
 
-    return { error: false, node: node || undefined, edges: createdEdges }
+    return { error: false }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-family-not-found' }
@@ -104,14 +100,64 @@ export const createTreeNode = async (
 }
 
 /**
+ * Update an existing tree node.
+ * Auth required.
+ * @param values {z.infer<typeof UpdateTreeNodeSchema>}
+ * @returns Promise<TreeResult>
+ */
+export const updateTreeNode = async (
+  values: z.infer<typeof UpdateTreeNodeSchema>
+): Promise<TreeResult> => {
+  const currentUser = await auth()
+  const userId = currentUser?.user?.id
+
+  // Not authenticated
+  if (!userId) return { error: true }
+
+  try {
+    const familyAccess = await db.familyAccess.findFirst({
+      where: {
+        familyId: values.familyId,
+        userId: userId,
+        role: { in: ['EDITOR', 'ADMIN'] },
+      },
+    })
+
+    if (!familyAccess) return { error: true, message: 'error-no-permission' }
+
+    await db.treeNode.update({
+      where: { id: values.id },
+      data: {
+        fullName: values.fullName,
+        birthDate: values.birthDate,
+        deathDate: values.deathDate,
+        gender: values.gender,
+      },
+      include: { edgesFrom: true, edgesTo: true },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/families')
+    revalidatePath(`/families/${values.familyId}`)
+
+    return { error: false }
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2025') return { error: true, message: 'error-node-not-found' }
+    }
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
  * Create new tree edge (relationship).
  * Auth required.
  * @param values {z.infer<typeof CreateTreeEdgeSchema>}
- * @returns Promise<TreeEdgeResult>
+ * @returns Promise<TreeResult>
  */
 export const createTreeEdge = async (
   values: z.infer<typeof CreateTreeEdgeSchema>
-): Promise<TreeEdgeResult> => {
+): Promise<TreeResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -148,7 +194,7 @@ export const createTreeEdge = async (
 
     if (existingEdge) return { error: true, message: 'error-relationship-already-exists' }
 
-    const edge = await db.treeEdge.create({
+    await db.treeEdge.create({
       data: {
         familyId: values.familyId,
         fromNodeId: values.fromNodeId,
@@ -161,7 +207,7 @@ export const createTreeEdge = async (
     revalidatePath('/families')
     revalidatePath(`/families/${values.familyId}`)
 
-    return { error: false, edge: edge || undefined }
+    return { error: false }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-family-not-found' }
@@ -175,9 +221,9 @@ export const createTreeEdge = async (
  * Auth required.
  * @param nodeId - The id of the node to delete
  * @param familyId - The id of the family the node belongs to
- * @returns Promise<TreeNodeResult>
+ * @returns Promise<TreeResult>
  */
-export const deleteTreeNode = async (nodeId: string, familyId: string): Promise<TreeNodeResult> => {
+export const deleteTreeNode = async (nodeId: string, familyId: string): Promise<TreeResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -214,7 +260,7 @@ export const deleteTreeNode = async (nodeId: string, familyId: string): Promise<
     revalidatePath('/families')
     revalidatePath(`/families/${familyId}`)
 
-    return { error: false, node: node as TreeNode, edges: connectedEdges as TreeEdge[] }
+    return { error: false }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-nodes-not-found' }
@@ -228,9 +274,9 @@ export const deleteTreeNode = async (nodeId: string, familyId: string): Promise<
  * Auth required.
  * @param edgeId {string} - The ID of the edge to delete
  * @param familyId {string} - The family ID for permission checking
- * @returns Promise<TreeEdgeResult>
+ * @returns Promise<TreeResult>
  */
-export const deleteTreeEdge = async (edgeId: string, familyId: string): Promise<TreeEdgeResult> => {
+export const deleteTreeEdge = async (edgeId: string, familyId: string): Promise<TreeResult> => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -254,7 +300,7 @@ export const deleteTreeEdge = async (edgeId: string, familyId: string): Promise<
     revalidatePath('/families')
     revalidatePath(`/families/${familyId}`)
 
-    return { error: false, edge: edge || undefined }
+    return { error: false }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-edge-not-found' }

@@ -8,9 +8,10 @@ import { type z } from 'zod'
 
 import { CreateTreeNodeSchema } from '@/server/schemas'
 import { createTreeNode } from '@/server/actions'
+
 import { Family } from '@/types'
 
-export function useNodeForm(family: Family, onSuccess?: () => void) {
+export function useNodeCreateForm(family: Family, onSuccess?: () => void) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
 
@@ -19,6 +20,11 @@ export function useNodeForm(family: Family, onSuccess?: () => void) {
     defaultValues: { familyId: family.id, fullName: '' },
   })
 
+  /**
+   * Handle form creation submission
+   * @param values {z.infer<typeof CreateTreeNodeSchema>}
+   * @returns {Promise<void>}
+   */
   const onSubmit = async (values: z.infer<typeof CreateTreeNodeSchema>): Promise<void> => {
     const { error, message } = await createTreeNode(values)
     if (error) {

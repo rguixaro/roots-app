@@ -1,7 +1,7 @@
 import dagre from 'dagre'
 import { Node, Edge, Position } from 'reactflow'
 
-import { TreeEdge, TreeNode } from '@/types'
+import { Family, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
@@ -78,16 +78,18 @@ export function computedLayout(
 
 /**
  * Create tree layout
- * @param familyType
- * @param nodes
- * @param edges
- * @param handleNodeClick
+ * @param family {Family}
+ * @param nodes {TreeNode[]}
+ * @param edges {TreeEdge[]}
+ * @param onUpdate {(node: TreeNode) => void}
+ * @param onGallery {(node: TreeNode) => void}
  */
 export function createTreeLayout(
-  familyType: string,
+  family: Family,
   nodes: TreeNode[],
   edges: TreeEdge[],
-  handleNodeClick: (label: string) => void
+  onUpdate: (node: TreeNode) => void,
+  onGallery: (node: TreeNode) => void
 ) {
   const treeEdges: Edge[] = edges.map((edge) => ({
     id: edge.id,
@@ -103,8 +105,14 @@ export function createTreeLayout(
     const edgesTo = edges.filter((e) => e.toNodeId === node.id)
     return {
       id: node.id,
-      type: familyType,
-      data: { node: { ...node, edgesFrom, edgesTo }, onClick: handleNodeClick },
+      type: family.type,
+      data: {
+        node: { ...node, edgesFrom, edgesTo },
+        withGallery: family.nodeGallery,
+        withPicture: family.nodeImage,
+        onInfo: onUpdate,
+        onGallery: onGallery,
+      },
       position: { x: 0, y: 0 },
     }
   })

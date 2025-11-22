@@ -10,7 +10,10 @@ import { TreeNode } from '@/types'
 
 interface StyledNodeProps {
   node: TreeNode
-  onClick?: (label: string) => void
+  onInfo: (node: TreeNode) => void
+  onGallery?: (node: TreeNode) => void
+  withGallery?: boolean
+  withPicture?: boolean
 }
 
 /**
@@ -31,6 +34,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isHovered, setIsHovered] = useState(false)
 
   const { fullName, birthDate, deathDate, edgesFrom, edgesTo } = data.node
+  const { withGallery, withPicture } = data
 
   const birthYear = birthDate ? birthDate.getFullYear() : null
   const deathYear = deathDate ? deathDate.getFullYear() : null
@@ -46,10 +50,17 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   /**
    * Handle node click event
    */
-  const handleClick = useCallback(() => {
-    data.onClick?.(fullName)
-    expand((prev) => !prev)
-  }, [data])
+  const onClick = useCallback(() => expand((prev) => !prev), [])
+
+  /**
+   * Handle node info click event
+   */
+  const onInfoClick = useCallback(() => data.onInfo?.(data.node), [data])
+
+  /**
+   * Handle node gallery click event
+   */
+  const onGalleryClick = useCallback(() => data.onGallery?.(data.node), [data])
 
   /**
    * Handle mouse enter event
@@ -108,7 +119,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
   return (
     <div
-      onClick={handleClick}
+      onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
@@ -117,7 +128,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         expanded && 'bg-ocean-50 rounded-b-none'
       )}
     >
-      <strong>{fullName}</strong>
+      <strong className="leading-none">{fullName}</strong>
       <div
         className={cn(
           'flex w-full justify-center space-x-2 text-xs font-medium',
@@ -170,7 +181,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         )}
       >
         <div
-          onClick={(e) => e.stopPropagation()}
+          onClick={onInfoClick}
           className={cn(
             'flex w-full cursor-pointer items-center justify-center bg-white p-2',
             'hover:bg-ocean-50 transition-colors duration-300'
@@ -178,15 +189,17 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         >
           <Info size={16} className="text-ocean-400" />
         </div>
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'flex w-full cursor-pointer items-center justify-center bg-white p-2',
-            'hover:bg-ocean-50 transition-colors duration-300'
-          )}
-        >
-          <Images size={16} className="text-ocean-400" />
-        </div>
+        {withGallery && (
+          <div
+            onClick={onGalleryClick}
+            className={cn(
+              'flex w-full cursor-pointer items-center justify-center bg-white p-2',
+              'hover:bg-ocean-50 transition-colors duration-300'
+            )}
+          >
+            <Images size={16} className="text-ocean-400" />
+          </div>
+        )}
       </div>
     </div>
   )

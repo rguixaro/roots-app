@@ -14,7 +14,14 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    * Utility states
    */
   const [loading, setLoading] = useState<boolean>(false)
-  const [showModal, setShowModal] = useState(false)
+
+  /**
+   * Modals state
+   */
+  const [displayCreate, setDisplayCreate] = useState(false)
+  const [displayUpdate, setDisplayUpdate] = useState(false)
+
+  const [selectedNode, selectNode] = useState<TreeNode | null>(null)
 
   /**
    * Edge context menu state
@@ -58,20 +65,37 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
   const resetView = () => reactFlowInstance.fitView({ padding: 0.2 })
 
   /**
-   * Handle node click event
-   * @param label
+   * Handle node update click event
+   * @param node {TreeNode} Node that was clicked
    */
-  const handleNodeClick = (label: string) => {}
+  const onUpdate = (node: TreeNode) => {
+    selectNode(node)
+    setDisplayUpdate(true)
+  }
+
+  /**
+   * Handle node gallery click event
+   * @param node {TreeNode} Node that was clicked
+   */
+  const onGallery = (node: TreeNode) => {
+    selectNode(node)
+    setDisplayUpdate(true)
+  }
 
   /**
    * Create a new node by showing the modal
    */
-  const createNode = () => setShowModal(true)
+  const createNode = () => setDisplayCreate(true)
 
   /**
    * Handle modal close event
    */
-  const handleModalClose = () => setShowModal(false)
+  const dismissModal = () => {
+    if (displayCreate) setDisplayCreate(false)
+    else if (displayUpdate) setDisplayUpdate(false)
+
+    if (selectedNode) setTimeout(() => selectNode(null), 150)
+  }
 
   /**
    * Handle async operations with loading state
@@ -96,9 +120,9 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
       nodes: layoutNodes,
       edges: layoutEdges,
       spousePairs,
-    } = createTreeLayout(family.type, nodes, edges, handleNodeClick)
+    } = createTreeLayout(family, nodes, edges, onUpdate, onGallery)
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [family.type, edges, nodes])
+  }, [family, edges, nodes])
 
   /**
    * Compute layout nodes and edges
@@ -121,19 +145,19 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
   /**
    * React Flow nodes state
    */
-  const [treeNodes, setNodes, onNodesChange] = useNodesState(computedNodes)
+  const [treeNodes, setTreeNodes, onTreeNodesChange] = useNodesState(computedNodes)
   /**
    * React Flow edges state
    */
-  const [treeEdges, setEdges, onEdgesChange] = useEdgesState(computedEdges)
+  const [treeEdges, setTreeEdges, onTreeEdgesChange] = useEdgesState(computedEdges)
 
   /**
    * Sync computed nodes and edges with React Flow state
    */
   useEffect(() => {
-    setNodes(computedNodes)
-    setEdges(computedEdges)
-  }, [computedNodes, computedEdges, setNodes, setEdges])
+    setTreeNodes(computedNodes)
+    setTreeEdges(computedEdges)
+  }, [computedNodes, computedEdges, setTreeNodes, setTreeEdges])
 
   /**
    * Handle edge click event (left-click)
@@ -200,39 +224,54 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    * Close confirmation dialog
    * @return void
    */
-  const closeDeleteConfirmation = useCallback(
-    () => setConfirmDelete({ open: false, nodeId: null }),
-    []
-  )
+  const closeDeleteConfirmation = useCallback(() => {
+    setConfirmDelete({ open: false, nodeId: null })
+    if (displayUpdate) dismissModal()
+  }, [])
 
   return {
+    setLoading,
     loading,
-    edgeContextMenu,
+
     nodeContextMenu,
-    confirmDelete,
-    showModal,
+    edgeContextMenu,
+
+    onNodeContextMenu,
+    onEdgeContextMenu,
+
+    closeNodeContextMenu,
+    closeEdgeContextMenu,
+
+    setTreeNodes,
+    setTreeEdges,
+
+    onTreeNodesChange,
+    onTreeEdgesChange,
+
     treeNodes,
     treeEdges,
+
     nodeTypes,
 
-    setLoading,
-    setNodes,
-    setEdges,
-    setShowModal,
+    createNode,
+    dismissModal,
 
-    onNodesChange,
-    onEdgesChange,
+    selectedNode,
+    selectNode,
+
     onEdgeClick,
-    onEdgeContextMenu,
-    onNodeContextMenu,
-    closeEdgeContextMenu,
-    closeNodeContextMenu,
+
+    displayCreate,
+    displayUpdate,
+
+    setDisplayCreate,
+    setDisplayUpdate,
+
+    confirmDelete,
     showDeleteConfirmation,
     closeDeleteConfirmation,
 
     withAsync,
     resetView,
-    createNode,
-    handleModalClose,
   }
 }

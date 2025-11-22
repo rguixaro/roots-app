@@ -31,6 +31,27 @@
     flex-wrap: nowrap; /* keep text + icon together */
     white-space: normal; /* allow text to wrap */
   }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  /* wrapper to position custom icon */
+  .date-input-wrapper {
+    position: relative;
+  }
+
+  .date-input-wrapper .calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* allow clicking the input */
+  }
 }
 
 @font-face {

@@ -12,6 +12,7 @@ import {
   Button,
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -167,8 +168,9 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
         className={cn(
           'text-ocean-400 fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out sm:top-0 sm:right-0 sm:h-full',
           isDragging ? 'transition-none' : 'transition-transform duration-300',
+          isMobile ? 'border-t-8' : 'border-l-8',
           showModal
-            ? 'border-ocean-200/50 translate-y-0 border-l-8 sm:translate-x-3/5 sm:translate-y-0'
+            ? 'border-ocean-200/50 translate-y-0 sm:translate-x-3/5 sm:translate-y-0'
             : 'translate-y-full sm:translate-x-full sm:translate-y-0'
         )}
         style={{
@@ -203,9 +205,12 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                   )}
                 />
               </div>
-              <div className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6">
-                <div className="mb-6 flex items-center justify-between">
-                  <TypographyH4 className="mt-5">{t_tree('node-new')}</TypographyH4>
+              <div className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start">
+                <div className="mb-6 flex items-start justify-between">
+                  <div className="flex flex-col">
+                    <TypographyH4 className="mt-4">{t_tree('node-new')}</TypographyH4>
+                    <p>{t_tree('node-new-description')} </p>
+                  </div>
                   <button
                     onClick={onClose}
                     className="hover:bg-ocean-200/15 rounded p-1 transition-colors duration-300"
@@ -214,14 +219,17 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                   </button>
                 </div>
                 {/* General Information Section */}
-                <TypographyH5 className="text-start">{t_tree('node-general-info')}</TypographyH5>
+                <TypographyH5 className="mt-5">{t_tree('node-general-info')}</TypographyH5>
                 <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
                   <FormField
                     control={form.control}
                     name="fullName"
                     render={({ field }) => (
-                      <FormItem className="">
-                        <FormLabel>{t_tree('node-fullname')}</FormLabel>
+                      <FormItem className="w-fit">
+                        <FormLabel>{`${t_tree('node-fullname')}*`}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_tree('node-fullname-description')}
+                        </FormDescription>
                         <FormControl>
                           <div className="py-2">
                             <Input
@@ -243,7 +251,10 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                     name="birthDate"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>{t_tree('node-birth-date')}</FormLabel>
+                        <FormLabel>{`${t_tree('node-birth-date')}*`}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_tree('node-birth-date-description')}
+                        </FormDescription>
                         <FormControl>
                           <div className="py-2">
                             <Input
@@ -270,8 +281,11 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                     control={form.control}
                     name="deathDate"
                     render={({ field }) => (
-                      <FormItem className="">
+                      <FormItem className="mt-3">
                         <FormLabel>{t_tree('node-death-date')}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_tree('node-death-date-description')}
+                        </FormDescription>
                         <FormControl>
                           <div className="py-2">
                             <Input
@@ -300,7 +314,10 @@ export function NodeFormModal({ showModal, loading, form, onSubmit, onClose }: N
                     name="gender"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>{t_tree('node-gender')}</FormLabel>
+                        <FormLabel>{`${t_tree('node-gender')}*`}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_tree('node-gender-description')}
+                        </FormDescription>
                         <FormControl>
                           <div className="py-2">
                             <Select

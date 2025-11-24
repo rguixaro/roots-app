@@ -19,7 +19,7 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    * Modals state
    */
   const [displayCreate, setDisplayCreate] = useState(false)
-  const [displayUpdate, setDisplayUpdate] = useState(false)
+  const [displayInfo, setDisplayInfo] = useState(false)
 
   const [selectedNode, selectNode] = useState<TreeNode | null>(null)
 
@@ -65,21 +65,12 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
   const resetView = () => reactFlowInstance.fitView({ padding: 0.2 })
 
   /**
-   * Handle node update click event
+   * Handle node info click event
    * @param node {TreeNode} Node that was clicked
    */
-  const onUpdate = (node: TreeNode) => {
+  const onInfo = (node: TreeNode) => {
     selectNode(node)
-    setDisplayUpdate(true)
-  }
-
-  /**
-   * Handle node gallery click event
-   * @param node {TreeNode} Node that was clicked
-   */
-  const onGallery = (node: TreeNode) => {
-    selectNode(node)
-    setDisplayUpdate(true)
+    setDisplayInfo(true)
   }
 
   /**
@@ -92,7 +83,7 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    */
   const dismissModal = () => {
     if (displayCreate) setDisplayCreate(false)
-    else if (displayUpdate) setDisplayUpdate(false)
+    else if (displayInfo) setDisplayInfo(false)
 
     if (selectedNode) setTimeout(() => selectNode(null), 150)
   }
@@ -120,9 +111,9 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
       nodes: layoutNodes,
       edges: layoutEdges,
       spousePairs,
-    } = createTreeLayout(family, nodes, edges, onUpdate, onGallery)
+    } = createTreeLayout(family, nodes, edges, selectedNode?.id ?? null, onInfo)
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [family, edges, nodes])
+  }, [family, edges, nodes, selectedNode])
 
   /**
    * Compute layout nodes and edges
@@ -226,7 +217,7 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    */
   const closeDeleteConfirmation = useCallback(() => {
     setConfirmDelete({ open: false, nodeId: null })
-    if (displayUpdate) dismissModal()
+    if (displayInfo) dismissModal()
   }, [])
 
   return {
@@ -262,10 +253,10 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
     onEdgeClick,
 
     displayCreate,
-    displayUpdate,
+    displayInfo,
 
     setDisplayCreate,
-    setDisplayUpdate,
+    setDisplayInfo,
 
     confirmDelete,
     showDeleteConfirmation,

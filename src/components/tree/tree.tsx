@@ -22,13 +22,7 @@ import {
   Button,
 } from '@/ui'
 
-import {
-  TreeToolbar,
-  NodeUpdateModal,
-  NodeCreateModal,
-  EdgeContextMenu,
-  NodeContextMenu,
-} from './ui'
+import { TreeToolbar, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
 
 import { Family, TreeEdge, TreeNode } from '@/types'
 
@@ -54,7 +48,7 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
    */
   const dismissModal = () => {
     treeState.setDisplayCreate(false)
-    treeState.setDisplayUpdate(false)
+    treeState.setDisplayInfo(false)
   }
 
   const nodeCreateForm = useNodeCreateForm(family, dismissModal)
@@ -78,10 +72,12 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
         onResetView={treeState.resetView}
       />
 
-      {/* Node Update Modal */}
-      <NodeUpdateModal
-        showModal={treeState.displayUpdate}
+      {/* Node Info Modal */}
+      <NodeInfoModal
+        showModal={treeState.displayInfo}
         node={treeState.selectedNode}
+        withPicture={family.nodeImage}
+        withGallery={family.nodeGallery}
         form={nodeUpdateForm.form}
         onUpdate={nodeUpdateForm.onSubmit}
         onClose={treeState.dismissModal}

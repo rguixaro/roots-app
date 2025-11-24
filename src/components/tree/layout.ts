@@ -5,8 +5,8 @@ import { Family, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
-const nodeWidth = 160
-const nodeHeight = 60
+const nodeWidth = 220
+const nodeHeight = 80
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
@@ -81,15 +81,15 @@ export function computedLayout(
  * @param family {Family}
  * @param nodes {TreeNode[]}
  * @param edges {TreeEdge[]}
- * @param onUpdate {(node: TreeNode) => void}
- * @param onGallery {(node: TreeNode) => void}
+ * @param selectedNodeId {string}
+ * @param onInfo {(node: TreeNode) => void}
  */
 export function createTreeLayout(
   family: Family,
   nodes: TreeNode[],
   edges: TreeEdge[],
-  onUpdate: (node: TreeNode) => void,
-  onGallery: (node: TreeNode) => void
+  selectedNodeId: string | null,
+  onInfo: (node: TreeNode) => void
 ) {
   const treeEdges: Edge[] = edges.map((edge) => ({
     id: edge.id,
@@ -108,10 +108,9 @@ export function createTreeLayout(
       type: family.type,
       data: {
         node: { ...node, edgesFrom, edgesTo },
-        withGallery: family.nodeGallery,
         withPicture: family.nodeImage,
-        onInfo: onUpdate,
-        onGallery: onGallery,
+        selectedNodeId: selectedNodeId,
+        onInfo: onInfo,
       },
       position: { x: 0, y: 0 },
     }

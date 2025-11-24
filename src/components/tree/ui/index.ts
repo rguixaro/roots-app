@@ -1,5 +1,5 @@
 export { TreeToolbar } from './toolbar'
-export { NodeUpdateModal } from './node-update-modal'
+export { NodeInfoModal } from './node-info-modal'
 export { NodeCreateModal } from './node-create-modal'
 export { NodeContextMenu } from './node-context-menu'
 export { EdgeContextMenu } from './edge-context-menu'

@@ -32,7 +32,6 @@ export function useNodeUpdateForm(family: Family, node: TreeNode | null, onSucce
       birthDate: node.birthDate ? new Date(node.birthDate) : null,
       deathDate: node.deathDate ? new Date(node.deathDate) : null,
       gender: node.gender ?? '',
-      photoUrl: node.photoUrl ?? null,
     })
   }, [node])
 

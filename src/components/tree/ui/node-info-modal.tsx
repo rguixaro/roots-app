@@ -56,7 +56,7 @@ export function NodeInfoModal({
   onDelete,
 }: NodeInfoModalProps) {
   const t_common = useTranslations('common')
-  const t_tree = useTranslations('tree')
+  const t_trees = useTranslations('trees')
   const t_errors = useTranslations('errors')
   const t_toasts = useTranslations('toasts')
 
@@ -274,7 +274,7 @@ export function NodeInfoModal({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('treeId', node!.familyId)
+      formData.append('treeId', node!.treeId)
 
       const response = await fetch('/api/pictures/upload', {
         method: 'POST',
@@ -407,24 +407,24 @@ export function NodeInfoModal({
                       </button>
                     )}
                   </div>
-                  <p>{t_tree('node-info-description')} </p>
+                  <p>{t_trees('node-info-description')} </p>
                 </div>
                 {/* General Information Section */}
-                <TypographyH5>{t_tree('node-general-info')}</TypographyH5>
+                <TypographyH5>{t_trees('node-general-info')}</TypographyH5>
                 <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
                   <FormField
                     control={form.control}
                     name="fullName"
                     render={({ field }) => (
                       <FormItem className="w-fit">
-                        <FormLabel>{t_tree('node-fullname')}</FormLabel>
+                        <FormLabel>{t_trees('node-fullname')}</FormLabel>
                         <FormControl>
                           <div className="py-2">
                             <Input
                               {...field}
                               autoComplete="off"
                               className="w-fit"
-                              placeholder={t_tree('node-fullname')}
+                              placeholder={t_trees('node-fullname')}
                               disabled={!editMode || loading}
                             />
                           </div>
@@ -439,7 +439,7 @@ export function NodeInfoModal({
                     name="birthDate"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>{t_tree('node-birth-date')}</FormLabel>
+                        <FormLabel>{t_trees('node-birth-date')}</FormLabel>
                         <FormControl>
                           <div className="py-2">
                             <Input
@@ -453,7 +453,7 @@ export function NodeInfoModal({
                               }
                               type="date"
                               autoComplete="off"
-                              placeholder={t_tree('node-birth-date')}
+                              placeholder={t_trees('node-birth-date')}
                               disabled={!editMode || loading}
                             />
                           </div>
@@ -467,7 +467,7 @@ export function NodeInfoModal({
                     name="deathDate"
                     render={({ field }) => (
                       <FormItem className="mt-3">
-                        <FormLabel>{t_tree('node-death-date')}</FormLabel>
+                        <FormLabel>{t_trees('node-death-date')}</FormLabel>
                         <FormControl>
                           <div className="py-2">
                             <Input
@@ -481,7 +481,7 @@ export function NodeInfoModal({
                               }
                               type="date"
                               autoComplete="off"
-                              placeholder={t_tree('node-death-date')}
+                              placeholder={t_trees('node-death-date')}
                               disabled={!editMode || loading}
                             />
                           </div>
@@ -496,7 +496,7 @@ export function NodeInfoModal({
                     name="gender"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>{t_tree('node-gender')}</FormLabel>
+                        <FormLabel>{t_trees('node-gender')}</FormLabel>
                         <FormControl>
                           <div className="py-2">
                             <Select
@@ -508,13 +508,15 @@ export function NodeInfoModal({
                                 <SelectValue placeholder={'-'} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="MALE">{t_tree('node-gender-male')}</SelectItem>
+                                <SelectItem value="MALE">{t_trees('node-gender-male')}</SelectItem>
                                 <SelectItem value="FEMALE">
-                                  {t_tree('node-gender-female')}
+                                  {t_trees('node-gender-female')}
                                 </SelectItem>
-                                <SelectItem value="OTHER">{t_tree('node-gender-other')}</SelectItem>
+                                <SelectItem value="OTHER">
+                                  {t_trees('node-gender-other')}
+                                </SelectItem>
                                 <SelectItem value="UNSPECIFIED">
-                                  {t_tree('node-gender-unspecified')}
+                                  {t_trees('node-gender-unspecified')}
                                 </SelectItem>
                               </SelectContent>
                             </Select>
@@ -534,7 +536,7 @@ export function NodeInfoModal({
                       onClick={() => setEditMode(true)}
                       disabled={loading}
                     >
-                      <span className="text-sm font-bold">{t_tree('node-info-edit')}</span>
+                      <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
                     </Button>
                   )}
                   {editMode && (
@@ -619,7 +621,7 @@ export function NodeInfoModal({
             <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
               <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
                 <div className="flex w-full items-center justify-between space-x-3">
-                  <TypographyH5>{t_tree('node-gallery')}</TypographyH5>
+                  <TypographyH5>{t_trees('node-gallery')}</TypographyH5>
                   <button
                     onClick={onClose}
                     type="button"
@@ -628,7 +630,7 @@ export function NodeInfoModal({
                     <X size={24} className="text-pale-ocean" />
                   </button>
                 </div>
-                <p>{t_tree('node-gallery-description')} </p>
+                <p>{t_trees('node-gallery-description')} </p>
                 <Button
                   type="button"
                   variant="ghost"
@@ -636,7 +638,7 @@ export function NodeInfoModal({
                   disabled={loading}
                   className="hover:text-ocean-50 bg-ocean-200/15 mt-5 cursor-pointer self-center"
                 >
-                  <span className="text-sm font-bold">{t_tree('node-gallery-upload')}</span>
+                  <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
                 </Button>
               </div>
               <input
@@ -652,7 +654,7 @@ export function NodeInfoModal({
                 </div>
               ) : pictures.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center space-y-5 pb-24 text-center">
-                  <p>{t_tree('node-gallery-empty')}</p>
+                  <p>{t_trees('node-gallery-empty')}</p>
                 </div>
               ) : (
                 <div className="columns-[124px] gap-2 sm:columns-[124px] xl:columns-3xs">

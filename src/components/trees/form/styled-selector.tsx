@@ -5,7 +5,7 @@ import { Check } from 'lucide-react'
 
 import { cn } from '@/utils'
 
-import { Icon } from '../../families/icon'
+import { Icon } from '../icon'
 
 interface StyledSelectorProps<T extends string = string> {
   types: readonly T[]

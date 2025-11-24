@@ -7,16 +7,18 @@ import { ArrowDownToLine } from 'lucide-react'
 import { toPng } from 'html-to-image'
 import { toast } from 'sonner'
 
-import { Family } from '@/types'
 import { TypographyH1, TypographyH4 } from '@/ui'
+
+import { Tree } from '@/types'
+
 import { cn } from '@/utils'
 
-export const FamilyDownload = ({
-  family,
+export const TreeDownload = ({
+  tree,
   className,
   classNameIcon,
 }: {
-  family: Family | null
+  tree: Tree | null
   className?: string
   classNameIcon?: string
 }) => {
@@ -24,7 +26,7 @@ export const FamilyDownload = ({
   const ref = useRef<HTMLDivElement>(null)
 
   const onButtonClick = useCallback(() => {
-    if (ref.current === null || !family) return
+    if (ref.current === null || !tree) return
 
     toPng(ref.current, {
       cacheBust: true,
@@ -34,16 +36,16 @@ export const FamilyDownload = ({
     })
       .then((dataUrl) => {
         const link = document.createElement('a')
-        link.download = `${family.slug}.png`
+        link.download = `${tree.slug}.png`
         link.href = dataUrl
         link.click()
       })
       .catch((_err) => {
         toast.error(t_errors('error'))
       })
-  }, [ref, family, t_errors])
+  }, [ref, tree, t_errors])
 
-  if (!family) return null
+  if (!tree) return null
 
   return (
     <button
@@ -57,7 +59,7 @@ export const FamilyDownload = ({
             <TypographyH1 className="font-title text-ocean-300 pb-5">{'Roots'}</TypographyH1>
           </div>
           <div className={cn('my-3 flex w-full flex-col items-center justify-center p-5')}>
-            <TypographyH4 className="text-ocean-300 text-2xl font-bold">{family.name}</TypographyH4>
+            <TypographyH4 className="text-ocean-300 text-2xl font-bold">{tree.name}</TypographyH4>
             <div className="bg-ocean-300/75 mt-7 h-1 w-2/4" />
             <div className="mt-5">
               <p>{t('more-on')}</p>

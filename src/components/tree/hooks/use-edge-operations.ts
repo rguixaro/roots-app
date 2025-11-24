@@ -7,12 +7,12 @@ import { Connection, Edge, addEdge } from 'reactflow'
 
 import { createTreeEdge, deleteTreeEdge } from '@/server/actions'
 
-import { TreeEdge, TreeEdgeType, Family } from '@/types'
+import { TreeEdge, TreeEdgeType, Tree } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
 export function useEdgeOperations(
-  family: Family,
+  tree: Tree,
   edges: TreeEdge[],
   treeEdges: Edge[],
   setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void
@@ -159,7 +159,7 @@ export function useEdgeOperations(
           const parentSpouse = findSpouse(parentNodeId)
 
           const { error: primaryError, message: primaryMessage } = await createTreeEdge({
-            familyId: family.id,
+            treeId: tree.id,
             fromNodeId: conn.source,
             toNodeId: conn.target,
             type: edgeType,
@@ -181,7 +181,7 @@ export function useEdgeOperations(
 
             if (!existingSpouseChildEdge) {
               const { error: spouseError } = await createTreeEdge({
-                familyId: family.id,
+                treeId: tree.id,
                 fromNodeId: parentSpouse,
                 toNodeId: childNodeId,
                 type: edgeType,
@@ -195,7 +195,7 @@ export function useEdgeOperations(
           toast.success(t_toasts('edge-created'))
         } else {
           const { error, message } = await createTreeEdge({
-            familyId: family.id,
+            treeId: tree.id,
             fromNodeId: conn.source,
             toNodeId: conn.target,
             type: edgeType,
@@ -212,7 +212,7 @@ export function useEdgeOperations(
         toast.error(t_errors('error'))
       }
     },
-    [setEdges, family.id, t_errors, t_toasts, validateConnection, findSpouse]
+    [setEdges, tree.id, t_errors, t_toasts, validateConnection, findSpouse]
   )
 
   /**
@@ -257,7 +257,7 @@ export function useEdgeOperations(
 
             if (spouseEdge) {
               try {
-                const { error, message } = await deleteTreeEdge(spouseEdge.id, family.id)
+                const { error, message } = await deleteTreeEdge(spouseEdge.id, tree.id)
                 if (error) {
                   toast.error(t_errors(message || 'error'))
                 } else {
@@ -282,7 +282,7 @@ export function useEdgeOperations(
             if (edgesToDelete.length > 0) {
               try {
                 for (const edgeToDelete of edgesToDelete) {
-                  const { error } = await deleteTreeEdge(edgeToDelete.id, family.id)
+                  const { error } = await deleteTreeEdge(edgeToDelete.id, tree.id)
                   if (error) {
                     toast.error(t_errors('error'))
                     closeContextMenu()
@@ -334,7 +334,7 @@ export function useEdgeOperations(
           dbEdgeId = dbEdge.id
         }
 
-        const { error, message } = await deleteTreeEdge(dbEdgeId, family.id)
+        const { error, message } = await deleteTreeEdge(dbEdgeId, tree.id)
 
         if (error) {
           toast.error(t_errors(message || 'error'))
@@ -347,7 +347,7 @@ export function useEdgeOperations(
 
       closeContextMenu()
     },
-    [treeEdges, edges, family.id, t_errors, t_toasts]
+    [treeEdges, edges, tree.id, t_errors, t_toasts]
   )
 
   return { onConnect, deleteEdge }

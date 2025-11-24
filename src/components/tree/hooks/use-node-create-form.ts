@@ -9,15 +9,15 @@ import { type z } from 'zod'
 import { CreateTreeNodeSchema } from '@/server/schemas'
 import { createTreeNode } from '@/server/actions'
 
-import { Family } from '@/types'
+import { Tree } from '@/types'
 
-export function useNodeCreateForm(family: Family, onSuccess?: () => void) {
+export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
 
   const form = useForm<z.infer<typeof CreateTreeNodeSchema>>({
     resolver: zodResolver(CreateTreeNodeSchema),
-    defaultValues: { familyId: family.id, fullName: '' },
+    defaultValues: { treeId: tree.id, fullName: '' },
   })
 
   /**

@@ -4,15 +4,14 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { motion, Variants } from 'framer-motion'
 
-import { FamilySchema } from '@/server/schemas'
+import { TreeSchema } from '@/server/schemas'
 
 import { cn } from '@/utils'
 
 import { Icon } from '../icon'
-import { ChevronRight } from 'lucide-react'
 
-export function ItemFamily({ family, index }: { family: FamilySchema | null; index: number }) {
-  const t_family = useTranslations('family')
+export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: number }) {
+  const t_trees = useTranslations('trees')
 
   const motions: Variants = {
     offscreen: { opacity: 0, x: 75 },
@@ -37,25 +36,25 @@ export function ItemFamily({ family, index }: { family: FamilySchema | null; ind
       whileInView="onscreen"
       variants={motions}
       viewport={{ once: true, amount: 0.01 }}
-      className={cn('aspect-square h-32 w-32 p-2', family && 'w-56')}
+      className={cn('aspect-square h-32 w-32 p-2', tree && 'w-56')}
     >
-      {family ? (
-        <Link href={`/families/${family.slug}`} className="block h-full w-full">
+      {tree ? (
+        <Link href={`/trees/${tree.slug}`} className="block h-full w-full">
           <div className={className}>
             <div className="flex flex-col items-center justify-center text-center">
               <Icon
-                type={family.type}
+                type={tree.type}
                 size={24}
                 className="stroke-pale-ocean group-hover:stroke-ocean-300 transition-colors duration-300"
               />
               <span className="text-pale-ocean group-hover:text-ocean-300 mt-1 text-base font-extrabold transition-colors duration-300 md:text-lg">
-                {family.name}
+                {tree.name}
               </span>
             </div>
           </div>
         </Link>
       ) : (
-        <Link href="/families/new">
+        <Link href="/trees/new">
           <div
             className={cn(
               className,
@@ -64,7 +63,7 @@ export function ItemFamily({ family, index }: { family: FamilySchema | null; ind
             )}
           >
             <span className="text-center text-base font-bold transition-colors duration-300 md:text-lg">
-              {t_family('family-new')}
+              {t_trees('tree-new')}
             </span>
           </div>
         </Link>

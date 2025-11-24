@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
 import { SquareArrowOutUpRight } from 'lucide-react'
 
-import { FamilyType } from '@/types'
+import { TreeType } from '@/types'
 
 import { cn } from '@/utils'
 
 import { Icon } from '../icon'
 
-export function ActivityItem({ item, index }: { item: FamilyType; index: number }) {
+export function ActivityItem({ item, index }: { item: TreeType; index: number }) {
   const motions: Variants = {
     offscreen: { opacity: 0, y: 75 },
     onscreen: {
@@ -51,10 +51,7 @@ export function ActivityItem({ item, index }: { item: FamilyType; index: number 
             <span className="text-sm">{index}</span>
           </div>
         </div>
-        <Link
-          href={`/families/${'guixaro-trancho'}`}
-          className="max-w-full min-w-0 text-xs font-bold"
-        >
+        <Link href={`/trees/${'guixaro-trancho'}`} className="max-w-full min-w-0 text-xs font-bold">
           <span className="flex-wrap-break inline-flex items-center gap-2 hover:underline">
             Guixaró-Trancho 2ekm12 12
             <SquareArrowOutUpRight size={16} />

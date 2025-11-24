@@ -29,7 +29,34 @@
   .flex-wrap-break {
     display: inline-flex;
     flex-wrap: nowrap; /* keep text + icon together */
-    white-space: normal; /* allow text to wrap */
+    white-space: normal;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    background-color: #0f434c;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar-track {
+    background: #0f434c;
+    border-radius: 0;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #0f434c;
+    border-radius: 0;
+    border: none;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #0f434c;
+  }
+
+  .styled-scrollbar {
+    margin: 0px;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: #4c8690 #2e6b74;
   }
 
   input[type='date']::-webkit-calendar-picker-indicator {
@@ -40,7 +67,6 @@
     cursor: pointer;
   }
 
-  /* wrapper to position custom icon */
   .date-input-wrapper {
     position: relative;
   }

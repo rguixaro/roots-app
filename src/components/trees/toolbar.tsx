@@ -10,7 +10,7 @@ export const Toolbar = () => {
 
   return (
     <div className="mt-5 flex w-full items-center justify-between">
-      <TypographyH4>{t_common('families')}</TypographyH4>
+      <TypographyH4>{t_common('trees')}</TypographyH4>
       <Settings />
     </div>
   )

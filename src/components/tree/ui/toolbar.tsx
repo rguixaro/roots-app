@@ -5,29 +5,29 @@ import { Plus, Minimize2, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 
 import { GoBack } from '@/components/layout'
-import { FamilyShare } from '@/components/families/share'
-import { FamilyDownload } from '@/components/families/download'
-import { FamilyEdit } from '@/components/families/edit'
+import { TreeShare } from '@/components/trees/share'
+import { TreeDownload } from '@/components/trees/download'
+import { TreeEdit } from '@/components/trees/edit'
 
 import { cn } from '@/utils'
 
-import { Family } from '@/types'
+import { Tree } from '@/types'
 
 interface TreeToolbarProps {
   readonly: boolean
-  family: Family
+  tree: Tree
   onCreateNode: () => void
   onResetView: () => void
 }
 
-export function TreeToolbar({ readonly, family, onCreateNode, onResetView }: TreeToolbarProps) {
+export function TreeToolbar({ readonly, tree, onCreateNode, onResetView }: TreeToolbarProps) {
   const btnClassName = 'text-pale-ocean group hover:bg-transparent'
   const iconClassName = 'text-pale-ocean group-hover:text-ocean-300 transition-colors duration-300'
   return (
     <div>
       <div className="absolute left-0 z-10 hidden rounded-lg sm:block">
         <GoBack
-          text={'families'}
+          text={'trees'}
           className={cn(
             'bg-ocean-100 rounded-lg rounded-t-none rounded-l-none py-1 ps-0 pe-4 pb-2',
             'hover:bg-ocean-100 group bg-none shadow-lg transition-all duration-300'
@@ -51,7 +51,7 @@ export function TreeToolbar({ readonly, family, onCreateNode, onResetView }: Tre
           'items-center rounded-lg rounded-t-none rounded-br-none shadow-lg sm:rounded-br-lg'
         )}
       >
-        <span className="text-pale-ocean text-lg font-extrabold md:text-xl">{family.name}</span>{' '}
+        <span className="text-pale-ocean text-lg font-extrabold md:text-xl">{tree.name}</span>
         <div className="bg-ocean-50 hidden h-4 w-0.5 sm:block" />
         <div
           onClick={onCreateNode}
@@ -103,10 +103,10 @@ export function TreeToolbar({ readonly, family, onCreateNode, onResetView }: Tre
           'items-center rounded-lg rounded-r-none rounded-b-none shadow-lg sm:rounded-t-none sm:rounded-bl-lg'
         )}
       >
-        <FamilyShare family={family} className={btnClassName} classNameIcon={iconClassName} />
-        <FamilyDownload family={family} className={btnClassName} classNameIcon={iconClassName} />
+        <TreeShare tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+        <TreeDownload tree={tree} className={btnClassName} classNameIcon={iconClassName} />
         {!readonly && (
-          <FamilyEdit family={family} className={btnClassName} classNameIcon={iconClassName} />
+          <TreeEdit tree={tree} className={btnClassName} classNameIcon={iconClassName} />
         )}
       </div>
     </div>

@@ -24,7 +24,7 @@ import {
 
 import { TreeToolbar, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
 
-import { Family, TreeEdge, TreeNode } from '@/types'
+import { Tree, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
@@ -32,16 +32,16 @@ import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
   readonly: boolean
-  family: Family
+  tree: Tree
   nodes: TreeNode[]
   edges: TreeEdge[]
 }
 
-export default function StyledTree({ readonly, family, nodes, edges }: StyledTreeProps) {
+export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeProps) {
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
 
-  const treeState = useTreeState(family, nodes, edges)
+  const treeState = useTreeState(tree, nodes, edges)
 
   /**
    * Dismiss any open modal
@@ -51,22 +51,17 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
     treeState.setDisplayInfo(false)
   }
 
-  const nodeCreateForm = useNodeCreateForm(family, dismissModal)
-  const nodeUpdateForm = useNodeUpdateForm(family, treeState.selectedNode, dismissModal)
+  const nodeCreateForm = useNodeCreateForm(tree, dismissModal)
+  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, dismissModal)
 
-  const edgeOperations = useEdgeOperations(
-    family,
-    edges,
-    treeState.treeEdges,
-    treeState.setTreeEdges
-  )
-  const nodeOperations = useNodeOperations(family, nodes)
+  const edgeOperations = useEdgeOperations(tree, edges, treeState.treeEdges, treeState.setTreeEdges)
+  const nodeOperations = useNodeOperations(tree, nodes)
 
   return (
     <div className="relative h-full w-full overflow-hidden">
       {/* Toolbar */}
       <TreeToolbar
-        family={family}
+        tree={tree}
         readonly={readonly}
         onCreateNode={treeState.createNode}
         onResetView={treeState.resetView}
@@ -76,8 +71,8 @@ export default function StyledTree({ readonly, family, nodes, edges }: StyledTre
       <NodeInfoModal
         showModal={treeState.displayInfo}
         node={treeState.selectedNode}
-        withPicture={family.nodeImage}
-        withGallery={family.nodeGallery}
+        withPicture={tree.nodeImage}
+        withGallery={tree.nodeGallery}
         form={nodeUpdateForm.form}
         onUpdate={nodeUpdateForm.onSubmit}
         onClose={treeState.dismissModal}

@@ -38,7 +38,7 @@ interface NodeCreateModalProps {
 
 export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCreateModalProps) {
   const t_common = useTranslations('common')
-  const t_tree = useTranslations('tree')
+  const t_trees = useTranslations('trees')
 
   const [loading, setLoading] = useState(false)
 
@@ -221,8 +221,8 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
               <div className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start">
                 <div className="mb-6 flex items-start justify-between">
                   <div className="flex flex-col">
-                    <TypographyH4 className="mt-4">{t_tree('node-new')}</TypographyH4>
-                    <p>{t_tree('node-new-description')} </p>
+                    <TypographyH4 className="mt-4">{t_trees('node-new')}</TypographyH4>
+                    <p>{t_trees('node-new-description')} </p>
                   </div>
                   <button
                     onClick={onClose}
@@ -232,16 +232,16 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                   </button>
                 </div>
                 {/* General Information Section */}
-                <TypographyH5 className="mt-5">{t_tree('node-general-info')}</TypographyH5>
+                <TypographyH5 className="mt-5">{t_trees('node-general-info')}</TypographyH5>
                 <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
                   <FormField
                     control={form.control}
                     name="fullName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{`${t_tree('node-fullname')}*`}</FormLabel>
+                        <FormLabel>{`${t_trees('node-fullname')}*`}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t_tree('node-fullname-description')}
+                          {t_trees('node-fullname-description')}
                         </FormDescription>
                         <FormControl>
                           <div className="py-2">
@@ -249,7 +249,7 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                               {...field}
                               autoComplete="off"
                               className="min-w-[16ch]"
-                              placeholder={t_tree('node-fullname')}
+                              placeholder={t_trees('node-fullname')}
                               disabled={loading}
                             />
                           </div>
@@ -264,9 +264,9 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     name="birthDate"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t_tree('node-birth-date')}</FormLabel>
+                        <FormLabel>{t_trees('node-birth-date')}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t_tree('node-birth-date-description')}
+                          {t_trees('node-birth-date-description')}
                         </FormDescription>
                         <FormControl>
                           <div className="py-2">
@@ -281,7 +281,7 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                               }
                               type="date"
                               autoComplete="off"
-                              placeholder={t_tree('node-birth-date')}
+                              placeholder={t_trees('node-birth-date')}
                               disabled={loading}
                             />
                           </div>
@@ -295,9 +295,9 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     name="deathDate"
                     render={({ field }) => (
                       <FormItem className="mt-3">
-                        <FormLabel>{t_tree('node-death-date')}</FormLabel>
+                        <FormLabel>{t_trees('node-death-date')}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t_tree('node-death-date-description')}
+                          {t_trees('node-death-date-description')}
                         </FormDescription>
                         <FormControl>
                           <div className="py-2">
@@ -312,7 +312,7 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                               }
                               type="date"
                               autoComplete="off"
-                              placeholder={t_tree('node-death-date')}
+                              placeholder={t_trees('node-death-date')}
                               disabled={loading}
                             />
                           </div>
@@ -327,9 +327,9 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     name="gender"
                     render={({ field }) => (
                       <FormItem className="">
-                        <FormLabel>{`${t_tree('node-gender')}*`}</FormLabel>
+                        <FormLabel>{`${t_trees('node-gender')}*`}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
-                          {t_tree('node-gender-description')}
+                          {t_trees('node-gender-description')}
                         </FormDescription>
                         <FormControl>
                           <div className="py-2">
@@ -342,13 +342,15 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                                 <SelectValue placeholder={'-'} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="MALE">{t_tree('node-gender-male')}</SelectItem>
+                                <SelectItem value="MALE">{t_trees('node-gender-male')}</SelectItem>
                                 <SelectItem value="FEMALE">
-                                  {t_tree('node-gender-female')}
+                                  {t_trees('node-gender-female')}
                                 </SelectItem>
-                                <SelectItem value="OTHER">{t_tree('node-gender-other')}</SelectItem>
+                                <SelectItem value="OTHER">
+                                  {t_trees('node-gender-other')}
+                                </SelectItem>
                                 <SelectItem value="UNSPECIFIED">
-                                  {t_tree('node-gender-unspecified')}
+                                  {t_trees('node-gender-unspecified')}
                                 </SelectItem>
                               </SelectContent>
                             </Select>

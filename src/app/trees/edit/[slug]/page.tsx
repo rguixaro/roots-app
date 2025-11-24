@@ -3,24 +3,24 @@ import { getTranslations } from 'next-intl/server'
 import { FileQuestion } from 'lucide-react'
 
 import { auth } from '@/auth'
-import { getFamily } from '@/server/queries'
-import { EditFamily } from '@/components/families/form'
+import { getTree } from '@/server/queries'
+import { EditTree } from '@/components/trees/form'
 import { TypographyH4 } from '@/ui'
 
-export default async function EditFamilyPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EditTreePage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth()
   if (!session) return null
 
   const t_common = await getTranslations('common')
 
   const { slug } = await params
-  const family = await getFamily(slug)
+  const tree = await getTree(slug)
 
-  if (!family) {
+  if (!tree) {
     return (
       <div className="text-ocean-200 mt-32 flex flex-col items-center justify-center">
         <FileQuestion size={24} />
-        <TypographyH4 className="mt-2 mb-5">{t_common('family-not-found')}</TypographyH4>
+        <TypographyH4 className="mt-2 mb-5">{t_common('tree-not-found')}</TypographyH4>
         <Link href="/" className="mt-5 font-medium underline">
           {t_common('return')}
         </Link>
@@ -28,5 +28,5 @@ export default async function EditFamilyPage({ params }: { params: Promise<{ slu
     )
   }
 
-  return <EditFamily userId={session.user.id!} family={family} />
+  return <EditTree userId={session.user.id!} tree={tree} />
 }

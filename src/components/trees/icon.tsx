@@ -1,10 +1,10 @@
 import { icons, LucideIcon } from 'lucide-react'
 
-import { FamilyType, FamilyRole } from '@/types'
+import { TreeType, TreeAccessRole } from '@/types'
 
 type BuiltInType =
-  | FamilyType
-  | FamilyRole
+  | TreeType
+  | TreeAccessRole
   | 'Filled'
   | 'Empty'
   | 'Enabled'
@@ -21,7 +21,7 @@ type IconProps = {
   customIcons?: Record<string, keyof typeof icons>
 }
 
-const defaultIconsByFamilyType: Record<string, keyof typeof icons> = {
+const defaultIconsByTreeType: Record<string, keyof typeof icons> = {
   human: 'PersonStanding',
   animal: 'Cat',
 }
@@ -52,7 +52,7 @@ export const Icon: React.FC<IconProps> = ({
 
   const iconName =
     customIcons[key] ||
-    defaultIconsByFamilyType[key] ||
+    defaultIconsByTreeType[key] ||
     defaultIconsByUserRole[key] ||
     otherDefaultIcons[key]
 

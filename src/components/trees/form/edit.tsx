@@ -9,11 +9,11 @@ import { toast } from 'sonner'
 import { type z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
-import { CreateFamilySchema, FamilyType } from '@/server/schemas'
-import { updateFamily, inviteMember, updateMember, removeMember } from '@/server/actions'
+import { CreateTreeSchema, TreeType } from '@/server/schemas'
+import { updateTree, inviteMember, updateMember, removeMember } from '@/server/actions'
 
 import { GoBack } from '@/components/layout'
-import { StyledSelector } from '@/components/families/form'
+import { StyledSelector } from '@/components/trees/form'
 import {
   Form,
   FormControl,
@@ -29,10 +29,10 @@ import {
   Button,
 } from '@/ui'
 
-import { Family, FamilyRole } from '@/types'
+import { Tree, TreeAccessRole } from '@/types'
 import { checkKeyDown, isValidEmail } from '@/utils'
 
-type FormValues = z.infer<typeof CreateFamilySchema>
+type FormValues = z.infer<typeof CreateTreeSchema>
 
 interface MemberItemProps {
   field: any
@@ -41,10 +41,10 @@ interface MemberItemProps {
   loading: boolean
   loadingUpdate: boolean
   currentUserId: string
-  currentUserRole: FamilyRole
-  currentMemberRole: FamilyRole
-  inviteUser: (email: string, role: FamilyRole) => void
-  updateUser: (userId: string, role: FamilyRole) => void
+  currentUserRole: TreeAccessRole
+  currentMemberRole: TreeAccessRole
+  inviteUser: (email: string, role: TreeAccessRole) => void
+  updateUser: (userId: string, role: TreeAccessRole) => void
   setCurrMember: (value: { index: number; memberId?: string } | null) => void
   setDialogOpen: (open: boolean) => void
   remove: (index: number) => void
@@ -69,7 +69,7 @@ const MemberItem = ({
   setDialogOpen,
   remove,
 }: Omit<MemberItemProps, 'field'>) => {
-  const t_family = useTranslations('family')
+  const t_trees = useTranslations('trees')
   const t_common = useTranslations('common')
   const t_errors = useTranslations('errors')
 
@@ -94,7 +94,7 @@ const MemberItem = ({
                 <div className="flex w-full sm:space-x-5">
                   <Input
                     {...form.register(`members.${index}.email`)}
-                    placeholder={t_family('family-member-email')}
+                    placeholder={t_trees('tree-member-email')}
                     className="w-full"
                     disabled={loading}
                   />
@@ -102,9 +102,9 @@ const MemberItem = ({
                     type="button"
                     disabled={!canInvite}
                     onClick={() => inviteUser(memberEmail!, memberRole!)}
-                    className="bg-ocean-200 hover:bg-ocean-300 disabled:bg-ocean-100 hidden h-9 w-64 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
+                    className="bg-ocean-200 hover:bg-ocean-300 disabled:bg-ocean-100 hidden h-9 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
                   >
-                    {t_family('family-member-invite')}
+                    {t_trees('tree-member-invite')}
                   </button>
                 </div>
               ) : (
@@ -138,7 +138,7 @@ const MemberItem = ({
                   }}
                   className="bg-ocean-500 hover:bg-ocean-600 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
                 >
-                  {t_family('family-member-remove')}
+                  {t_trees('tree-member-remove')}
                 </button>
               )}
             </div>
@@ -146,14 +146,14 @@ const MemberItem = ({
           <div className="flex items-center space-x-2">
             <FormControl>
               <StyledSelector
-                types={FamilyRole}
+                types={TreeAccessRole}
                 value={memberRole}
                 disabled={currentUserRole !== 'ADMIN' || currentUserId === memberId}
                 setValue={(value) => {
                   if (memberRole === 'ADMIN' && value !== 'ADMIN') {
                     const admins = form.getValues('members')?.filter((m) => m.role === 'ADMIN')
                     if (admins && admins.length <= 1) {
-                      toast.error(t_errors('error-family-admin-required'))
+                      toast.error(t_errors('error-tree-admin-required'))
                       return
                     }
                   }
@@ -173,7 +173,7 @@ const MemberItem = ({
                 onClick={() => inviteUser(memberEmail!, memberRole!)}
                 className="bg-ocean-200 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:hidden sm:w-auto"
               >
-                {t_family('family-member-invite')}
+                {t_trees('tree-member-invite')}
               </button>
             )}
             {!isNew && currentUserRole === 'ADMIN' && currentUserId != memberId && (
@@ -204,7 +204,7 @@ const MemberItem = ({
                 }}
                 className="text-ocean-500 visible h-9 rounded px-2 py-1 text-xs font-bold underline sm:hidden"
               >
-                {t_family('family-member-remove')}
+                {t_trees('tree-member-remove')}
               </button>
             )}
           </div>
@@ -214,13 +214,13 @@ const MemberItem = ({
   )
 }
 
-interface EditFamilyProps {
+interface EditTreeProps {
   userId: string
-  family: Family
+  tree: Tree
 }
 
-export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) => {
-  const t_family = useTranslations('family')
+export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
+  const t_trees = useTranslations('trees')
   const t_common = useTranslations('common')
   const t_errors = useTranslations('errors')
   const t_toasts = useTranslations('toasts')
@@ -228,20 +228,20 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
   const [loading, setLoading] = useState<boolean>(false)
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false)
 
-  const [currentFamily, setCurrentFamily] = useState<Family>(family)
+  const [currentTree, setCurrentTree] = useState<Tree>(tree)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [currMember, setCurrMember] = useState<{ index: number; memberId?: string } | null>(null)
-  const currentUserRole = family.accesses?.find((a) => a.userId === currentUserId)?.role || 'VIEWER'
+  const currentUserRole = tree.accesses?.find((a) => a.userId === currentUserId)?.role || 'VIEWER'
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(CreateFamilySchema),
+    resolver: zodResolver(CreateTreeSchema),
     defaultValues: {
-      name: currentFamily.name,
-      type: currentFamily.type as FamilyType,
-      nodeImage: currentFamily.nodeImage,
-      nodeGallery: currentFamily.nodeGallery,
-      members: currentFamily.accesses?.map((a) => ({
+      name: currentTree.name,
+      type: currentTree.type as TreeType,
+      nodeImage: currentTree.nodeImage,
+      nodeGallery: currentTree.nodeGallery,
+      members: currentTree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
         email: a.user.email,
@@ -252,7 +252,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
 
-  const familyName = form.watch('name')
+  const treeName = form.watch('name')
   const nodeImage = form.watch('nodeImage')
   const nodeGallery = form.watch('nodeGallery')
 
@@ -273,73 +273,73 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
 
   /**
    * onSubmit form handler
-   * @param values {z.infer<typeof CreateFamilySchema>}
+   * @param values {z.infer<typeof CreateTreeSchema>}
    */
-  const onSubmit = async (values: z.infer<typeof CreateFamilySchema>) =>
+  const onSubmit = async (values: z.infer<typeof CreateTreeSchema>) =>
     withAsync(async () => {
-      const { error, message, family } = await updateFamily(currentFamily.id, currentUserId, values)
+      const { error, message, tree } = await updateTree(currentTree.id, currentUserId, values)
       if (error) return toast.error(t_errors(message || 'error'))
 
-      toast.success(t_toasts('family-updated'))
-      if (family) resetFamily(family)
+      toast.success(t_toasts('tree-updated'))
+      if (tree) resetTree(tree)
     })
 
   /**
-   * Invite user to family
+   * Invite user to tree
    * @param email {string}
-   * @param role {FamilyRole}
+   * @param role {TreeAccessRole}
    */
-  const inviteUser = (email: string, role: FamilyRole) =>
+  const inviteUser = (email: string, role: TreeAccessRole) =>
     withAsync(async () => {
-      if (!currentFamily) return
-      const { error, message, family } = await inviteMember(currentFamily.id, email, role)
+      if (!currentTree) return
+      const { error, message, tree } = await inviteMember(currentTree.id, email, role)
       if (error) return toast.error(t_errors(message || 'error'))
-      toast.success(t_toasts('family-member-added'))
-      if (family) resetFamily(family)
+      toast.success(t_toasts('tree-member-added'))
+      if (tree) resetTree(tree)
     })
 
   /**
    * Update user role
    * @param memberId {string}
-   * @param role  {FamilyRole}
+   * @param role  {TreeAccessRole}
    */
-  const updateUser = (memberId: string, role: FamilyRole) =>
+  const updateUser = (memberId: string, role: TreeAccessRole) =>
     withAsync(async () => {
-      if (!currentFamily) return
-      const { error, message, family } = await updateMember(currentFamily.id, memberId, role)
+      if (!currentTree) return
+      const { error, message, tree } = await updateMember(currentTree.id, memberId, role)
       if (error) return toast.error(t_errors(message || 'error'))
-      toast.success(t_toasts('family-member-updated'))
-      if (family) resetFamily(family)
+      toast.success(t_toasts('tree-member-updated'))
+      if (tree) resetTree(tree)
     }, true)
 
   /**
-   * Remove user from family
+   * Remove user from tree
    * @param index {number}
    * @param memberId {string}
    */
   const removeUser = (index: number, memberId?: string) =>
     withAsync(async () => {
       if (!memberId) return remove(index)
-      if (!currentFamily) return
+      if (!currentTree) return
 
-      const { error, message, family } = await removeMember(currentFamily.id, memberId)
+      const { error, message, tree } = await removeMember(currentTree.id, memberId)
       if (error) return toast.error(t_errors(message || 'error'))
-      toast.success(t_toasts('family-member-removed'))
-      if (family) resetFamily(family)
+      toast.success(t_toasts('tree-member-removed'))
+      if (tree) resetTree(tree)
     })
 
   /**
-   * Reset the form and current family state.
-   * @param family {Family}
+   * Reset the form and current tree state.
+   * @param tree {Tree}
    */
-  const resetFamily = (family: Family) => {
-    setCurrentFamily(family)
+  const resetTree = (tree: Tree) => {
+    setCurrentTree(tree)
     form.reset({
-      name: family.name,
-      type: family.type,
-      nodeImage: family.nodeImage,
-      nodeGallery: family.nodeGallery,
-      members: family.accesses?.map((a) => ({
+      name: tree.name,
+      type: tree.type,
+      nodeImage: tree.nodeImage,
+      nodeGallery: tree.nodeGallery,
+      members: tree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
         email: a.user.email,
@@ -350,9 +350,9 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
 
   return (
     <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
-      <GoBack to={`/families/${currentFamily.slug}`} />
-      <TypographyH4 className="mt-4">{t_family('family-edit')}</TypographyH4>
-      <p className="mb-4">{t_family('family-edit-description')} </p>
+      <GoBack to={`/trees/${currentTree.slug}`} />
+      <TypographyH4 className="mt-4">{t_trees('tree-edit')}</TypographyH4>
+      <p className="mb-4">{t_trees('tree-edit-description')} </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)}>
           <Tabs.Root defaultValue="general">
@@ -361,38 +361,38 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                 value="general"
                 className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
-                {t_family('general-tab-label')}
+                {t_trees('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="settings"
                 className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
-                {t_family('settings-tab-label')}
+                {t_trees('settings-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
                 className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
               >
-                {t_family('family-members-tab-label')}
+                {t_trees('tree-members-tab-label')}
               </Tabs.Trigger>
             </Tabs.List>
             {/* --- GENERAL TAB --- */}
             <Tabs.Content value="general" className="space-y-4">
-              <TypographyH5 className="mt-2">{t_family('general-tab')}</TypographyH5>
+              <TypographyH5 className="mt-2">{t_trees('general-tab')}</TypographyH5>
               <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white p-3 text-left shadow-lg">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem className="">
-                      <FormLabel>{t_family('family-name')}</FormLabel>
+                      <FormLabel>{t_trees('tree-name')}</FormLabel>
                       <FormDescription className="text-sm opacity-70">
-                        {t_family('family-name-description')}
+                        {t_trees('tree-name-description')}
                       </FormDescription>
                       <FormControl className="mb-5 flex w-max">
                         <Input
                           {...field}
-                          placeholder={t_family('name')}
+                          placeholder={t_trees('name')}
                           className="w-auto"
                           disabled={loading}
                         />
@@ -407,21 +407,21 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   name="type"
                   render={() => (
                     <FormItem>
-                      <FormLabel>{t_family('family-types')}</FormLabel>
+                      <FormLabel>{t_trees('tree-types')}</FormLabel>
                       <FormDescription className="text-sm opacity-70">
-                        {t_family('family-types-info')}
+                        {t_trees('tree-types-info')}
                       </FormDescription>
                       <FormControl>
                         <StyledSelector
-                          types={FamilyType}
+                          types={TreeType}
                           value={form.getValues('type')}
-                          setValue={(value) => form.setValue('type', value as FamilyType)}
+                          setValue={(value) => form.setValue('type', value as TreeType)}
                           disabled
                         />
                       </FormControl>
                       <FormMessage />
                       <FormDescription className="opacity-70">
-                        {t_family('family-types-alert')}
+                        {t_trees('tree-types-alert')}
                       </FormDescription>
                     </FormItem>
                   )}
@@ -430,7 +430,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={loading || familyName === currentFamily.name}
+                  disabled={loading || treeName === currentTree.name}
                   className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
                 >
                   <div className="flex items-center space-x-3">
@@ -444,16 +444,16 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
             </Tabs.Content>
             {/* --- SETTINGS TAB --- */}
             <Tabs.Content value="settings" className="space-y-4">
-              <TypographyH5 className="mt-2">{t_family('settings-tab')}</TypographyH5>
+              <TypographyH5 className="mt-2">{t_trees('settings-tab')}</TypographyH5>
               <div className="border-ocean-200/50 flex-col items-start rounded border-2 bg-white p-3 shadow-lg">
                 <FormField
                   control={form.control}
                   name="nodeImage"
                   render={() => (
                     <FormItem>
-                      <FormLabel>{t_family('family-node-image')}</FormLabel>
+                      <FormLabel>{t_trees('tree-node-image')}</FormLabel>
                       <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_family('family-node-image-info')}
+                        {t_trees('tree-node-image-info')}
                       </FormDescription>
                       <FormControl>
                         <StyledSelector
@@ -472,9 +472,9 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   name="nodeGallery"
                   render={() => (
                     <FormItem>
-                      <FormLabel>{t_family('family-node-gallery')}</FormLabel>
+                      <FormLabel>{t_trees('tree-node-gallery')}</FormLabel>
                       <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_family('family-node-gallery-info')}
+                        {t_trees('tree-node-gallery-info')}
                       </FormDescription>
                       <FormControl>
                         <StyledSelector
@@ -493,8 +493,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   type="submit"
                   disabled={
                     loading ||
-                    (nodeImage === currentFamily.nodeImage &&
-                      nodeGallery === currentFamily.nodeGallery)
+                    (nodeImage === currentTree.nodeImage && nodeGallery === currentTree.nodeGallery)
                   }
                   className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
                 >
@@ -509,14 +508,14 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
             </Tabs.Content>
             {/* --- MEMBERS TAB --- */}
             <Tabs.Content value="members" className="space-y-4">
-              <TypographyH5 className="mt-2">{t_family('family-members-tab')}</TypographyH5>
+              <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
               <div className="border-ocean-200/50 flex-col items-start rounded border-2 bg-white p-3 shadow-lg">
-                <FormLabel>{t_family('family-members')}</FormLabel>
+                <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
-                  {t_family('family-members-info')}
+                  {t_trees('tree-members-info')}
                 </FormDescription>
                 <FormDescription className="my-4 text-sm opacity-70">
-                  {t_family('family-member-role')}
+                  {t_trees('tree-member-role')}
                 </FormDescription>
                 {fields.map((field, index) => (
                   <MemberItem
@@ -546,7 +545,7 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
                   >
                     <div className="flex items-center space-x-3">
                       {loading && <LoaderIcon size={16} className="animate-spin" />}
-                      <span className="text-sm font-bold">{t_family('family-member-add')}</span>
+                      <span className="text-sm font-bold">{t_trees('tree-member-add')}</span>
                     </div>
                   </button>
                 </div>
@@ -556,8 +555,8 @@ export const EditFamily = ({ userId: currentUserId, family }: EditFamilyProps) =
 
           <ConfirmDialog
             open={dialogOpen}
-            title={t_family('family-member-remove-confirm')}
-            description={t_family('family-member-remove-confirm-description')}
+            title={t_trees('tree-member-remove-confirm')}
+            description={t_trees('tree-member-remove-confirm-description')}
             onCancel={() => setDialogOpen(false)}
             onConfirm={() => {
               if (currMember) removeUser(currMember.index, currMember.memberId)

@@ -9,7 +9,7 @@ export const Header = ({ username }: { username: string }) => {
   const pathname = usePathname()
 
   const hideHeader =
-    pathname?.match(/^\/families\/[^\/]+$/) &&
+    pathname?.match(/^\/trees\/[^\/]+$/) &&
     !pathname.includes('/edit/') &&
     !pathname.includes('/new')
 

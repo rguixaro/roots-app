@@ -1,16 +1,16 @@
 import { cache } from 'react'
 
 import { auth } from '@/auth'
+
 import { db } from '@/server/db'
-import { Family, TreeEdge, TreeNode } from '@/types'
 
 /**
- * Get families that a user has access to.
+ * Get trees that a user has access to.
  * Auth required.
  * @param userId optional, if not provided uses current user
- * @returns Promise<{ families: Family[] } | null>
+ * @returns Promise<{ trees: Tree[] } | null>
  */
-export const getFamilies = cache(async () => {
+export const getTrees = cache(async () => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -18,23 +18,23 @@ export const getFamilies = cache(async () => {
   if (!userId) return null
 
   try {
-    const families = await db.family.findMany({
+    const trees = await db.tree.findMany({
       where: { accesses: { some: { userId: userId } } },
       include: { accesses: true },
     })
-    return { families: families }
+    return { trees: trees }
   } catch (error) {
     throw error
   }
 })
 
 /**
- * Get a family by slug that the current user has access to.
+ * Get a tree by slug that the current user has access to.
  * Auth required.
- * @param slug Family slug
- * @returns Promise<Family | null>
+ * @param slug Tree slug
+ * @returns Promise<Tree | null>
  */
-export const getFamily = cache(async (slug: string) => {
+export const getTree = cache(async (slug: string) => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -42,24 +42,24 @@ export const getFamily = cache(async (slug: string) => {
   if (!userId) return null
 
   try {
-    const family = await db.family.findFirst({
+    const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
       include: { accesses: { include: { user: true } } },
     })
 
-    return family
+    return tree
   } catch (error) {
     throw error
   }
 })
 
 /**
- * Get a family tree by its slug.
+ * Get a tree tree by its slug.
  * Auth required.
- * @param slug Family slug
+ * @param slug Tree slug
  * @returns Promise<TreeResult>
  */
-export const getFamilyTree = cache(async (slug: string) => {
+export const getTreeRoots = cache(async (slug: string) => {
   const currentUser = await auth()
   const userId = currentUser?.user?.id
 
@@ -67,22 +67,25 @@ export const getFamilyTree = cache(async (slug: string) => {
   if (!userId) return null
 
   try {
-    const family = await db.family.findFirst({
+    const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
       include: { accesses: { include: { user: true } } },
     })
 
-    if (!family) return { error: true, message: 'error-family-not-found' }
+    if (!tree) return { error: true, message: 'error-tree-not-found' }
 
     const nodes = await db.treeNode.findMany({
-      where: { familyId: family.id },
+      where: { treeId: tree.id },
+      include: {
+        taggedIn: {
+          where: { isProfile: true },
+          include: { picture: true },
+        },
+      },
     })
+    const edges = await db.treeEdge.findMany({ where: { treeId: tree.id } })
 
-    const edges = await db.treeEdge.findMany({
-      where: { familyId: family.id },
-    })
-
-    return { family, nodes, edges }
+    return { tree, nodes, edges }
   } catch (error) {}
 })
 

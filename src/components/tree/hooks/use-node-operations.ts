@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { deleteTreeNode } from '@/server/actions'
-import { Family, TreeNode } from '@/types'
+import { Tree, TreeNode } from '@/types'
 
-export function useNodeOperations(family: Family, nodes: TreeNode[]) {
+export function useNodeOperations(tree: Tree, nodes: TreeNode[]) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
 
@@ -20,7 +20,7 @@ export function useNodeOperations(family: Family, nodes: TreeNode[]) {
   const deleteNode = useCallback(
     async (nodeId: string, closeDialog: () => void) => {
       try {
-        const { error, message } = await deleteTreeNode(nodeId, family.id)
+        const { error, message } = await deleteTreeNode(nodeId, tree.id)
 
         if (error) {
           toast.error(t_errors(message || 'error'))
@@ -33,7 +33,7 @@ export function useNodeOperations(family: Family, nodes: TreeNode[]) {
 
       closeDialog()
     },
-    [family.id, t_errors, t_toasts]
+    [tree.id, t_errors, t_toasts]
   )
 
   return { deleteNode }

@@ -2,10 +2,10 @@
  * Icon properties
  * @type {Object}
  */
-export const IconProps = { color: '#525252', size: 18 }
+export const IconProps: object = { color: '#525252', size: 18 }
 
 /**
  * Site URL
  * @type {string}
  */
-export const SITE_URL = 'https://roots.rguixaro.dev'
+export const SITE_URL: string = 'https://roots.rguixaro.dev'

@@ -9,16 +9,16 @@ import { type z } from 'zod'
 import { UpdateTreeNodeSchema } from '@/server/schemas'
 import { updateTreeNode } from '@/server/actions'
 
-import { Family, TreeNode } from '@/types'
+import { Tree, TreeNode } from '@/types'
 import { useEffect } from 'react'
 
-export function useNodeUpdateForm(family: Family, node: TreeNode | null, onSuccess?: () => void) {
+export function useNodeUpdateForm(tree: Tree, node: TreeNode | null, onSuccess?: () => void) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
 
   const form = useForm<z.infer<typeof UpdateTreeNodeSchema>>({
     resolver: zodResolver(UpdateTreeNodeSchema),
-    defaultValues: { familyId: family.id, fullName: '' },
+    defaultValues: { treeId: tree.id, fullName: '' },
   })
 
   /** Reset form when node changes */
@@ -27,7 +27,7 @@ export function useNodeUpdateForm(family: Family, node: TreeNode | null, onSucce
 
     form.reset({
       id: node.id,
-      familyId: family.id,
+      treeId: tree.id,
       fullName: node.fullName ?? '',
       birthDate: node.birthDate ? new Date(node.birthDate) : null,
       deathDate: node.deathDate ? new Date(node.deathDate) : null,

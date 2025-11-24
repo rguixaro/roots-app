@@ -3,13 +3,13 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
 
-import { Family, TreeNode, TreeEdge } from '@/types'
+import { TreeNode, TreeEdge, Tree } from '@/types'
 
 import { createTreeLayout, computedLayout, positionCoupleNodes } from '../layout'
 
 import { StyledNode, VoidNode } from '../nodes'
 
-export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[]) {
+export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   /**
    * Utility states
    */
@@ -57,7 +57,7 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
    * Node types mapping
    * @return {object} Node types mapping
    */
-  const nodeTypes = useMemo(() => ({ [family.type]: StyledNode, COUPLE: VoidNode }), [family.type])
+  const nodeTypes = useMemo(() => ({ [tree.type]: StyledNode, COUPLE: VoidNode }), [tree.type])
 
   /**
    * Reset the view to fit all nodes
@@ -111,9 +111,9 @@ export function useTreeState(family: Family, nodes: TreeNode[], edges: TreeEdge[
       nodes: layoutNodes,
       edges: layoutEdges,
       spousePairs,
-    } = createTreeLayout(family, nodes, edges, selectedNode?.id ?? null, onInfo)
+    } = createTreeLayout(tree, nodes, edges, selectedNode?.id ?? null, onInfo)
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [family, edges, nodes, selectedNode])
+  }, [tree, edges, nodes, selectedNode])
 
   /**
    * Compute layout nodes and edges

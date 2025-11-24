@@ -3,17 +3,17 @@
 import React, { useEffect } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 
-import { Family, TreeEdge, TreeNode } from '@/types'
+import { Tree, TreeEdge, TreeNode } from '@/types'
 import StyledTree from './tree'
 
 export const TreeWrapper = ({
   readonly,
-  family,
+  tree,
   nodes,
   edges,
 }: {
   readonly: boolean
-  family: Family
+  tree: Tree
   nodes: TreeNode[]
   edges: TreeEdge[]
 }) => {
@@ -30,7 +30,7 @@ export const TreeWrapper = ({
 
   return (
     <ReactFlowProvider>
-      <StyledTree readonly={readonly} family={family} nodes={nodes} edges={edges} />
+      <StyledTree readonly={readonly} tree={tree} nodes={nodes} edges={edges} />
     </ReactFlowProvider>
   )
 }

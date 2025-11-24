@@ -40,7 +40,8 @@
     "edge-delete": "Eliminar relación",
     "node-delete": "Eliminar miembro",
     "node-delete-confirmation": "¿Estás seguro de que quieres eliminar a este miembro?",
-    "node-delete-confirm-description": "Esto también eliminará todas sus relaciones. Esta acción no se puede deshacer."
+    "node-delete-confirm-description": "Esto también eliminará todas sus relaciones. Esta acción no se puede deshacer.",
+    "node-picture-uploaded": "Imagen subida con éxito."
   },
   "errors": {
     "error": "Se ha producido un error.",
@@ -65,7 +66,8 @@
     "error-cannot-connect-to-self": "No se puede crear una relación con el mismo miembro.",
     "error-would-create-cycle": "Esta relación crearía un ciclo familiar.",
     "error-cannot-connect-siblings": "No se puede crear una relación padre-hijo entre hermanos.",
-    "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres."
+    "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres.",
+    "error-picture-upload": "Se ha producido un error al subir la imagen."
   },
   "enums": {
     "human": "Humana",
@@ -138,7 +140,11 @@
     "node-gender-other": "Otro",
     "node-gender-unspecified": "No especificado",
     "node-info-edit": "Editar la información",
-    "node-info-description": "Aquí puedes ver y modificar la información personal de este miembro de la familia."
+    "node-info-description": "Aquí puedes ver y modificar la información personal de este miembro de la familia.",
+    "node-gallery": "Galería de imágenes",
+    "node-gallery-description": "Aquí puedes ver y gestionar la galería de imágenes de este miembro de la familia.",
+    "node-gallery-upload": "Subir imagen",
+    "node-gallery-empty": "Este miembro no tiene imágenes en su galería."
   },
   "profile": {
     "title": "Configuración",

@@ -40,7 +40,8 @@
     "edge-delete": "Eliminar relació",
     "node-delete": "Eliminar membre",
     "node-delete-confirmation": "Estàs segur que vols eliminar aquest membre?",
-    "node-delete-confirm-description": "Això també eliminarà totes les seves relacions. Aquesta acció no es pot desfer."
+    "node-delete-confirm-description": "Això també eliminarà totes les seves relacions. Aquesta acció no es pot desfer.",
+    "node-picture-uploaded": "Imatge pujada amb èxit."
   },
   "errors": {
     "error": "S'ha produït un error.",
@@ -65,7 +66,8 @@
     "error-cannot-connect-to-self": "No es pot crear una relació amb el mateix membre.",
     "error-would-create-cycle": "Aquesta relació crearia un cicle familiar.",
     "error-cannot-connect-siblings": "No es pot crear una relació pare-fill entre germans.",
-    "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares."
+    "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares.",
+    "error-picture-upload": "S'ha produït un error en pujar la imatge."
   },
   "enums": {
     "human": "Humana",
@@ -137,7 +139,11 @@
     "node-gender-other": "Altre",
     "node-gender-unspecified": "No especificat",
     "node-info-edit": "Editar la informació",
-    "node-info-description": "Aquí pots veure i modificar la informació personal d'aquest membre de la família."
+    "node-info-description": "Aquí pots veure i modificar la informació personal d'aquest membre de la família.",
+    "node-gallery": "Galeria d'imatges",
+    "node-gallery-description": "Aquí pots veure i gestionar la galeria d'imatges d'aquest membre de la família.",
+    "node-gallery-upload": "Pujar imatge",
+    "node-gallery-empty": "Aquest membre no té imatges a la seva galeria."
   },
   "profile": {
     "title": "Preferències",

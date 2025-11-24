@@ -7,12 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum FamilyType {
+enum TreeType {
   HUMAN
   ANIMAL
 }
 
-enum FamilyRole {
+enum TreeAccessRole {
   VIEWER
   EDITOR
   ADMIN
@@ -32,19 +32,19 @@ enum TreeNodeGender {
   UNSPECIFIED
 }
 
-model Family {
+model Tree {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   slug        String
   name        String
-  type        FamilyType
-  nodeImage   Boolean    @default(false)
-  nodeGallery Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  type        TreeType
+  nodeImage   Boolean  @default(false)
+  nodeGallery Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   nodes    TreeNode[]
-  accesses FamilyAccess[]
+  accesses TreeAccess[]
   TreeEdge TreeEdge[]
   Picture  Picture[]
 
@@ -52,9 +52,9 @@ model Family {
 }
 
 model TreeNode {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
 
   fullName  String
   birthDate DateTime?
@@ -71,9 +71,9 @@ model TreeNode {
 }
 
 model TreeEdge {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
 
   fromNode   TreeNode @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
   fromNodeId String   @db.ObjectId
@@ -87,18 +87,18 @@ model TreeEdge {
   @@index([toNodeId])
 }
 
-model FamilyAccess {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String @db.ObjectId
+model TreeAccess {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
 
-  role FamilyRole @default(VIEWER)
+  role TreeAccessRole @default(VIEWER)
 
   createdAt DateTime @default(now())
 
-  @@unique([familyId, userId])
+  @@unique([treeId, userId])
   @@index([userId])
 }
 
@@ -149,13 +149,13 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  FamilyAccess FamilyAccess[]
+  TreeAccess TreeAccess[]
 }
 
 model Picture {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
 
   fileKey    String
   uploadedBy String @db.ObjectId

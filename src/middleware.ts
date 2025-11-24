@@ -4,7 +4,7 @@ import NextAuth from 'next-auth'
 import AuthConfig from './auth.config'
 import {
   DEFAULT_AUTH_REDIRECT_URL,
-  FAMILIES_ROUTE_PREFIX,
+  TREES_ROUTE_PREFIX,
   API_AUTH_PREFIX,
   AUTH_ROUTES,
   PROTECTED_ROUTES,
@@ -24,7 +24,7 @@ export default auth(async (req) => {
   const isApiAuthRoute = NextURL.pathname.startsWith(API_AUTH_PREFIX)
   const isProtectedRoute = PROTECTED_ROUTES.includes(NextURL.pathname)
   const isAuthRoute = AUTH_ROUTES.includes(NextURL.pathname)
-  const isFamilyRoute = NextURL.pathname.startsWith(FAMILIES_ROUTE_PREFIX)
+  const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
 
   /* Api Route */
   if (isApiAuthRoute) return
@@ -36,7 +36,7 @@ export default auth(async (req) => {
   }
 
   /* Protected route */
-  if (!isLoggedIn && (isProtectedRoute || isFamilyRoute)) {
+  if (!isLoggedIn && (isProtectedRoute || isTreeRoute)) {
     let callbackURL = NextURL.pathname
     if (NextURL.search) callbackURL += NextURL.search
     const encodedCallbackURL = encodeURIComponent(callbackURL)

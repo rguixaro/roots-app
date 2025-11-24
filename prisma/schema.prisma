@@ -46,6 +46,7 @@ model Family {
   nodes    TreeNode[]
   accesses FamilyAccess[]
   TreeEdge TreeEdge[]
+  Picture  Picture[]
 
   @@unique([slug])
 }
@@ -58,8 +59,9 @@ model TreeNode {
   fullName  String
   birthDate DateTime?
   deathDate DateTime?
-  photoUrl  String?
   gender    TreeNodeGender @default(UNSPECIFIED)
+
+  taggedIn PictureTag[] @relation("taggedIn")
 
   edgesFrom TreeEdge[] @relation("FromNode")
   edgesTo   TreeEdge[] @relation("ToNode")
@@ -148,4 +150,31 @@ model User {
   sessions Session[]
 
   FamilyAccess FamilyAccess[]
+}
+
+model Picture {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  familyId String @db.ObjectId
+
+  fileKey    String
+  uploadedBy String @db.ObjectId
+
+  tags PictureTag[] @relation("tags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PictureTag {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  picture   Picture @relation("tags", fields: [pictureId], references: [id], onDelete: Cascade)
+  pictureId String  @db.ObjectId
+
+  node   TreeNode @relation("taggedIn", fields: [nodeId], references: [id], onDelete: Cascade)
+  nodeId String   @db.ObjectId
+
+  isProfile Boolean @default(false)
+
+  @@unique([pictureId, nodeId])
 }

@@ -65,7 +65,10 @@
     "error-would-create-cycle": "Esta relación crearía un ciclo familiar.",
     "error-cannot-connect-siblings": "No se puede crear una relación padre-hijo entre hermanos.",
     "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres.",
-    "error-picture-upload": "Se ha producido un error al subir la imagen."
+    "error-picture-upload": "Se ha producido un error al subir la imagen.",
+    "error-picture-not-found": "Imagen no encontrada.",
+    "error-tag-already-exists": "Esta imagen ya está etiquetada con este miembro.",
+    "error-tag-not-found": "Esta etiqueta no existe."
   },
   "enums": {
     "human": "Humana",
@@ -169,5 +172,18 @@
     "account-logout-logging-out": "Cerrando la sesión...",
     "account-logout-logged-out": "Se ha cerrado la sesión.",
     "account-logout-error": "Se ha producido un error al cerrar la sesión."
+  },
+  "log_activities": {
+    "NODE_CREATED": "Miembro de la familia añadido",
+    "NODE_UPDATED": "Miembro de la familia actualizado",
+    "NODE_DELETED": "Miembro de la familia eliminado",
+    "EDGE_CREATED": "Relación creada",
+    "EDGE_DELETED": "Relación eliminada",
+    "PICTURE_ADDED": "Imagen añadida",
+    "PICTURE_DELETED": "Imagen eliminada",
+    "PICTURE_TAG_CREATED": "Etiqueta de imagen añadida",
+    "PICTURE_TAG_DELETED": "Etiqueta de imagen eliminada",
+    "TREE_UPDATED": "Familia actualizada",
+    "edited-by": "Editado por"
   }
 }

@@ -65,7 +65,10 @@
     "error-would-create-cycle": "Aquesta relació crearia un cicle familiar.",
     "error-cannot-connect-siblings": "No es pot crear una relació pare-fill entre germans.",
     "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares.",
-    "error-picture-upload": "S'ha produït un error en pujar la imatge."
+    "error-picture-upload": "S'ha produït un error en pujar la imatge.",
+    "error-picture-not-found": "Imatge no trobada.",
+    "error-tag-already-exists": "Aquesta imatge ja està etiquetada amb aquest membre.",
+    "error-tag-not-found": "Aquesta etiqueta no existeix."
   },
   "enums": {
     "human": "Humana",
@@ -168,5 +171,18 @@
     "account-logout-logged-out": "S'ha tancat la sessió.",
     "account-logout-logging-out": "Tancant la sessió...",
     "account-logout-error": "Hi ha hagut un error en tancar la sessió."
+  },
+  "log_activities": {
+    "NODE_CREATED": "Membre de la família afegit",
+    "NODE_UPDATED": "Membre de la família actualitzat",
+    "NODE_DELETED": "Membre de la família eliminat",
+    "EDGE_CREATED": "Relació creada",
+    "EDGE_DELETED": "Relació eliminada",
+    "PICTURE_ADDED": "Imatge afegida",
+    "PICTURE_DELETED": "Imatge eliminada",
+    "PICTURE_TAG_CREATED": "Etiqueta d'imatge afegida",
+    "PICTURE_TAG_DELETED": "Etiqueta d'imatge eliminada",
+    "TREE_UPDATED": "Família actualitzada",
+    "edited-by": "Editat per"
   }
 }

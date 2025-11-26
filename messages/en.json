@@ -65,7 +65,10 @@
     "error-would-create-cycle": "This relationship would create a family cycle.",
     "error-cannot-connect-siblings": "Cannot create a parent-child relationship between siblings.",
     "error-child-has-max-parents": "A child cannot have more than 2 parents.",
-    "error-picture-upload": "An error occurred while uploading the image."
+    "error-picture-upload": "An error occurred while uploading the image.",
+    "error-picture-not-found": "Picture not found.",
+    "error-tag-already-exists": "This picture is already tagged with this member.",
+    "error-tag-not-found": "This tag does not exist."
   },
   "enums": {
     "human": "Human",
@@ -169,5 +172,18 @@
     "account-logout-logged-out": "You have been logged out.",
     "account-logout-logging-out": "Logging out...",
     "account-logout-error": "An error occurred while logging out."
+  },
+  "log_activities": {
+    "NODE_CREATED": "Family member added",
+    "NODE_UPDATED": "Family member updated",
+    "NODE_DELETED": "Family member deleted",
+    "EDGE_CREATED": "Relationship created",
+    "EDGE_DELETED": "Relationship deleted",
+    "PICTURE_ADDED": "Image added",
+    "PICTURE_DELETED": "Image deleted",
+    "PICTURE_TAG_CREATED": "Image tag added",
+    "PICTURE_TAG_DELETED": "Image tag removed",
+    "TREE_UPDATED": "Family tree updated",
+    "edited-by": "Edited by"
   }
 }

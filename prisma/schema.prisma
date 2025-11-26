@@ -32,6 +32,23 @@ enum TreeNodeGender {
   UNSPECIFIED
 }
 
+enum ActivityAction {
+  NODE_CREATED
+  NODE_UPDATED
+  NODE_DELETED
+
+  EDGE_CREATED
+  EDGE_DELETED
+
+  PICTURE_ADDED
+  PICTURE_DELETED
+
+  PICTURE_TAG_CREATED
+  PICTURE_TAG_DELETED
+
+  TREE_UPDATED
+}
+
 model Tree {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
@@ -43,10 +60,11 @@ model Tree {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  nodes    TreeNode[]
-  accesses TreeAccess[]
-  TreeEdge TreeEdge[]
-  Picture  Picture[]
+  nodes       TreeNode[]
+  accesses    TreeAccess[]
+  TreeEdge    TreeEdge[]
+  Picture     Picture[]
+  ActivityLog ActivityLog[]
 
   @@unique([slug])
 }
@@ -149,7 +167,8 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  TreeAccess TreeAccess[]
+  TreeAccess  TreeAccess[]
+  ActivityLog ActivityLog[]
 }
 
 model Picture {
@@ -177,4 +196,21 @@ model PictureTag {
   isProfile Boolean @default(false)
 
   @@unique([pictureId, nodeId])
+}
+
+model ActivityLog {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  action ActivityAction
+
+  entityId String
+
+  metadata Json?
+
+  user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdBy String @db.ObjectId
+
+  createdAt DateTime @default(now())
 }

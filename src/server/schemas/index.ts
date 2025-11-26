@@ -12,6 +12,24 @@ export type TreeNodeGender = (typeof TreeNodeGender)[number]
 export const TreeEdgeType = ['PARENT', 'CHILD', 'SPOUSE', 'COUPLE'] as const
 export type TreeEdgeType = (typeof TreeEdgeType)[number]
 
+export const ActivityAction = [
+  'NODE_CREATED',
+  'NODE_UPDATED',
+  'NODE_DELETED',
+
+  'EDGE_CREATED',
+  'EDGE_DELETED',
+
+  'PICTURE_ADDED',
+  'PICTURE_DELETED',
+
+  'PICTURE_TAG_CREATED',
+  'PICTURE_TAG_DELETED',
+
+  'TREE_UPDATED',
+] as const
+export type ActivityAction = (typeof ActivityAction)[number]
+
 // Schema for creating a new tree
 export const CreateTreeSchema = z.object({
   name: z.string().min(3, { message: 'tree-name-too-short' }),
@@ -77,8 +95,6 @@ export const CreateTreeNodeSchema = z.object({
   birthDate: z.coerce.date().optional().nullable(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
-  motherId: z.string().optional().nullable(),
-  fatherId: z.string().optional().nullable(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   edgesFrom: z.array(z.any()).optional().nullable(),

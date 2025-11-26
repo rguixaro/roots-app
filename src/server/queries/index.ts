@@ -1,8 +1,7 @@
 import { cache } from 'react'
 
-import { auth } from '@/auth'
-
 import { db } from '@/server/db'
+import { assertAuthenticated } from '@/server/utils/auth'
 
 /**
  * Get trees that a user has access to.
@@ -11,13 +10,9 @@ import { db } from '@/server/db'
  * @returns Promise<{ trees: Tree[] } | null>
  */
 export const getTrees = cache(async () => {
-  const currentUser = await auth()
-  const userId = currentUser?.user?.id
-
-  /** Not authenticated */
-  if (!userId) return null
-
   try {
+    const userId = await assertAuthenticated()
+
     const trees = await db.tree.findMany({
       where: { accesses: { some: { userId: userId } } },
       include: { accesses: true },
@@ -35,13 +30,9 @@ export const getTrees = cache(async () => {
  * @returns Promise<Tree | null>
  */
 export const getTree = cache(async (slug: string) => {
-  const currentUser = await auth()
-  const userId = currentUser?.user?.id
-
-  /** Not authenticated */
-  if (!userId) return null
-
   try {
+    const userId = await assertAuthenticated()
+
     const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
       include: { accesses: { include: { user: true } } },
@@ -60,13 +51,9 @@ export const getTree = cache(async (slug: string) => {
  * @returns Promise<TreeResult>
  */
 export const getTreeRoots = cache(async (slug: string) => {
-  const currentUser = await auth()
-  const userId = currentUser?.user?.id
-
-  /** Not authenticated */
-  if (!userId) return null
-
   try {
+    const userId = await assertAuthenticated()
+
     const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
       include: { accesses: { include: { user: true } } },
@@ -76,12 +63,7 @@ export const getTreeRoots = cache(async (slug: string) => {
 
     const nodes = await db.treeNode.findMany({
       where: { treeId: tree.id },
-      include: {
-        taggedIn: {
-          where: { isProfile: true },
-          include: { picture: true },
-        },
-      },
+      include: { taggedIn: { where: { isProfile: true }, include: { picture: true } } },
     })
     const edges = await db.treeEdge.findMany({ where: { treeId: tree.id } })
 
@@ -90,30 +72,23 @@ export const getTreeRoots = cache(async (slug: string) => {
 })
 
 /**
- * Get profile by user id.
+ * Get the latest activity logs for trees the current user has access to.
  * Auth required.
- * @param userId User id
- * @returns Promise<{ profile: { name: string, image: string } | null; }>
+ * @returns Promise<{ logs: ActivityLog[], trees: Tree[] }>
  */
-export const getUserProfile = cache(
-  async (
-    userId: string
-  ): Promise<{
-    profile: { name: string; image: string } | null
-  }> => {
-    const currentUser = await auth()
+export const getActivityLogs = cache(async () => {
+  try {
+    const userId = await assertAuthenticated()
 
-    /** Not authenticated */
-    if (!currentUser) return { profile: null }
-
-    try {
-      const profile = await db.user.findFirst({
-        where: { id: userId, isPrivate: false },
-        select: { image: true, name: true },
-      })
-      return { profile }
-    } catch (error) {
-      return { profile: null }
-    }
+    const trees = await db.tree.findMany({ where: { accesses: { some: { userId: userId } } } })
+    const logs = await db.activityLog.findMany({
+      where: { treeId: { in: trees.map((t) => t.id) } },
+      include: { tree: true, user: true },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    })
+    return { logs: logs }
+  } catch (error) {
+    throw error
   }
-)
+})

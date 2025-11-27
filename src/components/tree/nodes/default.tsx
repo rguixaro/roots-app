@@ -2,7 +2,7 @@
 
 import { useState, useCallback, JSX, useEffect } from 'react'
 import { Position, Handle, NodeProps } from 'reactflow'
-import { Info, Images } from 'lucide-react'
+import { Info } from 'lucide-react'
 
 import { cn } from '@/utils'
 

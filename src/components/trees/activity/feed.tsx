@@ -1,29 +1,25 @@
 import { getTranslations } from 'next-intl/server'
 
-import { getTrees } from '@/server/queries'
+import { getTreeActivityLogs } from '@/server/queries'
 
 import { TypographyH5 } from '@/ui'
 
-import { TreeType } from '@/types'
-
 import { ActivityItem } from './item'
+import { GoBack } from '@/components/layout'
 
-export const ActivityFeed = async () => {
+export const ActivityFeed = async (slug: string) => {
   const t_common = await getTranslations('common')
 
-  const trees = (await getTrees())?.trees
+  const { logs: activityLogs } = (await getTreeActivityLogs(slug)) ?? {}
 
   return (
-    <div className="mt-5">
+    <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
+      <GoBack to={`/trees/${slug}`} />
       <TypographyH5>{t_common('recent-activity')}</TypographyH5>
       <p className="mb-5">{t_common('recent-activity-description')} </p>
-      {[TreeType[0], TreeType[1], TreeType[0], TreeType[1]]?.map((item, i) => {
-        return (
-          <div key={i}>
-            <ActivityItem item={item} index={i} />
-          </div>
-        )
-      })}
+      {activityLogs?.map((log, i) => (
+        <ActivityItem key={i} log={log} index={i} />
+      ))}
     </div>
   )
 }

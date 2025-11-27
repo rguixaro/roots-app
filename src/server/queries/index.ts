@@ -72,20 +72,19 @@ export const getTreeRoots = cache(async (slug: string) => {
 })
 
 /**
- * Get the latest activity logs for trees the current user has access to.
+ * Get the latest activity logs for the specified tree
  * Auth required.
- * @returns Promise<{ logs: ActivityLog[], trees: Tree[] }>
+ * @param treeId Tree ID
+ * @returns Promise<{ logs: ActivityLog[]}>
  */
-export const getActivityLogs = cache(async () => {
+export const getTreeActivityLogs = cache(async (slug: string) => {
   try {
-    const userId = await assertAuthenticated()
+    await assertAuthenticated()
 
-    const trees = await db.tree.findMany({ where: { accesses: { some: { userId: userId } } } })
     const logs = await db.activityLog.findMany({
-      where: { treeId: { in: trees.map((t) => t.id) } },
+      where: { tree: { slug: slug } },
       include: { tree: true, user: true },
       orderBy: { createdAt: 'desc' },
-      take: 10,
     })
     return { logs: logs }
   } catch (error) {

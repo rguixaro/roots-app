@@ -1,10 +1,9 @@
 'use client'
 
 import React from 'react'
-import { Plus, Minimize2, ChevronLeft } from 'lucide-react'
+import { Plus, Minimize2, ChevronLeft, Logs } from 'lucide-react'
 import Link from 'next/link'
 
-import { GoBack } from '@/components/layout'
 import { TreeShare } from '@/components/trees/share'
 import { TreeDownload } from '@/components/trees/download'
 import { TreeEdit } from '@/components/trees/edit'
@@ -13,42 +12,31 @@ import { cn } from '@/utils'
 
 import { Tree } from '@/types'
 
-interface TreeToolbarProps {
+interface TreeOverlayProps {
   readonly: boolean
   tree: Tree
   onCreateNode: () => void
   onResetView: () => void
 }
 
-export function TreeToolbar({ readonly, tree, onCreateNode, onResetView }: TreeToolbarProps) {
+export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeOverlayProps) {
   const btnClassName = 'text-pale-ocean group hover:bg-transparent'
   const iconClassName = 'text-pale-ocean group-hover:text-ocean-300 transition-colors duration-300'
   return (
     <div>
-      <div className="absolute left-0 z-10 hidden rounded-lg sm:block">
-        <GoBack
-          text={'trees'}
-          className={cn(
-            'bg-ocean-100 rounded-lg rounded-t-none rounded-l-none py-1 ps-0 pe-4 pb-2',
-            'hover:bg-ocean-100 group bg-none shadow-lg transition-all duration-300'
-          )}
-          classNameSvg="group-hover:stroke-ocean-300 stroke-pale-ocean"
-          classNameHover="group-hover:text-ocean-300 text-pale-ocean hover:bg-transparent"
-        />
-      </div>
       <Link
         href={'/'}
         className={cn(
-          'absolute left-0 z-10 rounded-lg sm:hidden',
-          'bg-ocean-100 rounded-lg rounded-t-none rounded-l-none py-1 ps-1 pe-3 pt-2 pb-4'
+          'group shadow-center-lg absolute left-0 z-10 rounded-lg',
+          'bg-ocean-100 rounded-lg rounded-t-none rounded-l-none ps-1 pe-3 pt-2 pb-4'
         )}
       >
         <ChevronLeft size={20} className={iconClassName} />
       </Link>
       <div
         className={cn(
-          'bg-ocean-100 absolute right-0 z-10 flex gap-4 px-4 py-1 pb-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2',
-          'items-center rounded-lg rounded-t-none rounded-br-none shadow-lg sm:rounded-br-lg'
+          'bg-ocean-100 absolute right-0 z-10 flex gap-4 px-4 pt-1 pb-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2',
+          'shadow-center-lg items-center rounded-lg rounded-t-none rounded-br-none sm:rounded-br-lg'
         )}
       >
         <span className="text-pale-ocean text-lg font-extrabold md:text-xl">{tree.name}</span>
@@ -74,8 +62,33 @@ export function TreeToolbar({ readonly, tree, onCreateNode, onResetView }: TreeT
       </div>
       <div
         className={cn(
-          'bg-ocean-100 absolute bottom-0 left-0 z-10 flex gap-4 px-4 py-1 pt-3 sm:hidden',
-          'items-center rounded-lg rounded-tl-none rounded-b-none shadow-lg'
+          'bg-ocean-100 absolute top-0 right-0 z-10 hidden flex-col gap-4 ps-3 pe-1 pt-2 pb-4 sm:flex',
+          'shadow-center-lg items-center justify-center rounded-lg rounded-t-none rounded-r-none rounded-bl-lg'
+        )}
+      >
+        <TreeShare tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+        <TreeDownload tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+        {!readonly && (
+          <>
+            <div className="bg-ocean-50 h-0.5 w-4" />
+            <Link
+              href={`/trees/logs/${tree?.slug}`}
+              className={cn(
+                'bg-ocean-100 cursor-pointer rounded p-1',
+                'group transition-all duration-300'
+              )}
+            >
+              <Logs size={20} className={iconClassName} />
+            </Link>
+            <TreeEdit tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+          </>
+        )}
+      </div>
+      <div
+        className={cn(
+          'bg-ocean-100 absolute right-0 bottom-0 left-0 z-10 flex gap-4 px-4 py-1 pt-3 sm:hidden',
+          'shadow-center-lg items-center',
+          !readonly ? 'justify-between' : 'justify-center gap-8'
         )}
       >
         <div
@@ -96,17 +109,22 @@ export function TreeToolbar({ readonly, tree, onCreateNode, onResetView }: TreeT
         >
           <Minimize2 size={20} className={iconClassName} />
         </div>
-      </div>
-      <div
-        className={cn(
-          'bg-ocean-100 absolute right-0 bottom-0 z-10 flex gap-4 px-4 py-1 pt-2 sm:bottom-auto sm:pt-1 sm:pb-2',
-          'items-center rounded-lg rounded-r-none rounded-b-none shadow-lg sm:rounded-t-none sm:rounded-bl-lg'
-        )}
-      >
         <TreeShare tree={tree} className={btnClassName} classNameIcon={iconClassName} />
         <TreeDownload tree={tree} className={btnClassName} classNameIcon={iconClassName} />
         {!readonly && (
-          <TreeEdit tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+          <div className="flex w-full items-center justify-end gap-4">
+            <div className="bg-ocean-50 h-4 w-0.5 sm:hidden" />
+            <Link
+              href={`/trees/logs/${tree?.slug}`}
+              className={cn(
+                'bg-ocean-100 cursor-pointer rounded p-1',
+                'group transition-all duration-300'
+              )}
+            >
+              <Logs size={20} className={iconClassName} />
+            </Link>
+            <TreeEdit tree={tree} className={btnClassName} classNameIcon={iconClassName} />
+          </div>
         )}
       </div>
     </div>

@@ -277,7 +277,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
    */
   const onSubmit = async (values: z.infer<typeof CreateTreeSchema>) =>
     withAsync(async () => {
-      const { error, message, tree } = await updateTree(currentTree.id, currentUserId, values)
+      const { error, message, tree } = await updateTree(currentTree.id, values)
       if (error) return toast.error(t_errors(message || 'error'))
 
       toast.success(t_toasts('tree-updated'))

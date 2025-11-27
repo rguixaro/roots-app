@@ -52,7 +52,7 @@ export const TreeDownload = ({
       onClick={onButtonClick}
       className={cn('hover:bg-ocean-200/15 rounded p-1 transition-colors duration-300', className)}
     >
-      <ArrowDownToLine size={24} className={cn('text-ocean-200', classNameIcon)} />
+      <ArrowDownToLine size={20} className={cn('text-ocean-200', classNameIcon)} />
       {/* <div className="pointer-events-none absolute w-96 opacity-0">
         <div ref={ref} className="flex w-full flex-col items-center justify-center">
           <div className="border-ocean-300 h-36 w-4/5 border-b-4 text-center">

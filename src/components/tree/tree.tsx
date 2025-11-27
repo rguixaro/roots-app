@@ -22,7 +22,7 @@ import {
   Button,
 } from '@/ui'
 
-import { TreeToolbar, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
+import { TreeOverlay, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
 
 import { Tree, TreeEdge, TreeNode } from '@/types'
 
@@ -59,8 +59,8 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Toolbar */}
-      <TreeToolbar
+      {/* Overlay */}
+      <TreeOverlay
         tree={tree}
         readonly={readonly}
         onCreateNode={treeState.createNode}

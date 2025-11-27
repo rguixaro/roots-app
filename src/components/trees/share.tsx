@@ -42,7 +42,7 @@ export const TreeShare = ({
       onClick={handleCopy(`${SITE_URL}/trees/${tree.slug}`)}
       className={cn('hover:bg-ocean-200/15 rounded p-1 transition-colors duration-300', className)}
     >
-      <Share2Icon size={24} className={cn('text-ocean-200', classNameIcon)} />
+      <Share2Icon size={20} className={cn('text-ocean-200', classNameIcon)} />
     </button>
   )
 }

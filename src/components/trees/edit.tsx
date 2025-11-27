@@ -21,7 +21,7 @@ export const TreeEdit = ({
       href={`/trees/edit/${tree?.slug}`}
       className={cn('hover:bg-ocean-200/15 rounded p-1 transition-colors duration-300', className)}
     >
-      <Settings2 size={24} className={cn('text-ocean-200', classNameIcon)} />
+      <Settings2 size={20} className={cn('text-ocean-200', classNameIcon)} />
     </Link>
   )
 }

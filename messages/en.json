@@ -20,7 +20,7 @@
     "searching": "Searching...",
     "share": "Share",
     "recent-activity": "Recent activity",
-    "recent-activity-description": "Any relevant actions performed within your families will appear here"
+    "recent-activity-description": "Here you can see the most recent changes made to this family."
   },
   "toasts": {
     "tree-created": "Family created successfully.",
@@ -92,6 +92,7 @@
   },
   "trees": {
     "title": "Families",
+    "loading": "Loading family settings...",
     "tree-new": "New Family",
     "tree-create": "Create new family",
     "tree-create-description": "Fill in the data below to create a new family.",
@@ -184,6 +185,21 @@
     "PICTURE_TAG_CREATED": "Image tag added",
     "PICTURE_TAG_DELETED": "Image tag removed",
     "TREE_UPDATED": "Family tree updated",
-    "edited-by": "Edited by"
+    "edited-by": "Edited by",
+    "loading": "Loading logs...",
+    "name": "Name",
+    "type": "Type",
+    "nodeImage": "Node images",
+    "nodeGallery": "Image gallery",
+    "fullName": "Full name",
+    "birthDate": "Birth date",
+    "deathDate": "Death date",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "unspecified": "Unspecified",
+    "true": "Enabled",
+    "false": "Disabled"
   }
 }

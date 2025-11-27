@@ -20,7 +20,7 @@
     "searching": "Buscant...",
     "share": "Compartir",
     "recent-activity": "Activitat recent",
-    "recent-activity-description": "Qualsevol acció rellevant realitzada dins de les teves famílies apareixerà aquí"
+    "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família."
   },
   "toasts": {
     "tree-created": "Família creada amb èxit.",
@@ -92,6 +92,7 @@
   },
   "trees": {
     "title": "Famílies",
+    "loading": "Carregant la configuració de la família...",
     "tree-new": "Nova família",
     "tree-create": "Crear nova família",
     "tree-create-description": "Omple les dades següents per crear una nova família.",
@@ -183,6 +184,21 @@
     "PICTURE_TAG_CREATED": "Etiqueta d'imatge afegida",
     "PICTURE_TAG_DELETED": "Etiqueta d'imatge eliminada",
     "TREE_UPDATED": "Família actualitzada",
-    "edited-by": "Editat per"
+    "edited-by": "Editat per",
+    "loading": "Carregant logs...",
+    "name": "Nom",
+    "type": "Tipus",
+    "nodeImage": "Imatges de nodes",
+    "nodeGallery": "Galeria d'imatges",
+    "fullName": "Nom complet",
+    "birthDate": "Data de naixement",
+    "deathDate": "Data de defunció",
+    "gender": "Gènere",
+    "male": "Home",
+    "female": "Dona",
+    "other": "Altres",
+    "unspecified": "No especificat",
+    "true": "Activat",
+    "false": "Desactivat"
   }
 }

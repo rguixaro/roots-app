@@ -23,6 +23,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Textarea,
   TypographyH4,
   TypographyH5,
 } from '@/ui'
@@ -168,7 +169,6 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className={cn(
           'bg-ocean-100/50 fixed inset-0 z-50 backdrop-blur-xs transition-opacity duration-300',
@@ -176,7 +176,6 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
         )}
         onClick={onClose}
       />
-      {/* Modal */}
       <div
         className={cn(
           'text-ocean-400 fixed inset-x-0 bottom-0 z-50 transition-transform duration-300 ease-out sm:top-0 sm:right-0 sm:h-full',
@@ -204,12 +203,14 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
             onKeyDown={(e) => checkKeyDown(e)}
             className="flex h-full w-full flex-col sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3 2xl:w-1/5"
           >
-            <div className="bg-pale-ocean shadow-2l h-full flex-col overflow-hidden sm:flex sm:flex-row">
-              {/* Mobile drag handle */}
+            <div className="bg-pale-ocean shadow-2l flex h-full flex-col overflow-hidden sm:flex sm:flex-row">
               <div
-                className="flex cursor-row-resize justify-center pt-3 pb-2 select-none sm:hidden"
+                className="flex shrink-0 cursor-row-resize justify-center pt-3 pb-2 select-none sm:hidden"
                 onMouseDown={handleDragStart}
-                onTouchStart={handleDragStart}
+                onTouchStart={(e) => {
+                  e.stopPropagation()
+                  handleDragStart(e)
+                }}
               >
                 <div
                   className={cn(
@@ -218,7 +219,10 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                   )}
                 />
               </div>
-              <div className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start">
+              <div
+                className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start"
+                style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+              >
                 <div className="mb-6 flex items-start justify-between">
                   <div className="flex flex-col">
                     <TypographyH4 className="mt-4">{t_trees('node-new')}</TypographyH4>
@@ -231,9 +235,8 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     <X size={24} className="text-ocean-200" />
                   </button>
                 </div>
-                {/* General Information Section */}
                 <TypographyH5 className="mt-5">{t_trees('node-general-info')}</TypographyH5>
-                <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white px-3 py-2 text-left shadow-lg">
+                <div className="border-ocean-200/50 shadow-center mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
                   <FormField
                     control={form.control}
                     name="fullName"
@@ -261,9 +264,34 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                   <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
                   <FormField
                     control={form.control}
-                    name="birthDate"
+                    name="birthPlace"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel>{t_trees('node-birth-place')}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_trees('node-birth-place-description')}
+                        </FormDescription>
+                        <FormControl>
+                          <div className="py-2">
+                            <Input
+                              {...field}
+                              value={field.value ?? ''}
+                              autoComplete="off"
+                              className="min-w-[16ch]"
+                              placeholder={t_trees('node-birth-place')}
+                              disabled={loading}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="birthDate"
+                    render={({ field }) => (
+                      <FormItem className="mt-3">
                         <FormLabel>{t_trees('node-birth-date')}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
                           {t_trees('node-birth-date-description')}
@@ -326,7 +354,7 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     control={form.control}
                     name="gender"
                     render={({ field }) => (
-                      <FormItem className="">
+                      <FormItem>
                         <FormLabel>{`${t_trees('node-gender')}*`}</FormLabel>
                         <FormDescription className="mb-2 text-sm opacity-70">
                           {t_trees('node-gender-description')}
@@ -361,7 +389,6 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                     )}
                   />
                 </div>
-                {/* Action Buttons */}
                 <div className="mt-6 flex gap-3">
                   <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                     <span className="text-sm font-bold">{t_common('cancel')}</span>

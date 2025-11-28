@@ -154,7 +154,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t_toasts('node-delete')}</DialogTitle>
-
             <DialogDescription className="my-2">
               {t_toasts('node-delete-confirmation')}
             </DialogDescription>
@@ -165,6 +164,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
           <DialogFooter>
             <Button
               variant="ghost"
+              className="my-2"
               onClick={() => treeState.closeDeleteConfirmation()}
               disabled={treeState.loading}
             >

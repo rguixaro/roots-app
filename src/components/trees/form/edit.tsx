@@ -384,7 +384,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                   control={form.control}
                   name="name"
                   render={({ field }) => (
-                    <FormItem className="">
+                    <FormItem>
                       <FormLabel>{t_trees('tree-name')}</FormLabel>
                       <FormDescription className="text-sm opacity-70">
                         {t_trees('tree-name-description')}

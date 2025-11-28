@@ -90,6 +90,26 @@
     "login-error": "Se ha producido un error al iniciar sesión.",
     "google-login": "Continuar con Google"
   },
+  "insights": {
+    "milestones": "Cumpleaños y efemérides",
+    "milestones-description": "Aquí puedes ver los próximos cumpleaños y acontecimientos destacados de los miembros de tu familia.",
+    "milestones-empty": "No hay cumpleaños ni efemérides en los próximos días.",
+    "on-this-day": "Efemérides",
+    "birthdays-this-month": "Cumpleaños de este mes",
+    "birthday-description": "{name} cumple {age, plural, one {# año} other {# años}} {daysUntil, plural, =0 {hoy} one {en 1 día} other {en # días}}",
+    "anniversary-description": "{type, select, birth {{name} nació hace {yearsAgo, plural, one {# año} other {# años}} hoy} death {En memoria de {name}, hace {yearsAgo, plural, one {# año} other {# años}}} other {}}",
+    "highlights": "Aspectos destacados de tus familias",
+    "highlights-description": "Descubre datos interesantes y estadísticas sobre tus árboles genealógicos.",
+    "highlights-empty": "No hay aspectos destacados disponibles para tus familias aún. Comienza a añadir miembros y relaciones para ver información interesante aquí.",
+    "oldest-ancestor-title": "Ancestro más antiguo",
+    "oldest-ancestor-subtitle": "Nacido en {year}",
+    "recently-added-title": "Recientemente agregado",
+    "recently-added-subtitle": "Agregado {relativeTime}",
+    "most-children-title": "Más hijos",
+    "most-children-subtitle": "{count} hijos",
+    "most-documented-title": "Más documentado",
+    "most-documented-subtitle": "{count, plural, one {# foto} other {# fotos}}"
+  },
   "trees": {
     "title": "Familias",
     "tree-new": "Nueva familia",

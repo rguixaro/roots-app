@@ -90,6 +90,26 @@
     "login-error": "An error occurred while signing in.",
     "google-login": "Continue with Google"
   },
+  "insights": {
+    "milestones": "Birthdays and milestones",
+    "milestones-description": "Here you can see upcoming birthdays and notable events of your family members.",
+    "milestones-empty": "There are no birthdays or anniversaries in the coming days.",
+    "on-this-day": "On this day",
+    "birthdays-this-month": "Birthdays this month",
+    "birthday-description": "{name} is turning {age, plural, one {# year} other {# years}} {daysUntil, plural, =0 {today} one {in 1 day} other {in # days}}",
+    "anniversary-description": "{type, select, birth {{name} was born {yearsAgo, plural, one {# year ago} other {# years ago}} today} death {In memory of {name}, {yearsAgo, plural, one {# year ago} other {# years ago}}} other {}}",
+    "highlights": "Family highlights",
+    "highlights-description": "Discover interesting facts and statistics about your family trees.",
+    "highlights-empty": "There are no highlights available for your families yet. Start adding members and relationships to see interesting insights here.",
+    "oldest-ancestor-title": "Oldest Ancestor",
+    "oldest-ancestor-subtitle": "Born in {year}",
+    "recently-added-title": "Recently Added",
+    "recently-added-subtitle": "Added {relativeTime}",
+    "most-children-title": "Most Children",
+    "most-children-subtitle": "{count} children",
+    "most-documented-title": "Most Documented",
+    "most-documented-subtitle": "{count, plural, one {# photo} other {# photos}}"
+  },
   "trees": {
     "title": "Families",
     "tree-new": "New Family",

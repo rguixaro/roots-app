@@ -92,7 +92,6 @@
   },
   "trees": {
     "title": "Famílies",
-    "loading": "Carregant la configuració de la família...",
     "tree-new": "Nova família",
     "tree-create": "Crear nova família",
     "tree-create-description": "Omple les dades següents per crear una nova família.",
@@ -185,7 +184,6 @@
     "PICTURE_TAG_DELETED": "Etiqueta d'imatge eliminada",
     "TREE_UPDATED": "Família actualitzada",
     "edited-by": "Editat per",
-    "loading": "Carregant logs...",
     "name": "Nom",
     "type": "Tipus",
     "nodeImage": "Imatges de nodes",

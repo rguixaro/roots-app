@@ -92,7 +92,6 @@
   },
   "trees": {
     "title": "Families",
-    "loading": "Loading family settings...",
     "tree-new": "New Family",
     "tree-create": "Create new family",
     "tree-create-description": "Fill in the data below to create a new family.",
@@ -186,7 +185,6 @@
     "PICTURE_TAG_DELETED": "Image tag removed",
     "TREE_UPDATED": "Family tree updated",
     "edited-by": "Edited by",
-    "loading": "Loading logs...",
     "name": "Name",
     "type": "Type",
     "nodeImage": "Node images",

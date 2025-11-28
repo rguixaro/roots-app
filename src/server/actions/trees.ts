@@ -4,8 +4,6 @@ import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import type { z } from 'zod'
 
-import { auth } from '@/auth'
-
 import { db } from '@/server/db'
 import type {
   CreateTreeSchema,

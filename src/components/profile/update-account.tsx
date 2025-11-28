@@ -28,7 +28,7 @@ import {
 
 import { DeleteAccount } from './delete-account'
 import { LogoutAccount } from './logout-account'
-import { StyledSelector } from '../families/form'
+import { StyledSelector } from '../trees/form'
 
 interface UpdateAccountProps {
   id: string

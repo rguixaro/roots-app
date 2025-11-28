@@ -3,9 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import type { z } from 'zod'
 
-import { auth, signOut } from '@/auth'
+import { signOut } from '@/auth'
 import { db } from '@/server/db'
 import type { UpdateProfileSchema } from '@/server/schemas'
+import { assertAuthenticated } from '@/server/utils'
 
 /**
  * Update Profile.
@@ -16,12 +17,9 @@ import type { UpdateProfileSchema } from '@/server/schemas'
 export const updateProfile = async (
   values: z.infer<typeof UpdateProfileSchema>
 ): Promise<void | null> => {
-  const currentUser = await auth()
+  const userId = await assertAuthenticated()
 
-  /** Not authenticated */
-  if (!currentUser) return null
-
-  await db.user.update({ where: { id: currentUser.user.id }, data: { ...values } })
+  await db.user.update({ where: { id: userId }, data: { ...values } })
 
   revalidatePath('/')
   revalidatePath('/profile')
@@ -35,12 +33,9 @@ export const updateProfile = async (
  * @returns Promise<null | true>
  */
 export const deleteProfile = async (): Promise<null | true> => {
-  const currentUser = await auth()
+  const userId = await assertAuthenticated()
 
-  /** Not authenticated */
-  if (!currentUser) return null
-
-  await db.user.delete({ where: { id: currentUser.user.id } })
+  await db.user.delete({ where: { id: userId } })
   await signOut()
 
   return true

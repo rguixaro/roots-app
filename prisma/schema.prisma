@@ -7,12 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum FamilyType {
+enum TreeType {
   HUMAN
   ANIMAL
 }
 
-enum FamilyRole {
+enum TreeAccessRole {
   VIEWER
   EDITOR
   ADMIN
@@ -32,34 +32,54 @@ enum TreeNodeGender {
   UNSPECIFIED
 }
 
-model Family {
+enum ActivityAction {
+  NODE_CREATED
+  NODE_UPDATED
+  NODE_DELETED
+
+  EDGE_CREATED
+  EDGE_DELETED
+
+  PICTURE_ADDED
+  PICTURE_DELETED
+
+  PICTURE_TAG_CREATED
+  PICTURE_TAG_DELETED
+
+  TREE_UPDATED
+}
+
+model Tree {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
   slug        String
   name        String
-  type        FamilyType
-  nodeImage   Boolean    @default(false)
-  nodeGallery Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  type        TreeType
+  nodeImage   Boolean  @default(false)
+  nodeGallery Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  nodes    TreeNode[]
-  accesses FamilyAccess[]
-  TreeEdge TreeEdge[]
+  nodes       TreeNode[]
+  accesses    TreeAccess[]
+  TreeEdge    TreeEdge[]
+  Picture     Picture[]
+  ActivityLog ActivityLog[]
 
   @@unique([slug])
 }
 
 model TreeNode {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
 
   fullName  String
   birthDate DateTime?
   deathDate DateTime?
-  photoUrl  String?
   gender    TreeNodeGender @default(UNSPECIFIED)
+
+  taggedIn PictureTag[] @relation("taggedIn")
 
   edgesFrom TreeEdge[] @relation("FromNode")
   edgesTo   TreeEdge[] @relation("ToNode")
@@ -69,9 +89,9 @@ model TreeNode {
 }
 
 model TreeEdge {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
 
   fromNode   TreeNode @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
   fromNodeId String   @db.ObjectId
@@ -85,18 +105,18 @@ model TreeEdge {
   @@index([toNodeId])
 }
 
-model FamilyAccess {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  family   Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  familyId String @db.ObjectId
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String @db.ObjectId
+model TreeAccess {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
 
-  role FamilyRole @default(VIEWER)
+  role TreeAccessRole @default(VIEWER)
 
   createdAt DateTime @default(now())
 
-  @@unique([familyId, userId])
+  @@unique([treeId, userId])
   @@index([userId])
 }
 
@@ -147,5 +167,50 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  FamilyAccess FamilyAccess[]
+  TreeAccess  TreeAccess[]
+  ActivityLog ActivityLog[]
+}
+
+model Picture {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  fileKey    String
+  uploadedBy String @db.ObjectId
+
+  tags PictureTag[] @relation("tags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PictureTag {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  picture   Picture @relation("tags", fields: [pictureId], references: [id], onDelete: Cascade)
+  pictureId String  @db.ObjectId
+
+  node   TreeNode @relation("taggedIn", fields: [nodeId], references: [id], onDelete: Cascade)
+  nodeId String   @db.ObjectId
+
+  isProfile Boolean @default(false)
+
+  @@unique([pictureId, nodeId])
+}
+
+model ActivityLog {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  action ActivityAction
+
+  entityId String
+
+  metadata Json?
+
+  user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdBy String @db.ObjectId
+
+  createdAt DateTime @default(now())
 }

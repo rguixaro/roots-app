@@ -4,7 +4,13 @@ import React from 'react'
 import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
 import { useTranslations } from 'next-intl'
 
-import { useTreeState, useNodeForm, useEdgeOperations, useNodeOperations } from './hooks'
+import {
+  useTreeState,
+  useNodeCreateForm,
+  useEdgeOperations,
+  useNodeOperations,
+  useNodeUpdateForm,
+} from './hooks'
 
 import {
   Dialog,
@@ -16,9 +22,9 @@ import {
   Button,
 } from '@/ui'
 
-import { TreeToolbar, NodeFormModal, EdgeContextMenu, NodeContextMenu } from './ui'
+import { TreeOverlay, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
 
-import { Family, TreeEdge, TreeNode } from '@/types'
+import { Tree, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
@@ -26,47 +32,71 @@ import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
   readonly: boolean
-  family: Family
+  tree: Tree
   nodes: TreeNode[]
   edges: TreeEdge[]
 }
 
-export default function StyledTree({ readonly, family, nodes, edges }: StyledTreeProps) {
+export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeProps) {
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
 
-  const treeState = useTreeState(family, nodes, edges)
+  const treeState = useTreeState(tree, nodes, edges)
 
-  const nodeForm = useNodeForm(family, () => treeState.setShowModal(false))
+  /**
+   * Dismiss any open modal
+   */
+  const dismissModal = () => {
+    treeState.setDisplayCreate(false)
+    treeState.setDisplayInfo(false)
+  }
 
-  const edgeOperations = useEdgeOperations(family, edges, treeState.treeEdges, treeState.setEdges)
-  const nodeOperations = useNodeOperations(family, nodes)
+  const nodeCreateForm = useNodeCreateForm(tree, dismissModal)
+  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, dismissModal)
+
+  const edgeOperations = useEdgeOperations(tree, edges, treeState.treeEdges, treeState.setTreeEdges)
+  const nodeOperations = useNodeOperations(tree, nodes)
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Toolbar */}
-      <TreeToolbar
-        family={family}
+      {/* Overlay */}
+      <TreeOverlay
+        tree={tree}
         readonly={readonly}
         onCreateNode={treeState.createNode}
         onResetView={treeState.resetView}
       />
 
-      {/* Node Creation Modal */}
-      <NodeFormModal
-        showModal={treeState.showModal}
-        loading={treeState.loading}
-        form={nodeForm.form}
-        onSubmit={nodeForm.onSubmit}
-        onClose={treeState.handleModalClose}
+      {/* Node Info Modal */}
+      <NodeInfoModal
+        showModal={treeState.displayInfo}
+        node={treeState.selectedNode}
+        withPicture={tree.nodeImage}
+        withGallery={tree.nodeGallery}
+        form={nodeUpdateForm.form}
+        onUpdate={nodeUpdateForm.onSubmit}
+        onClose={treeState.dismissModal}
+        onDelete={() => {
+          if (treeState.selectedNode?.id) {
+            treeState.showDeleteConfirmation(treeState.selectedNode.id)
+          }
+        }}
+      />
+
+      {/* Node Create Modal */}
+      <NodeCreateModal
+        showModal={treeState.displayCreate}
+        form={nodeCreateForm.form}
+        onCreate={nodeCreateForm.onSubmit}
+        onClose={treeState.dismissModal}
       />
 
       {/* React Flow Canvas */}
       <ReactFlow
         nodes={treeState.treeNodes}
         edges={treeState.treeEdges}
-        onNodesChange={treeState.onNodesChange}
-        onEdgesChange={treeState.onEdgesChange}
+        onNodesChange={treeState.onTreeNodesChange}
+        onEdgesChange={treeState.onTreeEdgesChange}
         nodeTypes={treeState.nodeTypes}
         onConnect={edgeOperations.onConnect}
         onEdgeClick={treeState.onEdgeClick}

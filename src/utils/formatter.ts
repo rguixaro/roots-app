@@ -1,0 +1,95 @@
+// src/utils/activityFormatter.ts
+import { TreeNodeGender } from '@/types'
+import type { ActivityAction } from '@prisma/client'
+
+export interface ActivityDisplay {
+  title: string
+  subtitle: string
+  details?: string[]
+}
+
+/**
+ * Formats a value based on its field type.
+ * @param value
+ * @param field
+ * @param t Translation function
+ * @returns The formatted value as string
+ */
+const formatValue = (value: any, field: string, t: (key: string) => string): string => {
+  const dateFields = ['birthDate', 'deathDate']
+  if (dateFields.includes(field)) return new Date(value).toISOString().split('T')[0]
+
+  const booleanFields = ['nodeGallery', 'nodeImage']
+  if (booleanFields.includes(field)) return value ? t('true') : t('false')
+
+  if (field === 'gender' && TreeNodeGender.includes(value)) return t(value.toLowerCase())
+
+  return String(value)
+}
+
+export const formatActivityLog = (
+  action: ActivityAction,
+  metadata: Record<string, any> | null,
+  t: (key: string) => string
+): ActivityDisplay => {
+  if (!metadata) return { title: t(action), subtitle: '' }
+  const meta = metadata as Record<string, any>
+
+  switch (action) {
+    case 'NODE_CREATED':
+      return { title: t('NODE_CREATED'), subtitle: `"${meta.nodeName}"` }
+    case 'NODE_UPDATED':
+      return {
+        title: t('NODE_UPDATED'),
+        subtitle: `"${meta.nodeName}"`,
+        details: meta.changes
+          ? Object.entries(meta.changes).map(
+              ([field, change]: [string, any]) =>
+                `${t(field)}: "${formatValue(change.before, field, t)}" → "${formatValue(change.after, field, t)}"`
+            )
+          : undefined,
+      }
+    case 'NODE_DELETED':
+      return { title: t('NODE_DELETED'), subtitle: `"${meta.nodeName}"` }
+    case 'EDGE_CREATED':
+      return {
+        title: t('EDGE_CREATED'),
+        subtitle: `"${meta.fromNodeName}" → "${meta.toNodeName}"`,
+        details: [meta.type],
+      }
+    case 'EDGE_DELETED':
+      return {
+        title: t('EDGE_DELETED'),
+        subtitle: `"${meta.fromNodeName}" → "${meta.toNodeName}"`,
+        details: [meta.type],
+      }
+    case 'PICTURE_ADDED':
+      return { title: t('PICTURE_ADDED'), subtitle: meta.fileKey || 'Untitled' }
+    case 'PICTURE_DELETED':
+      return {
+        title: t('PICTURE_DELETED'),
+        subtitle: meta.fileKey || 'Untitled',
+        details: meta.taggedNodeNames
+          ? [`${t('tagged')}: ${meta.taggedNodeNames.join(', ')}`]
+          : undefined,
+      }
+    case 'PICTURE_TAG_CREATED':
+      return { title: t('PICTURE_TAG_CREATED'), subtitle: `"${meta.nodeName}"` }
+    case 'PICTURE_TAG_DELETED':
+      return { title: t('PICTURE_TAG_DELETED'), subtitle: `"${meta.nodeName}"` }
+    case 'TREE_UPDATED':
+      return {
+        title: t('TREE_UPDATED'),
+        subtitle: `"${meta.treeName}"`,
+        details: meta.changes
+          ? Object.entries(meta.changes).map(
+              ([field, change]: [string, any]) =>
+                `${t(field)}: "${formatValue(change.before, field, t)}" → "${formatValue(change.after, field, t)}"`
+            )
+          : undefined,
+      }
+
+    default:
+      return { title: t(action), subtitle: '' }
+  }
+}

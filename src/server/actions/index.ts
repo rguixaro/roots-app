@@ -1,4 +1,4 @@
 export * from './auth'
 export * from './profile'
-export * from './families'
-export * from './tree'
+export * from './trees'
+export * from './pictures'

@@ -1,12 +1,12 @@
 import dagre from 'dagre'
 import { Node, Edge, Position } from 'reactflow'
 
-import { TreeEdge, TreeNode } from '@/types'
+import { Tree, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
-const nodeWidth = 160
-const nodeHeight = 60
+const nodeWidth = 220
+const nodeHeight = 80
 
 const dagreGraph = new dagre.graphlib.Graph()
 dagreGraph.setDefaultEdgeLabel(() => ({}))
@@ -78,16 +78,18 @@ export function computedLayout(
 
 /**
  * Create tree layout
- * @param familyType
- * @param nodes
- * @param edges
- * @param handleNodeClick
+ * @param tree {Tree}
+ * @param nodes {TreeNode[]}
+ * @param edges {TreeEdge[]}
+ * @param selectedNodeId {string}
+ * @param onInfo {(node: TreeNode) => void}
  */
 export function createTreeLayout(
-  familyType: string,
+  tree: Tree,
   nodes: TreeNode[],
   edges: TreeEdge[],
-  handleNodeClick: (label: string) => void
+  selectedNodeId: string | null,
+  onInfo: (node: TreeNode) => void
 ) {
   const treeEdges: Edge[] = edges.map((edge) => ({
     id: edge.id,
@@ -103,8 +105,13 @@ export function createTreeLayout(
     const edgesTo = edges.filter((e) => e.toNodeId === node.id)
     return {
       id: node.id,
-      type: familyType,
-      data: { node: { ...node, edgesFrom, edgesTo }, onClick: handleNodeClick },
+      type: tree.type,
+      data: {
+        node: { ...node, edgesFrom, edgesTo },
+        withPicture: tree.nodeImage,
+        selectedNodeId: selectedNodeId,
+        onInfo: onInfo,
+      },
       position: { x: 0, y: 0 },
     }
   })

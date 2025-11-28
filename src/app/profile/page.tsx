@@ -5,11 +5,10 @@ import { auth } from '@/auth'
 import { GoBack } from '@/components/layout'
 import { UpdateAccount } from '@/components/profile'
 
-import { TypographyH4, TypographyH5 } from '@/ui'
+import { TypographyH4 } from '@/ui'
 
 export default async function ProfilePage() {
   const t_profile = await getTranslations('profile')
-  const t_family = await getTranslations('family')
 
   const session = await auth()
   if (!session) return null

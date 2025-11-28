@@ -14,7 +14,7 @@ export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: numb
   const t_trees = useTranslations('trees')
 
   const motions: Variants = {
-    offscreen: { opacity: 0, x: 75 },
+    offscreen: { opacity: 0, x: 150 },
     onscreen: {
       opacity: 1,
       x: 0,

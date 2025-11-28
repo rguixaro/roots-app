@@ -13,7 +13,7 @@ export const TreesFeed = async () => {
   const treesWithAdd = [...(trees ?? []), null as Tree | null]
 
   return (
-    <div className="mb-5 flex h-full w-full flex-col">
+    <div className="flex h-full w-full flex-col">
       <p className="mt-2 mb-4">{t_common('trees-description')} </p>
       <div className="no-scrollbar flex w-full justify-start overflow-x-auto">
         <div className="flex w-max flex-row gap-2">

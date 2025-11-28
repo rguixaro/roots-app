@@ -90,6 +90,26 @@
     "login-error": "S'ha produït un error en iniciar sessió.",
     "google-login": "Continuar amb Google"
   },
+  "insights": {
+    "milestones": "Aniversaris i efemèrides",
+    "milestones-description": "Aquí pots veure els propers aniversaris i esdeveniments destacats dels membres de la teva família.",
+    "milestones-empty": "No hi ha aniversaris ni efemèrides en els pròxims dies.",
+    "on-this-day": "Efemèrides",
+    "birthdays-this-month": "Aniversaris d'aquest mes",
+    "birthday-description": "{name} complirà {age, plural, one {# any} other {# anys}} {daysUntil, plural, =0 {avui} one {en 1 dia} other {en # dies}}",
+    "anniversary-description": "{type, select, birth {{name} va néixer fa {yearsAgo, plural, one {# any} other {# anys}} avui} death {En memòria de {name}, fa {yearsAgo, plural, one {# any} other {# anys}}} other {}}",
+    "highlights": "Aspectes destacats de les teves famílies",
+    "highlights-description": "Descobreix dades interessants i estadístiques sobre els teus arbres genealògics.",
+    "highlights-empty": "No hi ha aspectes destacats disponibles per a les teves famílies encara. Comença a afegir membres i relacions per veure informació interessant aquí.",
+    "oldest-ancestor-title": "Ancestre més antic",
+    "oldest-ancestor-subtitle": "Nascut el {year}",
+    "recently-added-title": "Afegit recentment",
+    "recently-added-subtitle": "Afegit {relativeTime}",
+    "most-children-title": "Més fills",
+    "most-children-subtitle": "{count} fills",
+    "most-documented-title": "Més documentat",
+    "most-documented-subtitle": "{count, plural, one {# foto} other {# fotos}}"
+  },
   "trees": {
     "title": "Famílies",
     "tree-new": "Nova família",

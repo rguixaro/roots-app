@@ -79,10 +79,12 @@ model TreeNode {
   deathDate DateTime?
   gender    TreeNodeGender @default(UNSPECIFIED)
 
-  taggedIn PictureTag[] @relation("taggedIn")
+  birthPlace String?
+  biography  String?
 
-  edgesFrom TreeEdge[] @relation("FromNode")
-  edgesTo   TreeEdge[] @relation("ToNode")
+  taggedIn  PictureTag[] @relation("taggedIn")
+  edgesFrom TreeEdge[]   @relation("FromNode")
+  edgesTo   TreeEdge[]   @relation("ToNode")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

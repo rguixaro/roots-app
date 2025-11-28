@@ -22,7 +22,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  TypographyH4,
   TypographyH5,
 } from '@/ui'
 

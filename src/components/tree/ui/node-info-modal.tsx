@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { ArrowLeftRight, Edit, Eye, LoaderIcon, Trash2, X } from 'lucide-react'
+import { ArrowDownToLine, ArrowLeftRight, LoaderIcon, Plus, Tags, Trash2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -9,7 +9,14 @@ import { type z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
 import { UpdateTreeNodeSchema } from '@/server/schemas'
-import { createPicture, getPictures } from '@/server/actions'
+import {
+  createPicture,
+  createPictureTag,
+  deletePicture,
+  deletePictureTag,
+  getPictures,
+  getTreeNodes,
+} from '@/server/actions'
 
 import {
   Button,
@@ -71,6 +78,11 @@ export function NodeInfoModal({
   const [currentTab, setCurrentTab] = useState<'general' | 'gallery'>('general')
   const [loadingPictures, setLoadingPictures] = useState(false)
   const [profilePicture, setProfilePicture] = useState<Picture | null>(null)
+
+  const [showTagsModal, setShowTagsModal] = useState(false)
+  const [tappedImageId, setTappedImageId] = useState<string | null>(null)
+  const [selectedPicture, setSelectedPicture] = useState<Picture | null>(null)
+  const [availableNodes, setAvailableNodes] = useState<Array<{ id: string; fullName: string }>>([])
 
   const [modalHeight, setModalHeight] = useState(90)
   const [isDragging, setIsDragging] = useState(false)
@@ -242,9 +254,137 @@ export function NodeInfoModal({
     }
   }, [showModal, form])
 
-  const onPictureView = (picture: Picture) => {}
-  const onPictureEdit = (picture: Picture) => {}
-  const onPictureDelete = (picture: Picture) => {}
+  /**
+   * Effect to clear tapped image highlight after 1500ms
+   */
+  useEffect(() => {
+    if (tappedImageId) {
+      const timer = setTimeout(() => setTappedImageId(null), 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [tappedImageId])
+
+  /**
+   * Download picture
+   * @param fileKey {string} - The file key of the picture to download
+   */
+  const onPictureDownload = (fileKey: string) => {
+    try {
+      const element = document.createElement('a')
+      element.style.display = 'none'
+      element.href = `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${fileKey}`
+      element.download = fileKey.split('/').pop() || 'image.jpg'
+      element.target = '_blank'
+      document.body.appendChild(element)
+      element.click()
+      document.body.removeChild(element)
+    } catch (e) {
+      toast.error(t_errors('error'))
+    }
+  }
+
+  /**
+   * Edit picture tags
+   * @param picture {Picture} - The picture to edit tags for
+   */
+  const onPictureTags = async (picture: Picture) => {
+    setSelectedPicture(picture)
+    setShowTagsModal(true)
+
+    try {
+      const nodes = await getTreeNodes(node?.treeId!)
+      const taggedNodeIds = picture.tags?.map((tag) => tag.nodeId) || []
+      const available = nodes
+        .filter((node) => !taggedNodeIds.includes(node.id))
+        .map((n) => ({ id: n.id, fullName: n.fullName }))
+      setAvailableNodes(available)
+    } catch (error) {
+      toast.error(t_errors('error'))
+    }
+  }
+
+  /**
+   * Add tag to picture
+   * @param pictureId {string} - The picture to add tag to
+   * @param nodeId {string} - The node id of the tag to add
+   */
+  const onAddTag = async (pictureId: string, nodeId: string) => {
+    if (!selectedPicture) return
+
+    try {
+      const { error, message, tag } = await createPictureTag(pictureId, nodeId)
+      if (error || !tag) return toast.error(t_errors(message || 'error-tag-create'))
+
+      setSelectedPicture({
+        ...selectedPicture,
+        tags: [...(selectedPicture.tags || []), tag],
+      })
+
+      setPictures((prev) =>
+        prev.map((pic) =>
+          pic.id === pictureId ? { ...pic, tags: [...(pic.tags || []), tag] } : pic
+        )
+      )
+
+      setAvailableNodes((prev) => prev.filter((n) => n.id !== nodeId))
+
+      toast.success(t_toasts('node-picture-tag-added'))
+    } catch (error) {
+      toast.error(t_errors('error'))
+    }
+  }
+
+  /**
+   * Remove tag from picture
+   * @param pictureId {string} - The picture to remove tag from
+   * @param tagId {string} - The tag id of the tag to remove
+   */
+  const onRemoveTag = async (pictureId: string, tagId: string) => {
+    if (!selectedPicture) return
+
+    try {
+      const tagToRemove = selectedPicture.tags?.find((t) => t.id === tagId)
+      if (!tagToRemove) return
+
+      const { error, message } = await deletePictureTag(pictureId, tagToRemove.nodeId, node!.id)
+      if (error) return toast.error(t_errors(message || 'error-tag-remove'))
+
+      const updatedTags = selectedPicture.tags?.filter((t) => t.id !== tagId) || []
+      setSelectedPicture({ ...selectedPicture, tags: updatedTags })
+
+      setPictures((prev) =>
+        prev.map((pic) =>
+          pic.id === pictureId ? { ...pic, tags: pic.tags?.filter((t) => t.id !== tagId) } : pic
+        )
+      )
+
+      if (tagToRemove.node)
+        setAvailableNodes((prev) => [
+          ...prev,
+          { id: tagToRemove.nodeId, fullName: tagToRemove.node!.fullName },
+        ])
+
+      toast.success(t_toasts('node-picture-tag-removed'))
+    } catch (error) {
+      toast.error(t_errors('error'))
+    }
+  }
+
+  /**
+   * Deletes the picture and its tags
+   * @param picture {string} - The picture to delete
+   */
+  const onPictureDelete = async (pictureId: string) => {
+    try {
+      const { error, message } = await deletePicture(pictureId)
+      if (error) return toast.error(t_errors(message || 'error'))
+
+      setPictures((prev) => prev.filter((pic) => pic.id !== pictureId))
+      toast.success(t_toasts('node-picture-deleted'))
+    } catch (error) {
+      toast.error(t_errors('error'))
+    }
+  }
 
   /**
    * Handle file input change for picture upload
@@ -257,22 +397,7 @@ export function NodeInfoModal({
 
     setLoading(true)
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('treeId', node!.treeId)
-
-      const response = await fetch('/api/pictures/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) throw new Error('Upload failed')
-
-      const data = await response.json()
-      const result = await createPicture({
-        fileKey: data.fileKey,
-        nodeId: node!.id,
-      })
+      const result = await createPicture(node!.id, file)
 
       if (!result.error && result.picture) {
         setPictures([result.picture, ...pictures])
@@ -292,7 +417,7 @@ export function NodeInfoModal({
     <>
       <div
         className={cn(
-          'bg-ocean-100/50 fixed inset-0 z-30 backdrop-blur-xs transition-opacity duration-300',
+          'bg-ocean-500/50 fixed inset-0 z-30 backdrop-blur-xs transition-opacity duration-300',
           showModal ? 'opacity-100' : 'pointer-events-none opacity-0'
         )}
         onClick={onClose}
@@ -352,7 +477,7 @@ export function NodeInfoModal({
                   />
                 </div>
                 <div
-                  className="flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start"
+                  className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start"
                   style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
                 >
                   <div className="my-4 flex flex-col items-start gap-x-3 gap-y-2">
@@ -369,7 +494,7 @@ export function NodeInfoModal({
                             <div
                               className={cn(
                                 'absolute inset-0 m-1 flex items-center justify-center rounded-sm',
-                                'bg-ocean-300/50 opacity-100 backdrop-blur-[2px]',
+                                'bg-ocean-500/50 opacity-100 backdrop-blur-[2px]',
                                 'sm:backdrop-blur-0 sm:bg-transparent sm:opacity-0',
                                 'sm:hover:bg-ocean-300/50 sm:hover:opacity-100 sm:hover:backdrop-blur-[2px]',
                                 'cursor-pointer transition-all duration-300'
@@ -683,7 +808,15 @@ export function NodeInfoModal({
                           ) : (
                             <div className="columns-[124px] gap-2">
                               {pictures.map((picture, idx) => (
-                                <div key={picture.id} className="group relative">
+                                <div
+                                  key={picture.id}
+                                  className="group relative cursor-pointer"
+                                  onClick={() =>
+                                    setTappedImageId(
+                                      tappedImageId === picture.id ? null : picture.id
+                                    )
+                                  }
+                                >
                                   <img
                                     src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
                                     alt={`Picture ${idx + 1}`}
@@ -701,25 +834,46 @@ export function NodeInfoModal({
                                     }}
                                     className="shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg object-cover transition-opacity duration-300"
                                   />
-                                  <div className="pointer-events-none absolute inset-0 rounded-lg bg-black opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
-                                  <div className="pointer-events-none absolute inset-0 mb-2 flex items-end justify-center gap-2 rounded opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
+                                  <div
+                                    className={cn(
+                                      'pointer-events-none absolute inset-0 rounded-lg bg-black transition-opacity duration-300',
+                                      tappedImageId === picture.id ? 'opacity-20' : 'opacity-0'
+                                    )}
+                                  />
+                                  <div
+                                    className={cn(
+                                      'absolute inset-0 mb-2 flex items-end justify-center gap-2 rounded transition-opacity duration-300',
+                                      tappedImageId === picture.id
+                                        ? 'pointer-events-auto opacity-100'
+                                        : 'pointer-events-none opacity-0'
+                                    )}
+                                  >
                                     <button
                                       type="button"
-                                      onClick={() => onPictureView(picture)}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        onPictureDownload(picture.fileKey)
+                                      }}
                                       className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                                     >
-                                      <Eye size={18} />
+                                      <ArrowDownToLine size={18} />
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => onPictureEdit(picture)}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        onPictureTags(picture)
+                                      }}
                                       className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                                     >
-                                      <Edit size={18} />
+                                      <Tags size={18} />
                                     </button>
                                     <button
                                       type="button"
-                                      onClick={() => onPictureDelete(picture)}
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        onPictureDelete(picture.id)
+                                      }}
                                       className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                                     >
                                       <Trash2 size={18} />
@@ -826,21 +980,21 @@ export function NodeInfoModal({
                         <div className="pointer-events-none absolute inset-0 mb-2 flex items-end justify-center gap-2 rounded opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
                           <button
                             type="button"
-                            onClick={() => onPictureView(picture)}
+                            onClick={() => onPictureDownload(picture.fileKey)}
                             className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                           >
-                            <Eye size={18} />
+                            <ArrowDownToLine size={18} />
                           </button>
                           <button
                             type="button"
-                            onClick={() => onPictureEdit(picture)}
+                            onClick={() => onPictureTags(picture)}
                             className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                           >
-                            <Edit size={18} />
+                            <Tags size={18} />
                           </button>
                           <button
                             type="button"
-                            onClick={() => onPictureDelete(picture)}
+                            onClick={() => onPictureDelete(picture.id)}
                             className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
                           >
                             <Trash2 size={18} />
@@ -855,6 +1009,86 @@ export function NodeInfoModal({
           </div>
         )}
       </Tabs.Root>
+      {showTagsModal && selectedPicture && (
+        <>
+          <div
+            className="bg-ocean-500/50 fixed inset-0 z-60 backdrop-blur-xs"
+            onClick={() => setShowTagsModal(false)}
+          />
+          <div
+            className="fixed top-1/2 left-1/2 z-60 w-full max-w-5/6 -translate-x-1/2 -translate-y-1/2 transform sm:max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-pale-ocean text-ocean-400 shadow-center rounded-xl">
+              <div className="border-ocean-100 flex items-center justify-between border-b-4 px-6 py-4">
+                <TypographyH5>{t_trees('node-gallery-tags')}</TypographyH5>
+                <button
+                  onClick={() => setShowTagsModal(false)}
+                  className="hover:bg-ocean-200/15 rounded p-1 transition-colors"
+                >
+                  <X size={20} className="text-ocean-200" />
+                </button>
+              </div>
+
+              <div className="styled-scrollbar max-h-96 overflow-y-auto px-6 py-4">
+                {/* Currently Tagged */}
+                {selectedPicture.tags && selectedPicture.tags.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-ocean-300 mb-2 text-sm font-bold">
+                      {t_trees('node-gallery-tags-currently')}
+                    </p>
+                    <div className="text-ocean-200 space-y-2">
+                      {selectedPicture.tags.map((tag) => (
+                        <div
+                          key={tag.id}
+                          className="border-ocean-100 bg-ocean-50 flex items-center justify-between rounded-lg border-2 px-3 py-2"
+                        >
+                          <span className="text-sm font-medium">{tag.node?.fullName}</span>
+                          <button
+                            onClick={() => onRemoveTag(selectedPicture.id, tag.id)}
+                            className="hover:bg-ocean-200/15 rounded transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Available to Tag */}
+                {availableNodes.length > 0 && (
+                  <div>
+                    <p className="text-ocean-300 mb-2 text-sm font-bold">
+                      {t_trees('node-gallery-tags-add')}
+                    </p>
+                    <div className="text-ocean-200 space-y-2">
+                      {availableNodes.map((node) => (
+                        <button
+                          key={node.id}
+                          onClick={() => onAddTag(selectedPicture.id, node.id)}
+                          className="border-ocean-100 hover:bg-ocean-50 bg-pale-ocean flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors"
+                        >
+                          <span className="text-sm">{node.fullName}</span>
+                          <Plus size={18} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* No tags message - only show if both are empty */}
+                {(!selectedPicture.tags || selectedPicture.tags.length === 0) &&
+                  availableNodes.length === 0 && (
+                    <p className="text-ocean-300/70 py-8 text-center text-sm">
+                      {t_trees('node-gallery-tags-add-none')}
+                    </p>
+                  )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   )
 }

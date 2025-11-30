@@ -220,7 +220,7 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                 />
               </div>
               <div
-                className="w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start"
+                className="styled-scrollbar w-full flex-1 overflow-y-auto px-6 pt-2 pb-6 text-start"
                 style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
               >
                 <div className="mb-6 flex items-start justify-between">

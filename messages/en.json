@@ -18,7 +18,9 @@
     "deleting": "Deleting...",
     "search": "Search",
     "searching": "Searching...",
-    "share": "Share"
+    "share": "Share",
+    "close": "Close",
+    "download": "Download"
   },
   "toasts": {
     "tree-created": "Family created successfully.",
@@ -39,7 +41,12 @@
     "node-delete-confirm-description": "This will also delete all their relationships. This action cannot be undone.",
     "node-picture-uploaded": "Image uploaded successfully.",
     "node-picture-tag-added": "Tag added successfully.",
-    "node-picture-tag-removed": "Tag removed successfully."
+    "node-picture-tag-removed": "Tag removed successfully.",
+    "node-picture-manage-tags": "Manage Tags",
+    "node-picture-set-profile": "Set as Profile Picture",
+    "node-picture-profile-set": "Profile picture set successfully.",
+    "node-picture-delete-confirm": "Delete image?",
+    "node-picture-delete-confirm-description": "Are you sure you want to delete this image from the gallery? This action cannot be undone."
   },
   "errors": {
     "error": "An error occurred.",

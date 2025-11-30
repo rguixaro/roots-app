@@ -18,7 +18,9 @@
     "deleting": "Eliminando...",
     "search": "Buscar",
     "searching": "Buscando...",
-    "share": "Compartir"
+    "share": "Compartir",
+    "close": "Cerrar",
+    "download": "Descargar"
   },
   "toasts": {
     "tree-created": "Familia creada con éxito.",
@@ -39,7 +41,12 @@
     "node-delete-confirm-description": "Esto también eliminará todas sus relaciones. Esta acción no se puede deshacer.",
     "node-picture-uploaded": "Imagen subida con éxito.",
     "node-picture-tag-added": "Etiqueta añadida con éxito.",
-    "node-picture-tag-removed": "Etiqueta eliminada con éxito."
+    "node-picture-tag-removed": "Etiqueta eliminada con éxito.",
+    "node-picture-manage-tags": "Gestionar etiquetas",
+    "node-picture-set-profile": "Establecer como imagen de perfil",
+    "node-picture-profile-set": "Imagen de perfil establecida con éxito.",
+    "node-picture-delete-confirm": "¿Eliminar imagen?",
+    "node-picture-delete-confirm-description": "¿Estás seguro de que quieres eliminar esta imagen de la galería? Esta acción no se puede deshacer."
   },
   "errors": {
     "error": "Se ha producido un error.",

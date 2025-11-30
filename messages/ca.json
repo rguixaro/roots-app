@@ -18,7 +18,9 @@
     "deleting": "Eliminant...",
     "search": "Cerca",
     "searching": "Buscant...",
-    "share": "Compartir"
+    "share": "Compartir",
+    "close": "Tancar",
+    "download": "Descarregar"
   },
   "toasts": {
     "tree-created": "Família creada amb èxit.",
@@ -39,7 +41,12 @@
     "node-delete-confirm-description": "Això també eliminarà totes les seves relacions. Aquesta acció no es pot desfer.",
     "node-picture-uploaded": "Imatge pujada amb èxit.",
     "node-picture-tag-added": "Etiqueta afegida amb èxit.",
-    "node-picture-tag-removed": "Etiqueta eliminada amb èxit."
+    "node-picture-tag-removed": "Etiqueta eliminada amb èxit.",
+    "node-picture-manage-tags": "Gestionar etiquetes",
+    "node-picture-set-profile": "Establir com a imatge de perfil",
+    "node-picture-profile-set": "Imatge de perfil establerta amb èxit.",
+    "node-picture-delete-confirm": "Eliminar imatge?",
+    "node-picture-delete-confirm-description": "Estàs segur que vols eliminar aquesta imatge de la galeria? Aquesta acció no es pot desfer."
   },
   "errors": {
     "error": "S'ha produït un error.",

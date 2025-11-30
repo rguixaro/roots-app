@@ -2,13 +2,13 @@
 
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import type { z } from 'zod'
 
 import { db } from '@/server/db'
-import type { CreatePictureSchema } from '@/server/schemas'
 import { assertRole, assertAuthenticated } from '@/server/utils'
 
-import { Picture } from '@/types'
+import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
+
+import { Picture, PictureTag } from '@/types'
 
 /**
  * Get all pictures for a specific node
@@ -21,7 +21,11 @@ export const getPictures = async (nodeId: string) => {
 
     const pictures = await db.pictureTag.findMany({
       where: { nodeId },
-      include: { picture: true },
+      include: {
+        picture: {
+          include: { tags: { include: { node: { select: { id: true, fullName: true } } } } },
+        },
+      },
       orderBy: { picture: { createdAt: 'desc' } },
     })
     return pictures.map((tag) => tag.picture)
@@ -33,26 +37,32 @@ export const getPictures = async (nodeId: string) => {
 /**
  * Create a new picture and tag it to a node.
  * Auth required.
- * @param values {z.infer<typeof CreatePictureSchema>}
+ * @param nodeId Node id to tag
+ * @param file File to upload
  * @returns Promise<{ error: boolean; picture?: Picture; message?: string }>
  */
 export const createPicture = async (
-  values: z.infer<typeof CreatePictureSchema>
+  nodeId: string,
+  file: File
 ): Promise<{ error: boolean; picture?: Picture; message?: string }> => {
+  let fileKey: string | null = null
+
   try {
     const userId = await assertAuthenticated()
 
-    const node = await db.treeNode.findUnique({ where: { id: values.nodeId } })
+    const node = await db.treeNode.findUnique({ where: { id: nodeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
 
     await assertRole(node.treeId, userId)
 
+    fileKey = await uploadFileToS3(file, node.treeId)
+
     const picture = await db.picture.create({
-      data: { treeId: node.treeId, fileKey: values.fileKey, uploadedBy: userId },
+      data: { treeId: node.treeId, fileKey, uploadedBy: userId },
     })
 
     const newTag = await db.pictureTag.create({
-      data: { pictureId: picture.id, nodeId: values.nodeId, isProfile: false },
+      data: { pictureId: picture.id, nodeId: nodeId, isProfile: false },
     })
 
     await db.activityLog.create({
@@ -61,7 +71,7 @@ export const createPicture = async (
         createdBy: userId,
         action: 'PICTURE_ADDED',
         entityId: picture.id,
-        metadata: { fileKey: values.fileKey },
+        metadata: { fileKey },
       },
     })
 
@@ -71,7 +81,7 @@ export const createPicture = async (
         createdBy: userId,
         action: 'PICTURE_TAG_CREATED',
         entityId: newTag.id,
-        metadata: { pictureId: picture.id, nodeId: values.nodeId, nodeName: node.fullName },
+        metadata: { pictureId: picture.id, nodeId: nodeId, nodeName: node.fullName },
       },
     })
 
@@ -79,6 +89,11 @@ export const createPicture = async (
 
     return { error: false, picture }
   } catch (e) {
+    if (fileKey) {
+      try {
+        await deleteFileFromS3(fileKey)
+      } catch (_) {}
+    }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -105,6 +120,10 @@ export const deletePicture = async (
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+
+    try {
+      await deleteFileFromS3(picture.fileKey)
+    } catch (error) {}
 
     await db.picture.delete({ where: { id: pictureId } })
 
@@ -138,12 +157,12 @@ export const deletePicture = async (
  * Auth required.
  * @param pictureId Picture id
  * @param nodeId Node id to tag
- * @returns Promise<{ error: boolean; message?: string }>
+ * @returns Promise<{ error: boolean; message?: string, tag?: PictureTag }>
  */
 export const createPictureTag = async (
   pictureId: string,
   nodeId: string
-): Promise<{ error: boolean; message?: string }> => {
+): Promise<{ error: boolean; message?: string; tag?: PictureTag }> => {
   try {
     const userId = await assertAuthenticated()
 
@@ -163,7 +182,10 @@ export const createPictureTag = async (
     })
     if (existingTag) return { error: true, message: 'error-tag-already-exists' }
 
-    const newTag = await db.pictureTag.create({ data: { pictureId, nodeId, isProfile: false } })
+    const newTag = await db.pictureTag.create({
+      data: { pictureId, nodeId, isProfile: false },
+      include: { node: { select: { id: true, fullName: true } } },
+    })
 
     await db.activityLog.create({
       data: {
@@ -177,7 +199,7 @@ export const createPictureTag = async (
 
     revalidatePath(`/trees/${picture.treeId}`)
 
-    return { error: false }
+    return { error: false, tag: newTag }
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tag-already-exists' }
@@ -192,19 +214,32 @@ export const createPictureTag = async (
  * Auth required.
  * @param pictureId Picture id
  * @param nodeId Node tag to remove
+ * @param currentNodeId The node whose gallery we're viewing (optional, for extra validation)
  * @returns Promise<{ error: boolean; message?: string }>
  */
 export const deletePictureTag = async (
   pictureId: string,
-  nodeId: string
+  nodeId: string,
+  currentNodeId?: string
 ): Promise<{ error: boolean; message?: string }> => {
   try {
     const userId = await assertAuthenticated()
 
-    const picture = await db.picture.findUnique({ where: { id: pictureId } })
+    const picture = await db.picture.findUnique({
+      where: { id: pictureId },
+      include: { tags: true },
+    })
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+
+    if (picture.tags.length <= 1) return { error: true, message: 'error-picture-at-least-one-tag' }
+
+    if (currentNodeId && nodeId === currentNodeId) {
+      const otherNodeTags = picture.tags.filter((t) => t.nodeId !== currentNodeId)
+      if (otherNodeTags.length === 0)
+        return { error: true, message: 'error-picture-at-least-one-tag' }
+    }
 
     const node = await db.treeNode.findUnique({ where: { id: nodeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
@@ -263,6 +298,11 @@ export const setProfilePicture = async (
       where: { pictureId_nodeId: { pictureId, nodeId } },
     })
     if (!tag) return { error: true, message: 'error-tag-not-found' }
+
+    await db.pictureTag.updateMany({
+      where: { nodeId: nodeId, isProfile: true, id: { not: tag.id } },
+      data: { isProfile: false },
+    })
 
     await db.pictureTag.update({
       where: { id: tag.id },

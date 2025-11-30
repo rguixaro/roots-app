@@ -128,9 +128,3 @@ export const CreateTreeEdgeSchema = z.object({
 })
 
 export type CreateTreeEdgeInput = z.TypeOf<typeof CreateTreeEdgeSchema>
-
-export const CreatePictureSchema = z.object({
-  fileKey: z.string(),
-  nodeId: z.string(),
-})
-export type CreatePictureInput = z.TypeOf<typeof CreatePictureSchema>

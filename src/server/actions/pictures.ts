@@ -279,7 +279,7 @@ export const deletePictureTag = async (
  * @param nodeId Node id
  * @returns Promise<{ error: boolean; message?: string }>
  */
-export const setProfilePicture = async (
+export const setProfilePictureTag = async (
   pictureId: string,
   nodeId: string
 ): Promise<{ error: boolean; message?: string }> => {
@@ -310,45 +310,6 @@ export const setProfilePicture = async (
     })
 
     revalidatePath(`/trees/${picture.treeId}`)
-
-    return { error: false }
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
-    }
-    return { error: true, message: 'error' }
-  }
-}
-
-/**
- * Remove the profile picture for a node.
- * Auth required.
- * @param nodeId Node id
- * @returns Promise<{ error: boolean; message?: string }>
- */
-export const unsetProfilePicture = async (
-  nodeId: string
-): Promise<{ error: boolean; message?: string }> => {
-  try {
-    const userId = await assertAuthenticated()
-
-    const node = await db.treeNode.findUnique({ where: { id: nodeId } })
-    if (!node) return { error: true, message: 'error-node-not-found' }
-
-    await assertRole(node.treeId, userId)
-
-    const profileTag = await db.pictureTag.findFirst({
-      where: { nodeId, isProfile: true },
-      include: { picture: true },
-    })
-    if (!profileTag) return { error: true, message: 'error-tag-not-found' }
-
-    await db.pictureTag.update({
-      where: { id: profileTag.id },
-      data: { isProfile: false },
-    })
-
-    revalidatePath(`/trees/${node.treeId}`)
 
     return { error: false }
   } catch (e) {

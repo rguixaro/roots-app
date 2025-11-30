@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { ArrowDownToLine, ArrowLeftRight, LoaderIcon, Plus, Tags, Trash2, X } from 'lucide-react'
+import { Image, LoaderIcon, Menu, Plus, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -16,10 +16,13 @@ import {
   deletePictureTag,
   getPictures,
   getTreeNodes,
+  setProfilePictureTag,
 } from '@/server/actions'
 
+import { PictureContextMenu } from '@/components/tree/ui'
 import {
   Button,
+  ConfirmDialog,
   Form,
   FormControl,
   FormDescription,
@@ -78,6 +81,10 @@ export function NodeInfoModal({
   const [currentTab, setCurrentTab] = useState<'general' | 'gallery'>('general')
   const [loadingPictures, setLoadingPictures] = useState(false)
   const [profilePicture, setProfilePicture] = useState<Picture | null>(null)
+  const [errorProfilePicture, setErrorProfilePicture] = useState(false)
+  const [errorGalleryPicture, setErrorGalleryPicture] = useState<{ [key: string]: boolean }>({})
+
+  const [pictureDeleteDialogOpen, setPictureDeleteDialogOpen] = useState(false)
 
   const [showTagsModal, setShowTagsModal] = useState(false)
   const [tappedImageId, setTappedImageId] = useState<string | null>(null)
@@ -98,6 +105,27 @@ export function NodeInfoModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [pictureMenu, setPictureMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    picture: null as any | null,
+  })
+
+  function openPictureMenu(e: React.MouseEvent, picture: any) {
+    e.preventDefault()
+    setPictureMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      picture,
+    })
+  }
+
+  function closePictureMenu() {
+    setPictureMenu((prev) => ({ ...prev, visible: false }))
+  }
+
   /**
    * Handle form submission
    */
@@ -106,10 +134,6 @@ export function NodeInfoModal({
     await onUpdate(values)
     setLoading(false)
   })
-
-  const selectPicture = async (): Promise<string | null> => {
-    return null
-  }
 
   /**
    * Fetch pictures when node changes and modal opens with gallery
@@ -387,6 +411,23 @@ export function NodeInfoModal({
   }
 
   /**
+   * Sets the picture as profile picture for the node
+   * @param pictureId {string} - The picture to set as profile
+   */
+  const onPictureProfile = async (pictureId: string) => {
+    try {
+      const { error, message } = await setProfilePictureTag(pictureId, node!.id)
+      if (error) return toast.error(t_errors(message || 'error'))
+
+      const newProfilePicture = pictures.find((pic) => pic.id === pictureId) || null
+      setProfilePicture(newProfilePicture)
+      toast.success(t_toasts('node-picture-profile-set'))
+    } catch (error) {
+      toast.error(t_errors('error'))
+    }
+  }
+
+  /**
    * Handle file input change for picture upload
    * @param e {React.ChangeEvent<HTMLInputElement>}
    * @returns Promise<void>
@@ -477,39 +518,32 @@ export function NodeInfoModal({
                   />
                 </div>
                 <div
-                  className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start"
+                  className={cn(
+                    'styled-scrollbar flex w-full flex-1 flex-col',
+                    'overflow-y-auto px-6 pt-2 pb-6 text-start'
+                  )}
                   style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
                 >
                   <div className="my-4 flex flex-col items-start gap-x-3 gap-y-2">
                     <div className="flex w-full items-center space-x-3">
-                      {withPicture && profilePicture && (
-                        <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-                          {profilePicture && (
+                      {withPicture && (
+                        <div
+                          className={cn(
+                            'shadow-center relative flex h-24 w-24 shrink-0 items-center justify-center',
+                            'bg-ocean-50 border-ocean-300 text-ocean-300 rounded-lg border-4'
+                          )}
+                        >
+                          {profilePicture && !errorProfilePicture && (
                             <img
-                              className="bg-ocean-100 border-ocean-300 h-full w-full rounded-lg border-4 object-cover shadow"
-                              src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture?.fileKey}`}
+                              className="h-full w-full rounded-lg object-cover"
+                              src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture?.fileKey!}`}
+                              alt="Profile picture"
+                              onError={(_) => setErrorProfilePicture(true)}
                             />
                           )}
-                          {editMode && (
-                            <div
-                              className={cn(
-                                'absolute inset-0 m-1 flex items-center justify-center rounded-sm',
-                                'bg-ocean-500/50 opacity-100 backdrop-blur-[2px]',
-                                'sm:backdrop-blur-0 sm:bg-transparent sm:opacity-0',
-                                'sm:hover:bg-ocean-300/50 sm:hover:opacity-100 sm:hover:backdrop-blur-[2px]',
-                                'cursor-pointer transition-all duration-300'
-                              )}
-                              onClick={async () => {
-                                const newUrl = await selectPicture()
-                                if (newUrl) {
-                                  /* form.setValue('photoUrl', newUrl) */
-                                }
-                              }}
-                            >
-                              <ArrowLeftRight
-                                size={22}
-                                className="text-pale-ocean drop-shadow-md"
-                              />
+                          {(errorProfilePicture || !profilePicture) && (
+                            <div className="flex h-full w-full items-center justify-center rounded-lg">
+                              <Image size={48} />
                             </div>
                           )}
                         </div>
@@ -558,7 +592,6 @@ export function NodeInfoModal({
                                 <Input
                                   {...field}
                                   autoComplete="off"
-                                  className="w-fit"
                                   placeholder={t_trees('node-fullname')}
                                   disabled={!editMode || loading}
                                 />
@@ -810,39 +843,42 @@ export function NodeInfoModal({
                               {pictures.map((picture, idx) => (
                                 <div
                                   key={picture.id}
-                                  className="group relative cursor-pointer"
+                                  className={cn(
+                                    'group shadow-center relative mb-2 shrink-0 cursor-pointer break-inside-avoid',
+                                    'bg-ocean-300 text-ocean-200 rounded-lg'
+                                  )}
                                   onClick={() =>
                                     setTappedImageId(
                                       tappedImageId === picture.id ? null : picture.id
                                     )
                                   }
                                 >
-                                  <img
-                                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
-                                    alt={`Picture ${idx + 1}`}
-                                    onError={(e) => {
-                                      const target = e.currentTarget
-                                      target.style.display = 'none'
-                                      const parent = target.parentElement
-                                      if (parent && !parent.querySelector('.fallback-icon')) {
-                                        const fallback = document.createElement('div')
-                                        fallback.className =
-                                          'fallback-icon shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg flex items-center justify-center'
-                                        fallback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="62" height="124" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-ocean-400/50"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`
-                                        parent.appendChild(fallback)
+                                  {!errorGalleryPicture[picture.id] ? (
+                                    <img
+                                      className="min-h-[124px] w-full rounded-lg object-cover"
+                                      src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                                      alt={`Picture ${idx + 1}`}
+                                      onError={(_) =>
+                                        setErrorGalleryPicture((prev) => ({
+                                          ...prev,
+                                          [picture.id]: true,
+                                        }))
                                       }
-                                    }}
-                                    className="shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg object-cover transition-opacity duration-300"
-                                  />
+                                    />
+                                  ) : (
+                                    <div className="flex min-h-[124px] items-center justify-center rounded-lg">
+                                      <Image size={48} />
+                                    </div>
+                                  )}
                                   <div
                                     className={cn(
-                                      'pointer-events-none absolute inset-0 rounded-lg bg-black transition-opacity duration-300',
+                                      'bg-ocean-500 pointer-events-none absolute inset-0 rounded-lg transition-opacity duration-300',
                                       tappedImageId === picture.id ? 'opacity-20' : 'opacity-0'
                                     )}
                                   />
                                   <div
                                     className={cn(
-                                      'absolute inset-0 mb-2 flex items-end justify-center gap-2 rounded transition-opacity duration-300',
+                                      'absolute top-0 right-0 mt-2 mr-2 flex items-end justify-center gap-2 rounded transition-opacity duration-300',
                                       tappedImageId === picture.id
                                         ? 'pointer-events-auto opacity-100'
                                         : 'pointer-events-none opacity-0'
@@ -850,33 +886,10 @@ export function NodeInfoModal({
                                   >
                                     <button
                                       type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        onPictureDownload(picture.fileKey)
-                                      }}
-                                      className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
+                                      onClick={(e) => openPictureMenu(e, picture)}
+                                      className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
                                     >
-                                      <ArrowDownToLine size={18} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        onPictureTags(picture)
-                                      }}
-                                      className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
-                                    >
-                                      <Tags size={18} />
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        onPictureDelete(picture.id)
-                                      }}
-                                      className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
-                                    >
-                                      <Trash2 size={18} />
+                                      <Menu size={18} />
                                     </button>
                                   </div>
                                 </div>
@@ -958,46 +971,43 @@ export function NodeInfoModal({
                 ) : (
                   <div className="columns-[124px] gap-2 sm:columns-[124px] xl:columns-3xs">
                     {pictures.map((picture, idx) => (
-                      <div key={picture.id} className="group relative">
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
-                          alt={`Picture ${idx + 1}`}
-                          onError={(e) => {
-                            const target = e.currentTarget
-                            target.style.display = 'none'
-                            const parent = target.parentElement
-                            if (parent && !parent.querySelector('.fallback-icon')) {
-                              const fallback = document.createElement('div')
-                              fallback.className =
-                                'fallback-icon shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg flex items-center justify-center'
-                              fallback.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="62" height="124" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-ocean-400/50"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`
-                              parent.appendChild(fallback)
+                      <div
+                        key={picture.id}
+                        className={cn(
+                          'group shadow-center relative mb-2 shrink-0 cursor-pointer break-inside-avoid',
+                          'bg-ocean-300 text-ocean-200 rounded-lg'
+                        )}
+                      >
+                        {!errorGalleryPicture[picture.id] ? (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                            alt={`Picture ${idx + 1}`}
+                            onError={(_) =>
+                              setErrorGalleryPicture((prev) => ({
+                                ...prev,
+                                [picture.id]: true,
+                              }))
                             }
-                          }}
-                          className="shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg object-cover transition-opacity duration-300"
-                        />
-                        <div className="pointer-events-none absolute inset-0 rounded-lg bg-black opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
-                        <div className="pointer-events-none absolute inset-0 mb-2 flex items-end justify-center gap-2 rounded opacity-0 transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
+                            className="shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full rounded-lg object-cover transition-opacity duration-300"
+                          />
+                        ) : (
+                          <div className="flex min-h-[124px] items-center justify-center rounded-lg">
+                            <Image size={48} />
+                          </div>
+                        )}
+                        <div className="bg-ocean-500 pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
+                        <div
+                          className={cn(
+                            'pointer-events-none absolute top-0 right-0 mt-2 mr-2 flex items-end justify-center gap-2 rounded opacity-0',
+                            'transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100'
+                          )}
+                        >
                           <button
                             type="button"
-                            onClick={() => onPictureDownload(picture.fileKey)}
-                            className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
+                            onClick={(e) => openPictureMenu(e, picture)}
+                            className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
                           >
-                            <ArrowDownToLine size={18} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onPictureTags(picture)}
-                            className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
-                          >
-                            <Tags size={18} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onPictureDelete(picture.id)}
-                            className="bg-pale-ocean hover:bg-ocean-200 text-ocean-400 hover:text-pale-ocean cursor-pointer rounded-lg p-2 shadow-lg transition-all duration-200 hover:shadow-xl"
-                          >
-                            <Trash2 size={18} />
+                            <Menu size={18} />
                           </button>
                         </div>
                       </div>
@@ -1009,6 +1019,28 @@ export function NodeInfoModal({
           </div>
         )}
       </Tabs.Root>
+      <PictureContextMenu
+        visible={pictureMenu.visible}
+        x={pictureMenu.x}
+        y={pictureMenu.y}
+        picture={pictureMenu.picture}
+        onDownload={onPictureDownload}
+        onTags={onPictureTags}
+        onDelete={() => setPictureDeleteDialogOpen(true)}
+        onSetProfile={onPictureProfile}
+        profilePictureId={profilePicture?.id}
+        onClose={closePictureMenu}
+      />
+      <ConfirmDialog
+        open={pictureDeleteDialogOpen}
+        title={t_toasts('node-picture-delete-confirm')}
+        description={t_toasts('node-picture-delete-confirm-description')}
+        onCancel={() => setPictureDeleteDialogOpen(false)}
+        onConfirm={() => {
+          if (pictureMenu.picture) onPictureDelete(pictureMenu.picture.id)
+          setPictureDeleteDialogOpen(false)
+        }}
+      />
       {showTagsModal && selectedPicture && (
         <>
           <div
@@ -1031,7 +1063,6 @@ export function NodeInfoModal({
               </div>
 
               <div className="styled-scrollbar max-h-96 overflow-y-auto px-6 py-4">
-                {/* Currently Tagged */}
                 {selectedPicture.tags && selectedPicture.tags.length > 0 && (
                   <div className="mb-4">
                     <p className="text-ocean-300 mb-2 text-sm font-bold">
@@ -1055,8 +1086,6 @@ export function NodeInfoModal({
                     </div>
                   </div>
                 )}
-
-                {/* Available to Tag */}
                 {availableNodes.length > 0 && (
                   <div>
                     <p className="text-ocean-300 mb-2 text-sm font-bold">
@@ -1076,8 +1105,6 @@ export function NodeInfoModal({
                     </div>
                   </div>
                 )}
-
-                {/* No tags message - only show if both are empty */}
                 {(!selectedPicture.tags || selectedPicture.tags.length === 0) &&
                   availableNodes.length === 0 && (
                     <p className="text-ocean-300/70 py-8 text-center text-sm">

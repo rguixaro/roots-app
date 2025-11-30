@@ -34,16 +34,6 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   }>({ visible: false, x: 0, y: 0, edgeId: null })
 
   /**
-   * Node context menu state
-   */
-  const [nodeContextMenu, setNodeContextMenu] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    nodeId: string | null
-  }>({ visible: false, x: 0, y: 0, nodeId: null })
-
-  /**
    * Confirmation dialog state
    */
   const [confirmDelete, setConfirmDelete] = useState<{
@@ -173,31 +163,11 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   }, [])
 
   /**
-   * Handle node context menu event (right-click)
-   * @param event React mouse event
-   * @param node Node that was right-clicked
-   * @return void
-   */
-  const onNodeContextMenu = useCallback((event: React.MouseEvent, node: any) => {
-    event.preventDefault()
-    setNodeContextMenu({ visible: true, x: event.clientX, y: event.clientY, nodeId: node.id })
-  }, [])
-
-  /**
    * Close the edge context menu
    * @return void
    */
   const closeEdgeContextMenu = useCallback(
     () => setEdgeContextMenu({ visible: false, x: 0, y: 0, edgeId: null }),
-    []
-  )
-
-  /**
-   * Close the node context menu
-   * @return void
-   */
-  const closeNodeContextMenu = useCallback(
-    () => setNodeContextMenu({ visible: false, x: 0, y: 0, nodeId: null }),
     []
   )
 
@@ -224,13 +194,10 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
     setLoading,
     loading,
 
-    nodeContextMenu,
     edgeContextMenu,
 
-    onNodeContextMenu,
     onEdgeContextMenu,
 
-    closeNodeContextMenu,
     closeEdgeContextMenu,
 
     setTreeNodes,

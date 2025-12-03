@@ -5,9 +5,8 @@ import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
 
 import { TreeNode, TreeEdge, Tree } from '@/types'
 
-import { createTreeLayout, computedLayout, positionCoupleNodes } from '../layout'
-
-import { StyledNode, VoidNode } from '../nodes'
+import { createTreeLayout, computedLayout, positionCoupleNodes } from '@/components/tree/layout'
+import { StyledNode, VoidNode } from '@/components/tree/nodes'
 
 export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   /**

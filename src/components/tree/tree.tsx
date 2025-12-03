@@ -10,7 +10,11 @@ import {
   useEdgeOperations,
   useNodeOperations,
   useNodeUpdateForm,
-} from './hooks'
+} from '@/hooks'
+
+import { TreeOverlay, NodeInfoModal, NodeCreateModal } from '@/components/tree/modal'
+import { EdgeContextMenu } from '@/components/tree/context'
+import { StyledEdge } from '@/components/tree/edges'
 
 import {
   Dialog,
@@ -22,13 +26,9 @@ import {
   Button,
 } from '@/ui'
 
-import { TreeOverlay, NodeInfoModal, NodeCreateModal, EdgeContextMenu } from './ui'
-
 import { Tree, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
-
-import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
   readonly: boolean

@@ -43,7 +43,7 @@ export default async function TreePage({ params }: { params: Promise<{ slug: str
           <TypographyH4>{t_errors('error-tree-not-found')}</TypographyH4>
         </div>
       ) : (
-        <div className="bg-ocean-200/15 border-ocean-100 h-full w-full border-12 shadow-inner">
+        <div className="bg-ocean-200/15 border-ocean-400 h-full w-full border-12 shadow-inner">
           <TreeWrapper readonly={readonly} tree={tree} nodes={nodes} edges={edges} />
         </div>
       )}

@@ -16,7 +16,7 @@ export const TreesFeed = async () => {
     <div className="flex h-full w-full flex-col">
       <p className="mt-2 mb-4">{t_common('trees-description')} </p>
       <div className="no-scrollbar flex w-full justify-start overflow-x-auto">
-        <div className="flex w-max flex-row gap-2">
+        <div className="flex w-max flex-row gap-1 p-2">
           {treesWithAdd.map((item, i) => (
             <ItemTree key={i} tree={item} index={i} />
           ))}

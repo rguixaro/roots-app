@@ -22,7 +22,7 @@ type IconProps = {
 }
 
 const defaultIconsByTreeType: Record<string, keyof typeof icons> = {
-  human: 'PersonStanding',
+  human: 'UsersRound',
   animal: 'Cat',
 }
 

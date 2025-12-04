@@ -21,6 +21,10 @@
     box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.08);
   }
 
+  .shadow-center-sm {
+    box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.04);
+  }
+
   .shadow-center-lg {
     box-shadow: 0 0 20px 4px rgba(0, 0, 0, 0.1);
   }

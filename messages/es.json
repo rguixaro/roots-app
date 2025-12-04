@@ -51,6 +51,7 @@
   "errors": {
     "error": "Se ha producido un error.",
     "tree-name-too-short": "El nombre de la familia es demasiado corto.",
+    "tree-name-too-long": "El nombre de la familia es demasiado largo.",
     "tree-type-required": "Es necesario seleccionar una tipo de familia.",
     "tree-option-required": "Se debe seleccionar una opción.",
     "error-tree-exists": "Ya existe una familia con este nombre.",

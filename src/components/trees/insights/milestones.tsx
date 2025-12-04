@@ -25,7 +25,7 @@ export async function Milestones() {
     <div>
       <TypographyH5>{t_insights('milestones')}</TypographyH5>
       <p className="mt-2 mb-4">{t_insights('milestones-description')} </p>
-      <div className="text-pale-ocean border-ocean-100 bg-ocean-100 shadow-center flex h-full w-full flex-col rounded-lg border-4">
+      <div className="text-ocean-400 bg-pale-ocean shadow-center-sm flex h-full w-full flex-col rounded-lg">
         {hasAnniversaries && (
           <div className="p-4">
             <span className="flex items-center gap-2 font-bold">
@@ -45,7 +45,10 @@ export async function Milestones() {
                   <div className="flex gap-2 text-xs font-medium opacity-70">
                     <span>{item.date}</span>
                     {' · '}
-                    <Link href={`/trees/${item.treeSlug}`} className="hover:underline">
+                    <Link
+                      href={`/trees/${item.treeSlug}`}
+                      className="hover:text-ocean-500 hover:underline"
+                    >
                       {item.treeName}
                     </Link>
                   </div>
@@ -56,7 +59,7 @@ export async function Milestones() {
         )}
         {hasAnniversaries && hasBirthdays && (
           <div className="mx-auto w-5/6 items-center justify-center">
-            <div className="bg-pale-ocean h-0.5 rounded opacity-70 shadow-lg" />
+            <div className="bg-pale-ocean shadow-center-sm h-0.5 rounded opacity-70" />
           </div>
         )}
         {hasBirthdays && (
@@ -78,7 +81,10 @@ export async function Milestones() {
                   <div className="flex gap-2 text-xs font-medium opacity-70">
                     <span>{item.date}</span>
                     {' · '}
-                    <Link href={`/trees/${item.treeSlug}`} className="hover:underline">
+                    <Link
+                      href={`/trees/${item.treeSlug}`}
+                      className="hover:text-ocean-500 hover:underline"
+                    >
                       {item.treeName}
                     </Link>
                   </div>

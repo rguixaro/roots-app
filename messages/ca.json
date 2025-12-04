@@ -51,6 +51,7 @@
   "errors": {
     "error": "S'ha produït un error.",
     "tree-name-too-short": "El nom de la família és massa curt.",
+    "tree-name-too-long": "El nom de la família és massa llarg.",
     "tree-type-required": "Cal seleccionar una tipus de familia.",
     "tree-option-required": "Cal seleccionar una opció.",
     "error-tree-exists": "Ja existeix una família amb aquest nom.",

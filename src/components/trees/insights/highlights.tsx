@@ -1,6 +1,4 @@
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { motion, Variants } from 'framer-motion'
 
 import { getHighlights } from '@/server/actions'
 

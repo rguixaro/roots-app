@@ -141,7 +141,7 @@ function IconLink({
 export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeOverlayProps) {
   const t = useTranslations('trees')
 
-  const iconClassName = 'text-ocean-100 group-hover:text-pale-ocean transition-colors duration-300'
+  const iconClassName = 'text-ocean-50 group-hover:text-pale-ocean transition-colors duration-300'
 
   const downloadRef = useRef<HTMLDivElement>(null)
   const { copy } = useCopyToClipboard()
@@ -201,7 +201,7 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
           'max-w-[70vw] sm:max-w-none'
         )}
       >
-        <span className="text-ocean-100 text-lg font-extrabold md:text-xl">{tree.name}</span>
+        <span className="text-ocean-50 text-lg font-extrabold md:text-xl">{tree.name}</span>
         <div className="bg-ocean-300 hidden h-4 w-0.5 sm:block" />
         <IconButton onClick={onCreateNode} className="hidden sm:block">
           <Plus size={20} className={iconClassName} />

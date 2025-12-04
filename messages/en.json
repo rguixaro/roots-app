@@ -239,6 +239,11 @@
     "other": "Other",
     "unspecified": "Unspecified",
     "true": "Enabled",
-    "false": "Disabled"
+    "false": "Disabled",
+    "metadata": "Metadata",
+    "tagged": "Tagged members",
+    "edge-type": "Relationship type",
+    "parent": "Parent/Child",
+    "spouse": "Spouse"
   }
 }

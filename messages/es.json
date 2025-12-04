@@ -239,6 +239,11 @@
     "other": "Otro",
     "unspecified": "No especificado",
     "true": "Activado",
-    "false": "Desactivado"
+    "false": "Desactivado",
+    "metadata": "Metadatos",
+    "tagged": "Miembros etiquetados",
+    "edge-type": "Tipo de relación",
+    "parent": "Padre/Madre",
+    "spouse": "Cónyuge"
   }
 }

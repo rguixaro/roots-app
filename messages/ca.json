@@ -238,6 +238,11 @@
     "other": "Altres",
     "unspecified": "No especificat",
     "true": "Activat",
-    "false": "Desactivat"
+    "false": "Desactivat",
+    "metadata": "Metadades",
+    "tagged": "Membres etiquetats",
+    "edge-type": "Tipus de relació",
+    "parent": "Pare/Mare",
+    "spouse": "Cònjuge"
   }
 }

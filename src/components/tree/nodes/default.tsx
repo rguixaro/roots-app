@@ -18,10 +18,10 @@ interface StyledNodeProps {
 }
 
 /**
- * Global styles for node handles
+ * Base styles for visual handle overlays (not actual ReactFlow handles)
  */
-const NodeHandlesGlobalStyles =
-  'h-px! w-px! rounded-xl! border-3! border-pale-ocean! opacity-0 transition-all duration-200 bg-pale-ocean!'
+const HandleVisualStyles =
+  'h-px w-px rounded-xl border-3 border-pale-ocean bg-pale-ocean transition-all duration-200'
 
 /**
  * Animation variants for the main node container
@@ -131,9 +131,9 @@ const createHandleVariants = (delay: number): Variants => ({
 
 const handleVariants = {
   right: createHandleVariants(0),
-  left: createHandleVariants(0.1),
-  top: createHandleVariants(0.2),
-  bottom: createHandleVariants(0.3),
+  bottom: createHandleVariants(0.1),
+  left: createHandleVariants(0.2),
+  top: createHandleVariants(0.3),
 }
 
 /**
@@ -147,8 +147,8 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isInModal, setIsInModal] = useState(false)
   const [isPictureLoading, setIsPictureLoading] = useState(true)
   const [pictureError, setPictureError] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   const { id, fullName, birthDate, deathDate, edgesFrom, edgesTo } = data.node
   const { withPicture, selectedNodeId } = data
@@ -255,13 +255,13 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     const isExpandedAndIsConnected = isExpanded && isConnected
     const isMobileAndNotConnected = isMobile && !isConnected && !isHoveredOrExpanded
 
-    return cn(NodeHandlesGlobalStyles, {
-      'bg-ocean-200! h-6! w-2! opacity-100': isConnected,
-      'border-ocean-200! bg-ocean-100! w-2! opacity-100 ': isHoveredOrExpanded,
-      'border-ocean-200! bg-pale-ocean! h-6!': isHoveredAndNotConnected,
-      'border-ocean-200! bg-ocean-100! h-8!': isExpanded,
-      'bg-ocean-300!': isExpandedAndIsConnected,
-      'border-pale-ocean! bg-ocean-200! h-6! w-2! opacity-100': isMobileAndNotConnected,
+    return cn(HandleVisualStyles, {
+      'bg-ocean-200 h-6 w-2': isConnected,
+      'border-ocean-200 bg-ocean-100 w-2': isHoveredOrExpanded,
+      'border-ocean-200 bg-pale-ocean h-6': isHoveredAndNotConnected,
+      'border-ocean-200 bg-ocean-100 h-8': isExpanded,
+      'bg-ocean-300': isExpandedAndIsConnected,
+      'border-pale-ocean bg-ocean-200 h-6 w-2': isMobileAndNotConnected,
     })
   }
 
@@ -277,13 +277,13 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     const isExpandedAndIsConnected = isExpanded && isConnected
     const isMobileAndNotConnected = isMobile && !isConnected && !isHoveredOrExpanded
 
-    return cn(NodeHandlesGlobalStyles, {
-      'bg-ocean-200! h-2! w-8! opacity-100': isConnected,
-      'border-ocean-200! bg-ocean-100! h-2! opacity-100': isHoveredOrExpanded,
-      'border-ocean-200! bg-pale-ocean! h-2! w-8!': isHoveredAndNotConnected,
-      'border-ocean-200! w-16! bg-ocean-100!': isExpanded,
-      'bg-ocean-300!': isExpandedAndIsConnected,
-      'border-pale-ocean! bg-ocean-200! h-2! w-8! opacity-100': isMobileAndNotConnected,
+    return cn(HandleVisualStyles, {
+      'bg-ocean-200 h-2 w-8': isConnected,
+      'border-ocean-200 bg-ocean-100 h-2': isHoveredOrExpanded,
+      'border-ocean-200 bg-pale-ocean h-2 w-8': isHoveredAndNotConnected,
+      'border-ocean-200 w-16 bg-ocean-100': isExpanded,
+      'bg-ocean-300': isExpandedAndIsConnected,
+      'border-pale-ocean bg-ocean-200 h-2 w-8': isMobileAndNotConnected,
     })
   }
 
@@ -318,6 +318,30 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           {deathYear && <p>{deathYear}</p>}
         </div>
       ) : null}
+      <Handle
+        type="source"
+        id="right"
+        position={Position.Right}
+        className="pointer-events-none opacity-0!"
+      />
+      <Handle
+        type="target"
+        id="left"
+        position={Position.Left}
+        className="pointer-events-none opacity-0!"
+      />
+      <Handle
+        type="target"
+        id="top"
+        position={Position.Top}
+        className="pointer-events-none opacity-0!"
+      />
+      <Handle
+        type="source"
+        id="bottom"
+        position={Position.Bottom}
+        className="pointer-events-none opacity-0!"
+      />
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           variants={handleVariants.right}
@@ -327,14 +351,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
               ? 'visible'
               : 'hidden'
           }
-          className="absolute top-1/2 right-0 -translate-y-1/2"
+          className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2"
         >
-          <Handle
-            type="source"
-            id="right"
-            position={Position.Right}
-            className={getSideHandlesClass(!!hasRightConnection)}
-          />
+          <div className={getSideHandlesClass(!!hasRightConnection)} />
         </motion.div>
         <motion.div
           variants={handleVariants.left}
@@ -344,14 +363,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
               ? 'visible'
               : 'hidden'
           }
-          className="absolute top-1/2 left-0 -translate-y-1/2"
+          className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2"
         >
-          <Handle
-            type="target"
-            id="left"
-            position={Position.Left}
-            className={getSideHandlesClass(!!hasLeftConnection)}
-          />
+          <div className={getSideHandlesClass(!!hasLeftConnection)} />
         </motion.div>
         <motion.div
           variants={handleVariants.top}
@@ -361,12 +375,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
               ? 'visible'
               : 'hidden'
           }
-          className="absolute top-0 left-1/2 -translate-x-1/2"
+          className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
         >
-          <Handle
-            type="target"
-            id="top"
-            position={Position.Top}
+          <div
             className={cn(
               getVerticalHandlesClass(!!hasTopConnection),
               isExpanded && withPicture && 'h-0!'
@@ -381,12 +392,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
               ? 'visible'
               : 'hidden'
           }
-          className="absolute bottom-0 left-1/2 -translate-x-1/2"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
         >
-          <Handle
-            type="source"
-            id="bottom"
-            position={Position.Bottom}
+          <div
             className={cn(getVerticalHandlesClass(!!hasBottomConnection), isExpanded && 'h-0!')}
           />
         </motion.div>
@@ -468,7 +476,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         >
           <Info
             size={16}
-            className="stroke-pale-ocean group-hover/info:stroke-pale-ocean transition-colors duration-300"
+            className="stroke-pale-ocean group-hover/info:stroke-ocean-50 transition-colors duration-300"
           />
         </motion.div>
       </motion.div>

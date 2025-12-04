@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 import { motion, Variants } from 'framer-motion'
 
 import { HighlightCard } from '@/types'
@@ -15,8 +14,6 @@ export function HighlightItem({
   index: number
   total: number
 }) {
-  const t_insights = useTranslations('insights')
-
   const motions: Variants = {
     offscreen: { opacity: 0, x: -150 },
     onscreen: {

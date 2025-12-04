@@ -421,7 +421,6 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
               </div>
             </Tabs.Content>
           </Tabs.Root>
-
           <ConfirmDialog
             open={dialogOpen}
             title={t_trees('tree-member-remove-confirm')}

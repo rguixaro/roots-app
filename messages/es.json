@@ -19,8 +19,8 @@
     "search": "Buscar",
     "searching": "Buscando...",
     "share": "Compartir",
-    "recent-activity": "Actividad reciente",
-    "recent-activity-description": "Aquí puedes ver los cambios más recientes realizados en esta familia."
+    "close": "Cerrar",
+    "download": "Descargar"
   },
   "toasts": {
     "tree-created": "Familia creada con éxito.",
@@ -39,7 +39,14 @@
     "node-delete": "Eliminar miembro",
     "node-delete-confirmation": "¿Estás seguro de que quieres eliminar a este miembro?",
     "node-delete-confirm-description": "Esto también eliminará todas sus relaciones. Esta acción no se puede deshacer.",
-    "node-picture-uploaded": "Imagen subida con éxito."
+    "node-picture-uploaded": "Imagen subida con éxito.",
+    "node-picture-tag-added": "Etiqueta añadida con éxito.",
+    "node-picture-tag-removed": "Etiqueta eliminada con éxito.",
+    "node-picture-manage-tags": "Gestionar etiquetas",
+    "node-picture-set-profile": "Establecer como imagen de perfil",
+    "node-picture-profile-set": "Imagen de perfil establecida con éxito.",
+    "node-picture-delete-confirm": "¿Eliminar imagen?",
+    "node-picture-delete-confirm-description": "¿Estás seguro de que quieres eliminar esta imagen de la galería? Esta acción no se puede deshacer."
   },
   "errors": {
     "error": "Se ha producido un error.",
@@ -66,9 +73,13 @@
     "error-cannot-connect-siblings": "No se puede crear una relación padre-hijo entre hermanos.",
     "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres.",
     "error-picture-upload": "Se ha producido un error al subir la imagen.",
+    "error-picture-delete": "Se ha producido un error al eliminar la imagen.",
     "error-picture-not-found": "Imagen no encontrada.",
+    "error-picture-at-least-one-tag": "La imagen debe tener al menos una etiqueta.",
     "error-tag-already-exists": "Esta imagen ya está etiquetada con este miembro.",
-    "error-tag-not-found": "Esta etiqueta no existe."
+    "error-tag-not-found": "Esta etiqueta no existe.",
+    "error-tag-create": "Se ha producido un error al añadir la etiqueta.",
+    "error-tag-remove": "Se ha producido un error al eliminar la etiqueta."
   },
   "enums": {
     "human": "Humana",
@@ -148,6 +159,8 @@
     "node-general-info": "Información general",
     "node-fullname": "Nombre completo",
     "node-fullname-description": "Introduce el nombre completo del nuevo miembro.",
+    "node-birth-place": "Lugar de nacimiento",
+    "node-birth-place-description": "Introduce el lugar de nacimiento del nuevo miembro (opcional).",
     "node-birth-date": "Fecha de nacimiento",
     "node-birth-date-description": "Introduce la fecha de nacimiento del nuevo miembro.",
     "node-death-date": "Fecha de defunción",
@@ -158,12 +171,20 @@
     "node-gender-female": "Mujer",
     "node-gender-other": "Otro",
     "node-gender-unspecified": "No especificado",
+    "node-biography": "Biografía",
+    "node-biography-description": "Aquí puedes escribir una breve biografía o notas sobre este miembro de la familia.",
     "node-info-edit": "Editar la información",
     "node-info-description": "Aquí puedes ver y modificar la información personal de este miembro de la familia.",
     "node-gallery": "Galería de imágenes",
     "node-gallery-description": "Aquí puedes ver y gestionar la galería de imágenes de este miembro de la familia.",
     "node-gallery-upload": "Subir imagen",
-    "node-gallery-empty": "Este miembro no tiene imágenes en su galería."
+    "node-gallery-empty": "Este miembro no tiene imágenes en su galería.",
+    "node-gallery-tags": "Miembros etiquetados",
+    "node-gallery-tags-currently": "Actualmente etiquetados",
+    "node-gallery-tags-add": "Etiquetar miembros",
+    "node-gallery-tags-add-none": "No hay miembros disponibles para etiquetar",
+    "recent-activity": "Actividad reciente",
+    "recent-activity-description": "Aquí puedes ver los cambios más recientes realizados en esta familia."
   },
   "profile": {
     "title": "Configuración",

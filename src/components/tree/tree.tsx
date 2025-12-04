@@ -10,7 +10,11 @@ import {
   useEdgeOperations,
   useNodeOperations,
   useNodeUpdateForm,
-} from './hooks'
+} from '@/hooks'
+
+import { TreeOverlay, NodeInfoModal, NodeCreateModal } from '@/components/tree/modal'
+import { EdgeContextMenu } from '@/components/tree/context'
+import { StyledEdge } from '@/components/tree/edges'
 
 import {
   Dialog,
@@ -22,13 +26,9 @@ import {
   Button,
 } from '@/ui'
 
-import { TreeOverlay, NodeInfoModal, NodeCreateModal, EdgeContextMenu, NodeContextMenu } from './ui'
-
 import { Tree, TreeEdge, TreeNode } from '@/types'
 
 import { ocean } from '@/styles/colors'
-
-import { StyledEdge } from './edge'
 
 interface StyledTreeProps {
   readonly: boolean
@@ -101,7 +101,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onConnect={edgeOperations.onConnect}
         onEdgeClick={treeState.onEdgeClick}
         onEdgeContextMenu={treeState.onEdgeContextMenu}
-        onNodeContextMenu={treeState.onNodeContextMenu}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
         panOnDrag
@@ -134,27 +133,11 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onClose={treeState.closeEdgeContextMenu}
       />
 
-      {/* Node Context Menu */}
-      <NodeContextMenu
-        visible={treeState.nodeContextMenu.visible}
-        x={treeState.nodeContextMenu.x}
-        y={treeState.nodeContextMenu.y}
-        nodeId={treeState.nodeContextMenu.nodeId}
-        onDelete={() => {
-          if (treeState.nodeContextMenu.nodeId) {
-            treeState.showDeleteConfirmation(treeState.nodeContextMenu.nodeId)
-            treeState.closeNodeContextMenu()
-          }
-        }}
-        onClose={treeState.closeNodeContextMenu}
-      />
-
       {/* Confirmation Delete Dialog */}
       <Dialog open={treeState.confirmDelete.open} onOpenChange={treeState.closeDeleteConfirmation}>
-        <DialogContent>
+        <DialogContent className="text-ocean-400">
           <DialogHeader>
             <DialogTitle>{t_toasts('node-delete')}</DialogTitle>
-
             <DialogDescription className="my-2">
               {t_toasts('node-delete-confirmation')}
             </DialogDescription>
@@ -172,6 +155,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
             </Button>
             <Button
               variant="default"
+              className="font-bold"
               onClick={() => {
                 if (treeState.confirmDelete.nodeId) {
                   treeState.withAsync(() =>

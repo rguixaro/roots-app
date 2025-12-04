@@ -5,26 +5,26 @@ import { useTranslations } from 'next-intl'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Trash } from 'lucide-react'
 
-interface NodeContextMenuProps {
+interface EdgeContextMenuProps {
   visible: boolean
   x: number
   y: number
-  nodeId: string | null
+  edgeId: string | null
   onDelete: () => void
   onClose: () => void
 }
 
-export function NodeContextMenu({
+export function EdgeContextMenu({
   visible,
   x,
   y,
-  nodeId,
+  edgeId,
   onDelete,
   onClose,
-}: NodeContextMenuProps) {
+}: EdgeContextMenuProps) {
   const t_toasts = useTranslations('toasts')
 
-  if (!visible || !nodeId) return null
+  if (!visible || !edgeId) return null
 
   return (
     <DropdownMenu.Root
@@ -41,7 +41,7 @@ export function NodeContextMenu({
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="border-ocean-200/50 z-50 min-w-32 rounded-md border bg-white shadow-lg"
+          className="border-ocean-200 shadow-center bg-pale-ocean z-50 min-w-40 rounded-lg border-2"
           side="bottom"
           align="start"
         >
@@ -52,8 +52,8 @@ export function NodeContextMenu({
               onClose()
             }}
           >
-            <div> {t_toasts('node-delete')}</div>
             <Trash size={20} className="text-ocean-300" />
+            <div>{t_toasts('edge-delete')}</div>
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

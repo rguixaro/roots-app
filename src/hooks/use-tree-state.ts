@@ -5,9 +5,8 @@ import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
 
 import { TreeNode, TreeEdge, Tree } from '@/types'
 
-import { createTreeLayout, computedLayout, positionCoupleNodes } from '../layout'
-
-import { StyledNode, VoidNode } from '../nodes'
+import { createTreeLayout, computedLayout, positionCoupleNodes } from '@/components/tree/layout'
+import { StyledNode, VoidNode } from '@/components/tree/nodes'
 
 export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   /**
@@ -32,16 +31,6 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
     y: number
     edgeId: string | null
   }>({ visible: false, x: 0, y: 0, edgeId: null })
-
-  /**
-   * Node context menu state
-   */
-  const [nodeContextMenu, setNodeContextMenu] = useState<{
-    visible: boolean
-    x: number
-    y: number
-    nodeId: string | null
-  }>({ visible: false, x: 0, y: 0, nodeId: null })
 
   /**
    * Confirmation dialog state
@@ -173,31 +162,11 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   }, [])
 
   /**
-   * Handle node context menu event (right-click)
-   * @param event React mouse event
-   * @param node Node that was right-clicked
-   * @return void
-   */
-  const onNodeContextMenu = useCallback((event: React.MouseEvent, node: any) => {
-    event.preventDefault()
-    setNodeContextMenu({ visible: true, x: event.clientX, y: event.clientY, nodeId: node.id })
-  }, [])
-
-  /**
    * Close the edge context menu
    * @return void
    */
   const closeEdgeContextMenu = useCallback(
     () => setEdgeContextMenu({ visible: false, x: 0, y: 0, edgeId: null }),
-    []
-  )
-
-  /**
-   * Close the node context menu
-   * @return void
-   */
-  const closeNodeContextMenu = useCallback(
-    () => setNodeContextMenu({ visible: false, x: 0, y: 0, nodeId: null }),
     []
   )
 
@@ -224,13 +193,10 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
     setLoading,
     loading,
 
-    nodeContextMenu,
     edgeContextMenu,
 
-    onNodeContextMenu,
     onEdgeContextMenu,
 
-    closeNodeContextMenu,
     closeEdgeContextMenu,
 
     setTreeNodes,

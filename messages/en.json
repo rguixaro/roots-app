@@ -19,8 +19,8 @@
     "search": "Search",
     "searching": "Searching...",
     "share": "Share",
-    "recent-activity": "Recent activity",
-    "recent-activity-description": "Here you can see the most recent changes made to this family."
+    "close": "Close",
+    "download": "Download"
   },
   "toasts": {
     "tree-created": "Family created successfully.",
@@ -39,7 +39,14 @@
     "node-delete": "Delete member",
     "node-delete-confirmation": "Are you sure you want to delete this member?",
     "node-delete-confirm-description": "This will also delete all their relationships. This action cannot be undone.",
-    "node-picture-uploaded": "Image uploaded successfully."
+    "node-picture-uploaded": "Image uploaded successfully.",
+    "node-picture-tag-added": "Tag added successfully.",
+    "node-picture-tag-removed": "Tag removed successfully.",
+    "node-picture-manage-tags": "Manage Tags",
+    "node-picture-set-profile": "Set as Profile Picture",
+    "node-picture-profile-set": "Profile picture set successfully.",
+    "node-picture-delete-confirm": "Delete image?",
+    "node-picture-delete-confirm-description": "Are you sure you want to delete this image from the gallery? This action cannot be undone."
   },
   "errors": {
     "error": "An error occurred.",
@@ -66,9 +73,13 @@
     "error-cannot-connect-siblings": "Cannot create a parent-child relationship between siblings.",
     "error-child-has-max-parents": "A child cannot have more than 2 parents.",
     "error-picture-upload": "An error occurred while uploading the image.",
+    "error-picture-delete": "An error occurred while deleting the image.",
     "error-picture-not-found": "Picture not found.",
+    "error-picture-at-least-one-tag": "The picture must have at least one tag.",
     "error-tag-already-exists": "This picture is already tagged with this member.",
-    "error-tag-not-found": "This tag does not exist."
+    "error-tag-not-found": "This tag does not exist.",
+    "error-tag-create": "An error occurred while adding the tag.",
+    "error-tag-remove": "An error occurred while removing the tag."
   },
   "enums": {
     "human": "Human",
@@ -148,6 +159,8 @@
     "node-general-info": "General information",
     "node-fullname": "Full name",
     "node-fullname-description": "Enter the full name of the new member.",
+    "node-birth-place": "Birth place",
+    "node-birth-place-description": "Enter the birth place of the new member (optional).",
     "node-birth-date": "Birth date",
     "node-birth-date-description": "Enter the birth date of the new member.",
     "node-death-date-description": "Enter the death date of the new member (optional).",
@@ -158,12 +171,20 @@
     "node-gender-female": "Female",
     "node-gender-other": "Other",
     "node-gender-unspecified": "Unspecified",
+    "node-biography": "Biography",
+    "node-biography-description": "Here you can write a brief biography or notes about this family member.",
     "node-info-edit": "Edit information",
     "node-info-description": "Here you can view and modify the personal information of this family member.",
     "node-gallery": "Image gallery",
     "node-gallery-description": "Here you can view and manage the image gallery of this family member.",
     "node-gallery-upload": "Upload image",
-    "node-gallery-empty": "This member has no pictures in their gallery."
+    "node-gallery-empty": "This member has no pictures in their gallery.",
+    "node-gallery-tags": "Tagged members",
+    "node-gallery-tags-currently": "Currently tagged",
+    "node-gallery-tags-add": "Tag members",
+    "node-gallery-tags-add-none": "No members available to tag",
+    "recent-activity": "Recent activity",
+    "recent-activity-description": "Here you can see the most recent changes made to this family."
   },
   "profile": {
     "title": "Settings",

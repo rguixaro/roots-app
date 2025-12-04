@@ -57,6 +57,8 @@ export const TreeSchema = z.object({
   type: z.enum(TreeType),
   nodeImage: z.boolean().default(false),
   nodeGallery: z.boolean().default(false),
+  birthPlace: z.string().nullable().optional(),
+  biography: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -92,9 +94,11 @@ export type UpdateProfileInput = z.TypeOf<typeof UpdateProfileSchema>
 export const CreateTreeNodeSchema = z.object({
   treeId: z.string().min(1),
   fullName: z.string().min(1, { message: 'full-name-required' }),
+  birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
+  biography: z.string().nullable().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   edgesFrom: z.array(z.any()).optional().nullable(),
@@ -107,9 +111,11 @@ export const UpdateTreeNodeSchema = z.object({
   id: z.string(),
   treeId: z.string().min(1),
   fullName: z.string().min(1, { message: 'full-name-required' }),
+  birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
+  biography: z.string().nullable().optional(),
 })
 
 export type UpdateTreeNodeInput = z.TypeOf<typeof UpdateTreeNodeSchema>
@@ -122,9 +128,3 @@ export const CreateTreeEdgeSchema = z.object({
 })
 
 export type CreateTreeEdgeInput = z.TypeOf<typeof CreateTreeEdgeSchema>
-
-export const CreatePictureSchema = z.object({
-  fileKey: z.string(),
-  nodeId: z.string(),
-})
-export type CreatePictureInput = z.TypeOf<typeof CreatePictureSchema>

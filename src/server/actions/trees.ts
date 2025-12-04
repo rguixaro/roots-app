@@ -14,7 +14,7 @@ import type {
 } from '@/server/schemas'
 import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
 
-import { Tree } from '@/types'
+import { Tree, TreeNode } from '@/types'
 
 interface TreeResult {
   error: boolean
@@ -477,5 +477,20 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
       if (e.code === 'P2025') return { error: true, message: 'error-edge-not-found' }
     }
     return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Get all tree nodes for a specific tree
+ * @param treeId Tree id
+ * @returns Promise<TreeNode[]>
+ */
+export const getTreeNodes = async (treeId: string): Promise<TreeNode[]> => {
+  try {
+    await assertAuthenticated()
+
+    return await db.treeNode.findMany({ where: { treeId } })
+  } catch (error) {
+    return []
   }
 }

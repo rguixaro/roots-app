@@ -45,6 +45,8 @@ export interface TreeNode {
   birthDate?: Date | null
   deathDate?: Date | null
   gender: TreeNodeGender
+  birthPlace?: string | null
+  biography?: string | null
   createdAt: Date
   updatedAt: Date
 

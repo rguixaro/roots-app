@@ -19,8 +19,8 @@
     "search": "Cerca",
     "searching": "Buscant...",
     "share": "Compartir",
-    "recent-activity": "Activitat recent",
-    "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família."
+    "close": "Tancar",
+    "download": "Descarregar"
   },
   "toasts": {
     "tree-created": "Família creada amb èxit.",
@@ -39,7 +39,14 @@
     "node-delete": "Eliminar membre",
     "node-delete-confirmation": "Estàs segur que vols eliminar aquest membre?",
     "node-delete-confirm-description": "Això també eliminarà totes les seves relacions. Aquesta acció no es pot desfer.",
-    "node-picture-uploaded": "Imatge pujada amb èxit."
+    "node-picture-uploaded": "Imatge pujada amb èxit.",
+    "node-picture-tag-added": "Etiqueta afegida amb èxit.",
+    "node-picture-tag-removed": "Etiqueta eliminada amb èxit.",
+    "node-picture-manage-tags": "Gestionar etiquetes",
+    "node-picture-set-profile": "Establir com a imatge de perfil",
+    "node-picture-profile-set": "Imatge de perfil establerta amb èxit.",
+    "node-picture-delete-confirm": "Eliminar imatge?",
+    "node-picture-delete-confirm-description": "Estàs segur que vols eliminar aquesta imatge de la galeria? Aquesta acció no es pot desfer."
   },
   "errors": {
     "error": "S'ha produït un error.",
@@ -66,9 +73,13 @@
     "error-cannot-connect-siblings": "No es pot crear una relació pare-fill entre germans.",
     "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares.",
     "error-picture-upload": "S'ha produït un error en pujar la imatge.",
+    "error-picture-delete": "S'ha produït un error en eliminar la imatge.",
     "error-picture-not-found": "Imatge no trobada.",
+    "error-picture-at-least-one-tag": "La imatge ha de tenir almenys una etiqueta.",
     "error-tag-already-exists": "Aquesta imatge ja està etiquetada amb aquest membre.",
-    "error-tag-not-found": "Aquesta etiqueta no existeix."
+    "error-tag-not-found": "Aquesta etiqueta no existeix.",
+    "error-tag-create": "S'ha produït un error en afegir l'etiqueta.",
+    "error-tag-remove": "S'ha produït un error en eliminar l'etiqueta."
   },
   "enums": {
     "human": "Humana",
@@ -147,6 +158,8 @@
     "node-general-info": "Informació general",
     "node-fullname": "Nom complet",
     "node-fullname-description": "Introdueix el nom complet del nou membre.",
+    "node-birth-place": "Lloc de naixement",
+    "node-birth-place-description": "Introdueix el lloc de naixement del nou membre (opcional).",
     "node-birth-date": "Data de naixement",
     "node-birth-date-description": "Introdueix la data de naixement del nou membre.",
     "node-death-date-description": "Introdueix la data de defunció del nou membre (opcional).",
@@ -157,12 +170,20 @@
     "node-gender-female": "Dona",
     "node-gender-other": "Altre",
     "node-gender-unspecified": "No especificat",
+    "node-biography": "Biografia",
+    "node-biography-description": "Aquí pots escriure una breu biografia o notes sobre aquest membre de la família.",
     "node-info-edit": "Editar la informació",
     "node-info-description": "Aquí pots veure i modificar la informació personal d'aquest membre de la família.",
     "node-gallery": "Galeria d'imatges",
     "node-gallery-description": "Aquí pots veure i gestionar la galeria d'imatges d'aquest membre de la família.",
     "node-gallery-upload": "Pujar imatge",
-    "node-gallery-empty": "Aquest membre no té imatges a la seva galeria."
+    "node-gallery-empty": "Aquest membre no té imatges a la seva galeria.",
+    "node-gallery-tags": "Membres etiquetats",
+    "node-gallery-tags-currently": "Actualment etiquetats",
+    "node-gallery-tags-add": "Etiqueta membres",
+    "node-gallery-tags-add-none": "No hi ha membres disponibles per etiquetar",
+    "recent-activity": "Activitat recent",
+    "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família."
   },
   "profile": {
     "title": "Preferències",

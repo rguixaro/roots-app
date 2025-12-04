@@ -6,6 +6,11 @@ export interface PictureTag {
 
   pictureId: string
   picture?: Picture
+
+  node?: {
+    id: string
+    fullName: string
+  }
 }
 
 export interface Picture {
@@ -18,4 +23,6 @@ export interface Picture {
 
   createdAt: Date
   updatedAt: Date
+
+  tags?: PictureTag[]
 }

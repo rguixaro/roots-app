@@ -53,7 +53,7 @@ export async function Milestones() {
           </div>
         )}
         <div className="mx-auto w-5/6 items-center justify-center">
-          <div className="bg-pale-ocean h-0.5 rounded opacity-70 shadow-lg" />
+          <div className="bg-pale-ocean shadow-center-sm h-0.5 rounded opacity-70" />
         </div>
         {milestones.birthdays.length > 0 && (
           <div className="p-4">

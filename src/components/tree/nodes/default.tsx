@@ -298,7 +298,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       whileTap="tap"
       className={cn(
         'text-ocean-400 group relative flex h-20 w-52 cursor-pointer flex-col items-center justify-center rounded-lg',
-        'shadow-center hover:bg-ocean-200 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
+        'shadow-center-sm hover:bg-ocean-200 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
         isExpanded &&
           `bg-ocean-200 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`,
         isInModal &&

@@ -38,7 +38,7 @@ export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: numb
       whileHover="hover"
       variants={motions}
       viewport={{ once: true, amount: 0.01 }}
-      className={cn('aspect-square h-32 w-32 p-2', tree && 'w-56')}
+      className={cn('aspect-square h-32 w-24 p-2', tree && 'w-48')}
     >
       {tree ? (
         <Link href={`/trees/${tree.slug}`} className="block h-full w-full">
@@ -61,12 +61,12 @@ export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: numb
             className={cn(
               className,
               'flex cursor-pointer flex-col items-center justify-center',
-              'text-ocean-400 bg-pale-ocean hover:bg-ocean-200 hover:text-pale-ocean'
+              'hover:text-ocean-400 hover:bg-pale-ocean bg-ocean-200 text-pale-ocean'
             )}
           >
             <Plus
               size={24}
-              className="stroke-ocean-400 group-hover:stroke-pale-ocean transition-colors duration-300"
+              className="group-hover:stroke-ocean-400 stroke-pale-ocean transition-colors duration-300"
             />
             <span className="text-center leading-5 font-medium transition-colors duration-300 md:text-lg">
               {t_trees('tree-new')}

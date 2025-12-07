@@ -63,7 +63,7 @@ export function NodeInfoTabGeneral({
   return (
     <>
       {!isMobile && <TypographyH5>{t_trees('node-general-info')}</TypographyH5>}
-      <div className="border-ocean-200/50 shadow-center mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
+      <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
         <FormField
           control={form.control}
           name="fullName"
@@ -219,12 +219,7 @@ export function NodeInfoTabGeneral({
       </div>
       <div className="my-6 flex gap-3">
         {!editMode && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onEditModeChange(true)}
-            disabled={loading}
-          >
+          <Button type="button" onClick={() => onEditModeChange(true)} disabled={loading}>
             <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
           </Button>
         )}

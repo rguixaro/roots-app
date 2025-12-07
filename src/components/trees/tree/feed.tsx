@@ -10,7 +10,7 @@ export const TreesFeed = async () => {
   const t_common = await getTranslations('common')
 
   const trees = (await getTrees())?.trees
-  const treesWithAdd = [...(trees ?? []), null as Tree | null]
+  const treesWithAdd = [null as Tree | null, ...(trees ?? [])]
 
   return (
     <div className="flex h-full w-full flex-col">

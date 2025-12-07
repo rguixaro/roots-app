@@ -183,7 +183,7 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         initial="hidden"
         animate="visible"
         className={cn(
-          'shadow-center-lg absolute left-0 z-10',
+          'shadow-center-lg absolute top-0 left-0 z-10',
           'bg-ocean-400 rounded-lg rounded-t-none rounded-l-none ps-1 pe-3 pt-2 pb-4'
         )}
       >
@@ -196,7 +196,7 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         initial="hidden"
         animate="visible"
         className={cn(
-          'bg-ocean-400 absolute right-0 z-10 flex gap-4 px-4 pt-1 pb-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2',
+          'bg-ocean-400 absolute top-0 right-0 z-10 flex gap-4 px-4 pt-1 pb-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2',
           'shadow-center-lg items-center rounded-lg rounded-t-none rounded-br-none sm:rounded-br-lg',
           'max-w-[70vw] sm:max-w-none'
         )}

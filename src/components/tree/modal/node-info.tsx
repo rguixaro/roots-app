@@ -56,6 +56,7 @@ export function NodeInfoModal({
   const [formLoading, setFormLoading] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [currentTab, setCurrentTab] = useState<'general' | 'gallery'>('general')
+  const [displayNode, setDisplayNode] = useState<TreeNode | null>(null)
 
   const { modalHeight, isDragging, isMobile, handleDragStart } = useMobileDrag()
 
@@ -98,6 +99,15 @@ export function NodeInfoModal({
   }, [showModal])
 
   /**
+   * Effect to store node data when modal opens (keeps it visible during close animation)
+   */
+  useEffect(() => {
+    if (showModal && node) {
+      setDisplayNode(node)
+    }
+  }, [showModal, node])
+
+  /**
    * Effect to reset form when modal is closed
    */
   useEffect(() => {
@@ -105,6 +115,8 @@ export function NodeInfoModal({
       form.reset()
       setEditMode(false)
       setFormLoading(false)
+      const timeout = setTimeout(() => setDisplayNode(null), 500)
+      return () => clearTimeout(timeout)
     }
   }, [showModal, form])
 
@@ -184,7 +196,7 @@ export function NodeInfoModal({
                         />
                       )}
                       <div className="flex flex-1 items-center">
-                        <TypographyH4>{node?.fullName}</TypographyH4>
+                        <TypographyH4>{displayNode?.fullName}</TypographyH4>
                       </div>
                       {!withGallery && (
                         <button

@@ -7,8 +7,8 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 export const InputGlobalStyles = cn(
-  'flex h-9 w-full rounded border-2 border-ocean-200/50 bg-ocean-200/15',
-  'px-3 py-1 text-sm text-ocean-200 font-medium shadow-sm transition-colors file:border-0',
+  'flex h-9 w-full rounded-lg border-2 border-ocean-200/50 bg-ocean-200/15',
+  'px-3 py-1 text-sm text-ocean-200 font-medium shadow-center-sm transition-colors file:border-0',
   'file:bg-transparent file:text-sm file:font-medium placeholder:text-ocean-200',
   'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ocean-200/50',
   'disabled:cursor-not-allowed disabled:opacity-50 transition-shadow duration-200'

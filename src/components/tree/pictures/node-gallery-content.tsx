@@ -44,7 +44,9 @@ export function NodeGalleryContent({
 }: NodeGalleryContentProps) {
   if (isMobile) {
     return (
-      <div className={cn('bg-ocean-400 text-pale-ocean shadow-center h-full flex-col rounded-xl')}>
+      <div
+        className={cn('bg-ocean-400 text-pale-ocean shadow-center-sm h-full flex-col rounded-xl')}
+      >
         <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
           <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
             <p>{t_trees('node-gallery-description')} </p>
@@ -170,14 +172,14 @@ export function NodeGalleryContent({
             <div
               key={picture.id}
               className={cn(
-                'group shadow-center relative mb-2 shrink-0 cursor-pointer break-inside-avoid',
+                'group shadow-center-sm relative mb-2 shrink-0 cursor-pointer break-inside-avoid',
                 'bg-ocean-300 text-ocean-200 rounded-lg'
               )}
             >
               <GalleryImage
                 src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
                 alt={`Picture ${idx + 1}`}
-                className="shadow-center bg-ocean-300 mb-2 min-h-[124px] w-full"
+                className="shadow-center-sm bg-ocean-300 mb-2 min-h-[124px] w-full"
                 hasError={errorGalleryPicture[picture.id]}
                 onError={() => onGalleryPictureError(picture.id)}
               />
@@ -191,7 +193,7 @@ export function NodeGalleryContent({
                 <button
                   type="button"
                   onClick={(e) => onPictureMenuOpen(e, picture)}
-                  className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
+                  className="bg-pale-ocean text-ocean-400 shadow-center-sm cursor-pointer rounded-lg p-2 transition-all duration-200"
                 >
                   <Menu size={18} />
                 </button>

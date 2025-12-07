@@ -18,7 +18,7 @@ interface IconRefProps {
 export type ButtonIconProps = IconProps | IconRefProps
 
 const buttonVariants = cva(
-  'inline-flex items-center space-x-3 justify-center whitespace-nowrap rounded text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-neutral-500',
+  'inline-flex items-center space-x-3 justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-neutral-500',
   {
     variants: {
       variant: {

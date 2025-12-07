@@ -83,13 +83,15 @@ export function computedLayout(
  * @param edges {TreeEdge[]}
  * @param selectedNodeId {string}
  * @param onInfo {(node: TreeNode) => void}
+ * @param collapseKey {number} - Key to trigger collapse of all expanded nodes
  */
 export function createTreeLayout(
   tree: Tree,
   nodes: TreeNode[],
   edges: TreeEdge[],
   selectedNodeId: string | null,
-  onInfo: (node: TreeNode) => void
+  onInfo: (node: TreeNode) => void,
+  collapseKey: number = 0
 ) {
   const treeEdges: Edge[] = edges.map((edge) => ({
     id: edge.id,
@@ -111,6 +113,7 @@ export function createTreeLayout(
         withPicture: tree.nodeImage,
         selectedNodeId: selectedNodeId,
         onInfo: onInfo,
+        collapseKey: collapseKey,
       },
       position: { x: 0, y: 0 },
     }

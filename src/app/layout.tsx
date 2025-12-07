@@ -14,23 +14,10 @@ import 'reactflow/dist/style.css'
 
 import { cn } from '@/utils'
 
-const montserrat = localFont({
-  variable: '--font-montserrat',
-  src: [
-    { path: '../fonts/montserrat-regular.ttf', weight: '400' },
-    { path: '../fonts/montserrat-medium.ttf', weight: '500' },
-    { path: '../fonts/montserrat-semibold.ttf', weight: '600' },
-    { path: '../fonts/montserrat-bold.ttf', weight: '700' },
-    { path: '../fonts/montserrat-extrabold.ttf', weight: '800' },
-  ],
-})
-
-const guavine = localFont({
-  variable: '--font-guavine',
-  src: '../fonts/guavine-regular.otf',
-  weight: '400',
-  display: 'swap',
-  preload: true,
+const outfit = localFont({
+  src: '../fonts/outfit-variable.ttf',
+  variable: '--font-outfit',
+  weight: '100 900',
 })
 
 export const metadata: Metadata = {
@@ -53,7 +40,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
-          `font-sans ${montserrat.variable} ${guavine.variable} antialiased`,
+          `font-sans ${outfit.variable} antialiased`,
           'bg-ocean-50 selection:bg-ocean-200/15 flex justify-center overflow-x-hidden'
         )}
       >

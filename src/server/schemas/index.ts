@@ -32,7 +32,10 @@ export type ActivityAction = (typeof ActivityAction)[number]
 
 // Schema for creating a new tree
 export const CreateTreeSchema = z.object({
-  name: z.string().min(3, { message: 'tree-name-too-short' }),
+  name: z
+    .string()
+    .min(3, { message: 'tree-name-too-short' })
+    .max(24, { message: 'tree-name-too-long' }),
   type: z.enum(TreeType, { required_error: 'tree-type-required' }),
   nodeImage: z.boolean({ required_error: 'tree-option-required' }),
   nodeGallery: z.boolean({ required_error: 'tree-option-required' }),

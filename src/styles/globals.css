@@ -21,6 +21,10 @@
     box-shadow: 0 0 12px 2px rgba(0, 0, 0, 0.08);
   }
 
+  .shadow-center-sm {
+    box-shadow: 0 0 12px 1px rgba(0, 0, 0, 0.04);
+  }
+
   .shadow-center-lg {
     box-shadow: 0 0 20px 4px rgba(0, 0, 0, 0.1);
   }
@@ -76,56 +80,15 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    pointer-events: none; /* allow clicking the input */
+    pointer-events: none;
   }
 }
 
 @font-face {
-  font-family: 'Guavine';
-  src: url('/src/app/fonts/guavine-regular.otf') format('opentype');
-  font-weight: 400;
+  font-family: 'Outfit';
+  src: url('/src/app/fonts/outfit-variable.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/src/app/fonts/montserrat-regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/src/app/fonts/montserrat-medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/src/app/fonts/montserrat-semibold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/src/app/fonts/montserrat-bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Montserrat';
-  src: url('/src/app/fonts/montserrat-extrabold.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
 }
 
 /* Define custom theme tokens */
@@ -143,8 +106,7 @@
   --color-pale-ocean: #f7fdfe;
 
   /* Font families */
-  --font-sans: 'Montserrat', system-ui, sans-serif;
-  --font-title: 'Guavine', serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
 
   /* Keyframes */
   @keyframes accordion-down {

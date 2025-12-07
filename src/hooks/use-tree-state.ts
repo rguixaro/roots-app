@@ -23,6 +23,11 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   const [selectedNode, selectNode] = useState<TreeNode | null>(null)
 
   /**
+   * Key to trigger collapse of all expanded nodes
+   */
+  const [collapseKey, setCollapseKey] = useState(0)
+
+  /**
    * Edge context menu state
    */
   const [edgeContextMenu, setEdgeContextMenu] = useState<{
@@ -63,6 +68,11 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   }
 
   /**
+   * Collapse all expanded nodes (triggered on pane click)
+   */
+  const collapseAllNodes = useCallback(() => setCollapseKey((prev) => prev + 1), [])
+
+  /**
    * Create a new node by showing the modal
    */
   const createNode = () => setDisplayCreate(true)
@@ -100,9 +110,9 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
       nodes: layoutNodes,
       edges: layoutEdges,
       spousePairs,
-    } = createTreeLayout(tree, nodes, edges, selectedNode?.id ?? null, onInfo)
+    } = createTreeLayout(tree, nodes, edges, selectedNode?.id ?? null, onInfo, collapseKey)
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [tree, edges, nodes, selectedNode])
+  }, [tree, edges, nodes, selectedNode, collapseKey])
 
   /**
    * Compute layout nodes and edges
@@ -230,5 +240,7 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
 
     withAsync,
     resetView,
+
+    collapseAllNodes,
   }
 }

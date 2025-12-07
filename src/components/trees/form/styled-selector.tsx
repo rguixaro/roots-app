@@ -35,7 +35,7 @@ export const StyledSelector = <T extends string>({
             }}
             key={name}
             className={cn(
-              'bg-ocean-200/15 relative mx-1 flex min-w-18 snap-center flex-col items-center justify-center rounded py-3 shadow-sm',
+              'bg-ocean-200/15 shadow-center-sm relative mx-1 flex min-w-18 snap-center flex-col items-center justify-center rounded-lg py-3',
               'border-ocean-200/15 border-2 transition-all duration-400 hover:scale-[1.05]',
               isActive && 'border-ocean-200'
             )}

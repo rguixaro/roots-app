@@ -95,10 +95,9 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                 {t_profile('account-tab-label')}
               </Tabs.Trigger>
             </Tabs.List>
-            {/* --- PROFILE TAB --- */}
             <Tabs.Content value="profile">
               <TypographyH5 className="mt-2">{t_profile('profile-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white p-3 text-left shadow-lg">
+              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
                 <FormField
                   control={hookForm.control}
                   name="name"
@@ -158,10 +157,9 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                 </Button>
               </div>
             </Tabs.Content>
-            {/* --- ACCOUNT TAB --- */}
             <Tabs.Content value="account">
               <TypographyH5 className="mt-2">{t_profile('account-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 mb-2 flex flex-col items-start rounded border-2 bg-white p-3 text-left shadow-lg">
+              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
                 <FormField
                   name="email"
                   render={({ field }) => (

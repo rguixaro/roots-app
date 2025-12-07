@@ -376,10 +376,9 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                 {t_trees('tree-members-tab-label')}
               </Tabs.Trigger>
             </Tabs.List>
-            {/* --- GENERAL TAB --- */}
             <Tabs.Content value="general" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('general-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 mb-2 flex-col items-start rounded border-2 bg-white p-3 text-left shadow-lg">
+              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
                 <FormField
                   control={form.control}
                   name="name"
@@ -442,10 +441,9 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                 </Button>
               </div>
             </Tabs.Content>
-            {/* --- SETTINGS TAB --- */}
             <Tabs.Content value="settings" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('settings-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 flex-col items-start rounded border-2 bg-white p-3 shadow-lg">
+              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded-lg border-2 bg-white p-3">
                 <FormField
                   control={form.control}
                   name="nodeImage"
@@ -495,7 +493,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                     loading ||
                     (nodeImage === currentTree.nodeImage && nodeGallery === currentTree.nodeGallery)
                   }
-                  className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
+                  className="bg-ocean-200 hover:bg-ocean-300 rounded-lg p-2 px-5 text-white shadow transition-colors duration-300"
                 >
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
@@ -506,10 +504,9 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                 </Button>
               </div>
             </Tabs.Content>
-            {/* --- MEMBERS TAB --- */}
             <Tabs.Content value="members" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 flex-col items-start rounded border-2 bg-white p-3 shadow-lg">
+              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded border-2 bg-white p-3">
                 <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
                   {t_trees('tree-members-info')}

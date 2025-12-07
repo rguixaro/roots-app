@@ -74,7 +74,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
           </div>
           <div className="text-ocean-200 mt-2 flex flex-col text-xs">
             <span>{log.createdAt.toISOString().split('T')[0]}</span>
-            <span className="font-bold">
+            <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
               {log.user.name}
             </span>
@@ -103,7 +103,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
           </div>
           <div className="border-ocean-200/50 flex flex-col border-l-2 pl-3 text-xs">
             <span>{log.createdAt.toISOString().split('T')[0]}</span>
-            <span className="font-bold">
+            <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
               {log.user.name}
             </span>
@@ -116,7 +116,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
             className="overflow-hidden"
           >
             <div className="text-ocean-200 border-ocean-100 mt-3 flex flex-col space-y-2 border-t-2 pt-3">
-              <span className="text-ocean-300 text-xs font-bold">Changes</span>
+              <span className="text-ocean-300 text-xs font-bold">{t_logs('metadata')}</span>
               <div className="flex flex-col space-y-1">
                 {display.details?.map((detail, idx) => {
                   const field = detail.split(':')[0].trim()

@@ -59,15 +59,12 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Overlay */}
       <TreeOverlay
         tree={tree}
         readonly={readonly}
         onCreateNode={treeState.createNode}
         onResetView={treeState.resetView}
       />
-
-      {/* Node Info Modal */}
       <NodeInfoModal
         showModal={treeState.displayInfo}
         node={treeState.selectedNode}
@@ -82,16 +79,12 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
           }
         }}
       />
-
-      {/* Node Create Modal */}
       <NodeCreateModal
         showModal={treeState.displayCreate}
         form={nodeCreateForm.form}
         onCreate={nodeCreateForm.onSubmit}
         onClose={treeState.dismissModal}
       />
-
-      {/* React Flow Canvas */}
       <ReactFlow
         nodes={treeState.treeNodes}
         edges={treeState.treeEdges}
@@ -101,6 +94,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onConnect={edgeOperations.onConnect}
         onEdgeClick={treeState.onEdgeClick}
         onEdgeContextMenu={treeState.onEdgeContextMenu}
+        onPaneClick={treeState.collapseAllNodes}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
         panOnDrag
@@ -116,8 +110,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
       >
         <Background gap={32} size={1} color={ocean[300]} />
       </ReactFlow>
-
-      {/* Edge Context Menu */}
       <EdgeContextMenu
         visible={treeState.edgeContextMenu.visible}
         x={treeState.edgeContextMenu.x}
@@ -132,8 +124,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         }
         onClose={treeState.closeEdgeContextMenu}
       />
-
-      {/* Confirmation Delete Dialog */}
       <Dialog open={treeState.confirmDelete.open} onOpenChange={treeState.closeDeleteConfirmation}>
         <DialogContent className="text-ocean-400">
           <DialogHeader>

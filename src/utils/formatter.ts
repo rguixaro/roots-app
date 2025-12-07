@@ -55,13 +55,13 @@ export const formatActivityLog = (
       return {
         title: t('EDGE_CREATED'),
         subtitle: `"${meta.fromNodeName}" → "${meta.toNodeName}"`,
-        details: [meta.type],
+        details: [t('edge-type') + ': ' + t(meta.type.toLowerCase())],
       }
     case 'EDGE_DELETED':
       return {
         title: t('EDGE_DELETED'),
         subtitle: `"${meta.fromNodeName}" → "${meta.toNodeName}"`,
-        details: [meta.type],
+        details: [t('edge-type') + ': ' + t(meta.type.toLowerCase())],
       }
     case 'PICTURE_ADDED':
       return { title: t('PICTURE_ADDED'), subtitle: meta.fileKey || 'Untitled' }

@@ -54,7 +54,7 @@ export const LogoutAccount = (props: LogoutAccountProps) => {
               {t_common('cancel')}
             </Button>
           </DialogClose>
-          <Button disabled={loading} onClick={handleLogoutAccount} variant="destructive">
+          <Button disabled={loading} onClick={handleLogoutAccount}>
             {loading ?? <LoaderIcon size={16} className="animate-spin" />}
             <span>{t_profile('account-logout')}</span>
           </Button>

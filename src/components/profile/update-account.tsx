@@ -187,8 +187,8 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                 <div className="flex w-full justify-between">
                   <LogoutAccount
                     trigger={
-                      <Button variant="ghost">
-                        <LogOut size={16} color="#3D6C5F" />
+                      <Button>
+                        <LogOut size={16} />
                         <span className="font-bold">{t_profile('account-logout')}</span>
                       </Button>
                     }

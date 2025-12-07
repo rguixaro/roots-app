@@ -4,15 +4,19 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
 
+import { AUTH_ROUTES } from '@/routes'
+
 import { TypographyH3 } from '@/ui'
+import { isKnownRoute, isTreeDetailRoute, normalizePath } from '@/utils'
 
 export const Header = ({ username }: { username: string }) => {
   const pathname = usePathname()
 
+  const p = pathname
+  const normalized = normalizePath(p)
+
   const hideHeader =
-    pathname?.match(/^\/trees\/[^\/]+$/) &&
-    !pathname.includes('/edit/') &&
-    !pathname.includes('/new')
+    AUTH_ROUTES.includes(normalized) || isTreeDetailRoute(normalized) || !isKnownRoute(normalized)
 
   if (hideHeader) return null
 

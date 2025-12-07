@@ -96,11 +96,17 @@
     "private": "Private"
   },
   "login": {
-    "login-to": "Sign in to your ",
-    "login-name": "Roots",
+    "login-to": "Sign in to ",
+    "login-name": "roots",
     "login-text": "Sign in to access all your families and create new ones.",
     "login-error": "An error occurred while signing in.",
-    "google-login": "Continue with Google"
+    "login-with": "Continue with ",
+    "build-your-tree-title": "Build Your Tree",
+    "build-your-tree-description": "Create and explore your family connections",
+    "share-memories-title": "Share Memories",
+    "share-memories-description": "Preserve stories and photos for future generations",
+    "private-and-secure-title": "Private & Secure",
+    "private-and-secure-description": "Your family data stays safe and private"
   },
   "insights": {
     "milestones": "Birthdays and milestones",

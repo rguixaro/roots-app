@@ -96,11 +96,17 @@
     "private": "Privat"
   },
   "login": {
-    "login-to": "Accedeix al teu ",
-    "login-name": "Llibre de Famílies",
+    "login-to": "Accedeix a ",
+    "login-name": "Arrels",
     "login-text": "Inicia sessió per accedir a totes les teves famílies i crear-ne de noves.",
     "login-error": "S'ha produït un error en iniciar sessió.",
-    "google-login": "Continuar amb Google"
+    "login-with": "Continuar amb ",
+    "build-your-tree-title": "Construeix el teu arbre",
+    "build-your-tree-description": "Crea i explora les teves connexions familiars",
+    "share-memories-title": "Comparteix records",
+    "share-memories-description": "Preserva històries i fotos per a les generacions futures",
+    "private-and-secure-title": "Privat i segur",
+    "private-and-secure-description": "Les dades de la teva família es mantenen segures i privades"
   },
   "insights": {
     "milestones": "Aniversaris i efemèrides",

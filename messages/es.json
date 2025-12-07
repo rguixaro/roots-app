@@ -96,11 +96,17 @@
     "private": "Privado"
   },
   "login": {
-    "login-to": "Acceder a tu ",
-    "login-name": "Libro de Familias",
+    "login-to": "Acceder a ",
+    "login-name": "roots",
     "login-text": "Inicia sesión para acceder a todas tus familias y crear nuevas.",
     "login-error": "Se ha producido un error al iniciar sesión.",
-    "google-login": "Continuar con Google"
+    "login-with": "Continuar con ",
+    "build-your-tree-title": "Construye tu árbol",
+    "build-your-tree-description": "Crea y explora tus conexiones familiares",
+    "share-memories-title": "Comparte Recuerdos",
+    "share-memories-description": "Preserva historias y fotos para las generaciones futuras",
+    "private-and-secure-title": "Privado y Seguro",
+    "private-and-secure-description": "Los datos de tu familia permanecen seguros y privados"
   },
   "insights": {
     "milestones": "Cumpleaños y efemérides",

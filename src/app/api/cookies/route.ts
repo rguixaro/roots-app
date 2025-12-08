@@ -53,7 +53,7 @@ export async function GET(req: Request) {
       httpOnly: false,
       secure: true,
       sameSite: 'none',
-      domain: '.rguixaro.dev',
+      domain: 'assets.rguixaro.dev',
       maxAge: 60 * 60 * 6,
     })
   })

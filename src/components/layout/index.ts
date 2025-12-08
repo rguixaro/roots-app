@@ -1,3 +1,5 @@
 export * from './go-back'
 export * from './header'
+export * from './footer'
 export * from './settings'
+export * from './not-found'

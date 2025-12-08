@@ -10,6 +10,10 @@
     display: none;
   }
 
+  *:focus-visible {
+    @apply outline-none;
+  }
+
   /* Hide scrollbar for IE, Edge, and Firefox */
   .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */

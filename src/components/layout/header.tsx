@@ -3,16 +3,22 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+
+import { AUTH_ROUTES } from '@/routes'
 
 import { TypographyH3 } from '@/ui'
+import { isKnownRoute, isTreeDetailRoute, normalizePath } from '@/utils'
 
 export const Header = ({ username }: { username: string }) => {
+  const t_common = useTranslations('common')
   const pathname = usePathname()
 
+  const p = pathname
+  const normalized = normalizePath(p)
+
   const hideHeader =
-    pathname?.match(/^\/trees\/[^\/]+$/) &&
-    !pathname.includes('/edit/') &&
-    !pathname.includes('/new')
+    AUTH_ROUTES.includes(normalized) || isTreeDetailRoute(normalized) || !isKnownRoute(normalized)
 
   if (hideHeader) return null
 
@@ -53,6 +59,7 @@ export const Header = ({ username }: { username: string }) => {
             className="cursor-pointer"
           />
           <motion.div
+            className="relative"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
@@ -78,9 +85,17 @@ export const Header = ({ username }: { username: string }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: displayName ? 0.45 : 0.35 }}
               >
-                roots
+                {t_common('app-name')}
               </motion.span>
             </TypographyH3>
+            <motion.span
+              className="text-ocean-100 absolute top-full right-0 font-semibold"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: -5 }}
+              transition={{ duration: 0.2, delay: 0.7 }}
+            >
+              beta
+            </motion.span>
           </motion.div>
         </Link>
       </motion.div>
@@ -94,7 +109,7 @@ export const Header = ({ username }: { username: string }) => {
           ease: 'easeInOut',
         }}
       >
-        <div className="bg-ocean-200 shadow-center-sm h-3 rounded-b" />
+        <div className="bg-ocean-200 shadow-center-sm h-2 rounded-b" />
       </motion.div>
     </>
   )

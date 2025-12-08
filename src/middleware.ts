@@ -13,8 +13,9 @@ import {
 const { auth } = NextAuth(AuthConfig)
 
 /**
- * Middleware to handle the routing flow.
- * @param req
+ * Middleware to handle the routing flow and CloudFront cookies.
+ * @param req {NextRequest} The incoming request object.
+ * @returns {NextResponse} The response object.
  */
 export default auth(async (req) => {
   const { nextUrl: NextURL } = req
@@ -27,12 +28,12 @@ export default auth(async (req) => {
   const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
 
   /* Api Route */
-  if (isApiAuthRoute) return
+  if (isApiAuthRoute) return NextResponse.next()
 
   /* Auth Route */
   if (isAuthRoute) {
     if (isLoggedIn) return NextResponse.redirect(new URL(DEFAULT_AUTH_REDIRECT_URL, NextURL))
-    return
+    return NextResponse.next()
   }
 
   /* Protected route */
@@ -43,8 +44,21 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL(`/auth?callbackUrl=${encodedCallbackURL}`, NextURL))
   }
 
+  /* CloudFront cookies for authenticated users */
+  if (isLoggedIn) {
+    const hasCookies =
+      req.cookies.get('CloudFront-Key-Pair-Id') &&
+      req.cookies.get('CloudFront-Policy') &&
+      req.cookies.get('CloudFront-Signature')
+
+    if (!hasCookies) {
+      const baseUrl = NextURL.origin
+      await fetch(`${baseUrl}/api/cookies`, { method: 'GET', credentials: 'include' })
+    }
+  }
+
   /* Public route */
-  return
+  return NextResponse.next()
 })
 
 export const config = {
@@ -52,24 +66,4 @@ export const config = {
     '/((?!api/|_next/|images/|docs/|_proxy/|_static|_vercel|[\\w-]+\\.\\w+).*)',
     '/s/:slug*',
   ],
-}
-
-export async function middleware(req: NextRequest) {
-  // Skip for static files & public routes
-  if (req.nextUrl.pathname.startsWith('/_next')) return NextResponse.next()
-  if (req.nextUrl.pathname.startsWith('/api')) return NextResponse.next()
-  if (req.nextUrl.pathname.startsWith('/auth')) return NextResponse.next()
-
-  // Check if CloudFront cookies exist
-  const hasCookies =
-    req.cookies.get('CloudFront-Key-Pair-Id') &&
-    req.cookies.get('CloudFront-Policy') &&
-    req.cookies.get('CloudFront-Signature')
-
-  if (!hasCookies) {
-    const baseUrl = req.nextUrl.origin
-    await fetch(`${baseUrl}/api/cookies`, { method: 'GET', credentials: 'include' })
-  }
-
-  return NextResponse.next()
 }

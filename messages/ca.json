@@ -20,7 +20,14 @@
     "searching": "Buscant...",
     "share": "Compartir",
     "close": "Tancar",
-    "download": "Descarregar"
+    "download": "Descarregar",
+    "app-name": "arrels",
+    "app-beta": "versió beta",
+    "app-status": "es troba actualment en la seva",
+    "app-issues": "Si detectes algun problema o error, no dubtis en",
+    "app-ticket": "obrir un ticket",
+    "app-source": "a GitHub",
+    "unavailable-feature": "Aquesta funcionalitat no està disponible en aquesta versió beta."
   },
   "toasts": {
     "tree-created": "Família creada amb èxit.",
@@ -96,11 +103,16 @@
     "private": "Privat"
   },
   "login": {
-    "login-to": "Accedeix al teu ",
-    "login-name": "Llibre de Famílies",
-    "login-text": "Inicia sessió per accedir a totes les teves famílies i crear-ne de noves.",
+    "login-to": "Accedeix a ",
+    "login-text": "Explora les teves connexions familiars i enforteix les teves arrels",
     "login-error": "S'ha produït un error en iniciar sessió.",
-    "google-login": "Continuar amb Google"
+    "login-with": "Continuar amb ",
+    "build-your-tree-title": "Construeix el teu arbre",
+    "build-your-tree-description": "Crea i explora les teves connexions familiars",
+    "share-memories-title": "Comparteix records",
+    "share-memories-description": "Preserva històries i fotos per a les generacions futures",
+    "private-and-secure-title": "Privat i segur",
+    "private-and-secure-description": "Les dades de la teva família es mantenen segures i privades"
   },
   "insights": {
     "milestones": "Aniversaris i efemèrides",
@@ -129,6 +141,7 @@
     "tree-create-description": "Omple les dades següents per crear una nova família.",
     "tree-edit": "Editar família",
     "tree-edit-description": "Modifica les dades i la configuració de la teva família a continuació.",
+    "general-tab": "Detalls",
     "general-tab-label": "General",
     "tree-name": "Nom de la família",
     "tree-name-description": "Aquest és el nom que identificarà la teva família dins de l'aplicació.",

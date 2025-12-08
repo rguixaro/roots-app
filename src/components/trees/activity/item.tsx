@@ -47,7 +47,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
       <div
         className={cn(
           'group transition-all duration-300',
-          'my-2 rounded-lg border-4 px-3 py-2 sm:px-5 sm:py-3',
+          'my-2 rounded-lg border-2 px-3 py-2 sm:px-5 sm:py-3',
           'flex flex-col items-start justify-start',
           'border-ocean-100 bg-pale-ocean hover:shadow-md',
           'text-ocean-300 hover:bg-ocean-50'

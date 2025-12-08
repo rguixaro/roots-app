@@ -20,7 +20,14 @@
     "searching": "Searching...",
     "share": "Share",
     "close": "Close",
-    "download": "Download"
+    "download": "Download",
+    "app-name": "roots",
+    "app-beta": "beta version",
+    "app-status": "is currently in its",
+    "app-issues": "If you detect any problem or bug, feel free to",
+    "app-ticket": "create an issue",
+    "app-source": "on GitHub",
+    "unavailable-feature": "This feature is not available in this beta version."
   },
   "toasts": {
     "tree-created": "Family created successfully.",
@@ -96,11 +103,16 @@
     "private": "Private"
   },
   "login": {
-    "login-to": "Sign in to your ",
-    "login-name": "Roots",
-    "login-text": "Sign in to access all your families and create new ones.",
+    "login-to": "Sign in to ",
+    "login-text": "Explore your family connections and strengthen your roots",
     "login-error": "An error occurred while signing in.",
-    "google-login": "Continue with Google"
+    "login-with": "Continue with ",
+    "build-your-tree-title": "Build Your Tree",
+    "build-your-tree-description": "Create and explore your family connections",
+    "share-memories-title": "Share Memories",
+    "share-memories-description": "Preserve stories and photos for future generations",
+    "private-and-secure-title": "Private & Secure",
+    "private-and-secure-description": "Your family data stays safe and private"
   },
   "insights": {
     "milestones": "Birthdays and milestones",

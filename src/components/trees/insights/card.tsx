@@ -37,7 +37,10 @@ export function HighlightItem({
         <p className="mb-2 leading-tight font-medium">{item.value}</p>
         <div className="flex flex-col text-xs font-medium opacity-70">
           <span>{item.subtitle}</span>
-          <Link href={`/trees/${item.treeSlug}`} className="hover:text-ocean-500 hover:underline">
+          <Link
+            href={`/trees/${item.treeSlug}`}
+            className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
+          >
             {item.treeName}
           </Link>
         </div>

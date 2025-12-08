@@ -43,7 +43,10 @@ export async function Milestones() {
                   <div className="flex gap-2 text-xs font-medium opacity-70">
                     <span>{item.date}</span>
                     {' · '}
-                    <Link href={`/trees/${item.treeSlug}`} className="hover:underline">
+                    <Link
+                      href={`/trees/${item.treeSlug}`}
+                      className="decoration-dotted underline-offset-4 hover:underline"
+                    >
                       {item.treeName}
                     </Link>
                   </div>
@@ -74,7 +77,10 @@ export async function Milestones() {
                   <div className="flex gap-2 text-xs font-medium opacity-70">
                     <span>{item.date}</span>
                     {' · '}
-                    <Link href={`/trees/${item.treeSlug}`} className="hover:underline">
+                    <Link
+                      href={`/trees/${item.treeSlug}`}
+                      className="decoration-dotted underline-offset-4 hover:underline"
+                    >
                       {item.treeName}
                     </Link>
                   </div>

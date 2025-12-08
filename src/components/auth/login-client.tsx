@@ -31,19 +31,6 @@ const backgroundOrbVariants: Variants = {
   }),
 }
 
-const logoVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 200,
-      damping: 20,
-    },
-  },
-}
-
 const textVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -217,23 +204,51 @@ export function LoginClient({
             'bg-ocean-500 shadow-center w-full max-w-sm shrink-0 overflow-hidden rounded-3xl'
           )}
         >
-          <div className="text-ocean-300 flex flex-col items-center justify-center space-y-1.5 p-6 text-center">
-            <motion.img variants={logoVariants} src={'/logo.svg'} width={72} height={72} />
+          <div className="text-ocean-300 flex flex-col items-center justify-center p-6 text-center">
+            <motion.img
+              src={'/logo.svg'}
+              width={96}
+              height={96}
+              initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{
+                duration: 0.5,
+                delay: 0.1,
+                type: 'spring',
+                stiffness: 200,
+                damping: 15,
+              }}
+              whileHover={{
+                scale: 1.1,
+                rotate: 5,
+                transition: { duration: 0.2 },
+              }}
+              whileTap={{ scale: 0.95 }}
+              className="cursor-pointer"
+            />
             <motion.h3
               variants={textVariants}
-              className="text-ocean-100 py-5 text-2xl leading-none font-semibold tracking-tight md:text-3xl"
+              className="text-ocean-100 py-3 text-2xl leading-none font-semibold tracking-tight md:text-3xl"
             >
               {loginTo}
               <motion.p
                 variants={textVariants}
-                className="text-pale-ocean text-3xl font-extrabold md:text-4xl"
+                className="text-ocean-50 relative text-3xl font-extrabold md:text-4xl"
               >
                 {loginName}
+                <motion.span
+                  className="text-ocean-100 absolute right-0 text-sm font-semibold sm:text-lg"
+                  initial={{ opacity: 0, x: 0, y: 12 }}
+                  animate={{ opacity: 1, x: 25, y: 12 }}
+                  transition={{ duration: 0.2, delay: 1 }}
+                >
+                  beta
+                </motion.span>
               </motion.p>
             </motion.h3>
             <motion.p
               variants={textVariants}
-              className="text-ocean-100 mt-5 text-base font-medium md:text-lg"
+              className="text-ocean-100 mt-5 px-5 text-base font-medium md:text-lg"
             >
               {loginText}
             </motion.p>

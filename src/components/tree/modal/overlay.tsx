@@ -139,7 +139,7 @@ function IconLink({
 }
 
 export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeOverlayProps) {
-  const t = useTranslations('trees')
+  const t_common = useTranslations('common')
 
   const iconClassName = 'text-ocean-50 group-hover:text-pale-ocean transition-colors duration-300'
 
@@ -147,26 +147,11 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
   const { copy } = useCopyToClipboard()
 
   const handleShare = useCallback(async () => {
-    const url = `${SITE_URL}/trees/${tree?.slug}`
-    const copied = await copy(url)
-    if (copied) {
-      toast.success(t('share.success'))
-    }
-  }, [copy, tree?.slug, t])
+    toast.info(t_common('unavailable-feature'))
+  }, [copy, tree?.slug, t_common])
 
   const handleDownload = useCallback(() => {
-    if (downloadRef.current === null) return
-
-    toPng(downloadRef.current, { cacheBust: true })
-      .then((dataUrl) => {
-        const link = document.createElement('a')
-        link.download = `${tree?.slug}.png`
-        link.href = dataUrl
-        link.click()
-      })
-      .catch((err) => {
-        console.log(err)
-      })
+    toast.info(t_common('unavailable-feature'))
   }, [tree?.slug])
 
   return (

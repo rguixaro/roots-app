@@ -106,7 +106,7 @@ export function NotFoundClient({ pageNotFound, returnText }: NotFoundClientProps
             initial="idle"
             whileHover="hover"
             whileTap="tap"
-            className="mt-12 inline-block font-medium underline"
+            className="mt-12 inline-block font-medium underline decoration-dotted underline-offset-4"
           >
             {returnText}
           </motion.span>

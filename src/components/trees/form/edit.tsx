@@ -136,7 +136,7 @@ const MemberItem = ({
                     if (memberId) (setCurrMember({ index, memberId }), setDialogOpen(true))
                     else remove(index)
                   }}
-                  className="bg-ocean-500 hover:bg-ocean-600 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
+                  className="bg-ocean-400 hover:bg-ocean-500 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
                 >
                   {t_trees('tree-member-remove')}
                 </button>
@@ -202,7 +202,7 @@ const MemberItem = ({
                     remove(index)
                   }
                 }}
-                className="text-ocean-500 visible h-9 rounded px-2 py-1 text-xs font-bold underline sm:hidden"
+                className="text-ocean-400 visible h-9 rounded px-2 py-1 text-xs font-bold underline decoration-dotted underline-offset-4 sm:hidden"
               >
                 {t_trees('tree-member-remove')}
               </button>

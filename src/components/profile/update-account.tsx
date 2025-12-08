@@ -141,7 +141,7 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                   )}
                 />
               </div>
-              <div className="my-5">
+              <div className="my-5 flex w-full justify-between gap-2">
                 <Button
                   type="submit"
                   disabled={loading || (name === props.name && isPrivate === props.isPrivate)}
@@ -155,6 +155,14 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                     {loading ? t_common('saving') : t_common('save')}
                   </span>
                 </Button>
+                <LogoutAccount
+                  trigger={
+                    <Button className="bg-ocean-400 hover:bg-ocean-300">
+                      <LogOut size={16} />
+                      <span className="font-bold">{t_profile('account-logout')}</span>
+                    </Button>
+                  }
+                />
               </div>
             </Tabs.Content>
             <Tabs.Content value="account">
@@ -183,21 +191,16 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                     </FormItem>
                   )}
                 />
-                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
-                <div className="flex w-full justify-between">
-                  <LogoutAccount
-                    trigger={
-                      <Button>
-                        <LogOut size={16} />
-                        <span className="font-bold">{t_profile('account-logout')}</span>
-                      </Button>
-                    }
-                  />
-                  <DeleteAccount
-                    email={props.email!}
-                    trigger={<Button variant="ghost">{t_profile('account-delete')}</Button>}
-                  />
-                </div>
+              </div>
+              <div className="my-5 flex w-full justify-end">
+                <DeleteAccount
+                  email={props.email!}
+                  trigger={
+                    <Button className="bg-ocean-400 hover:bg-ocean-300">
+                      {t_profile('account-delete')}
+                    </Button>
+                  }
+                />
               </div>
             </Tabs.Content>
           </Tabs.Root>

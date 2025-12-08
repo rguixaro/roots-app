@@ -20,7 +20,7 @@ export default async function TreeLogsPage({ params }: { params: Promise<{ slug:
       <div className="text-ocean-200 mt-32 flex flex-col items-center justify-center">
         <FileQuestion size={24} />
         <TypographyH4 className="mt-2 mb-5">{t_common('tree-not-found')}</TypographyH4>
-        <Link href="/" className="mt-5 font-medium underline">
+        <Link href="/" className="mt-5 font-medium underline decoration-dotted underline-offset-4">
           {t_common('return')}
         </Link>
       </div>

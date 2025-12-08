@@ -47,7 +47,7 @@ export async function Milestones() {
                     {' · '}
                     <Link
                       href={`/trees/${item.treeSlug}`}
-                      className="hover:text-ocean-500 hover:underline"
+                      className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
                     >
                       {item.treeName}
                     </Link>
@@ -83,7 +83,7 @@ export async function Milestones() {
                     {' · '}
                     <Link
                       href={`/trees/${item.treeSlug}`}
-                      className="hover:text-ocean-500 hover:underline"
+                      className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
                     >
                       {item.treeName}
                     </Link>

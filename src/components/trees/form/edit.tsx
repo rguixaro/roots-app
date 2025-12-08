@@ -359,19 +359,19 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             <Tabs.List className="border-ocean-200/50 mb-4 flex border-b-2">
               <Tabs.Trigger
                 value="general"
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_trees('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="settings"
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_trees('settings-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_trees('tree-members-tab-label')}
               </Tabs.Trigger>

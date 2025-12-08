@@ -84,13 +84,13 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
             <Tabs.List className="border-ocean-200/50 mb-4 flex border-b-2">
               <Tabs.Trigger
                 value="profile"
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_profile('profile-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="account"
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_profile('account-tab-label')}
               </Tabs.Trigger>

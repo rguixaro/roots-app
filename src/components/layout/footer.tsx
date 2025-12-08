@@ -23,8 +23,9 @@ export const Footer = () => {
       >
         <div className="flex w-full items-center justify-center">
           <p className="text-sm md:text-base">
-            <b className="text-ocean-400">{t_common('app-name')}</b> {t_common('app-status')}{' '}
-            <b className="text-ocean-400">{t_common('app-beta')}</b>. {`${t_common('app-issues')} `}
+            <b className="text-ocean-400">{t_common('app-name').toLowerCase()}</b>{' '}
+            {t_common('app-status')} <b className="text-ocean-400">{t_common('app-beta')}</b>.{' '}
+            {`${t_common('app-issues')} `}
             <Link
               href="https://github.com/rguixaro/roots-app/issues/new/choose"
               className="text-ocean-400 font-semibold underline decoration-dotted underline-offset-4"

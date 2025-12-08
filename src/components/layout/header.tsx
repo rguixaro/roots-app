@@ -85,7 +85,7 @@ export const Header = ({ username }: { username: string }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: displayName ? 0.45 : 0.35 }}
               >
-                {t_common('app-name')}
+                {t_common('app-name').toLowerCase()}
               </motion.span>
             </TypographyH3>
             <motion.span

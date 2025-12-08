@@ -417,7 +417,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           animate={isExpanded ? 'expanded' : 'collapsed'}
           className={cn(
             'bg-ocean-200 absolute bottom-full left-1/2 flex w-full origin-bottom -translate-x-1/2 justify-evenly',
-            'cursor-default overflow-hidden rounded-t-xl'
+            '-mb-px cursor-default overflow-hidden rounded-t-xl'
           )}
         >
           <div className={cn('flex w-full items-center justify-center pt-3 pb-1')}>

@@ -39,6 +39,10 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.png" />
+      </head>
       <body
         className={cn(
           `font-sans ${outfit.variable} antialiased`,

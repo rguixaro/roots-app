@@ -3,9 +3,9 @@ import { randomUUID } from 'crypto'
 
 import { env } from '@/env.mjs'
 
-const { AWS_REGION, AWS_S3_BUCKET_NAME } = env
+const { AMAZON_REGION, AMAZON_S3_BUCKET_NAME } = env
 
-const s3 = new S3Client({ region: AWS_REGION })
+const s3 = new S3Client({ region: AMAZON_REGION })
 
 export async function uploadFileToS3(file: File, treeId: string): Promise<string> {
   const arrayBuffer = await file.arrayBuffer()
@@ -17,7 +17,7 @@ export async function uploadFileToS3(file: File, treeId: string): Promise<string
 
   await s3.send(
     new PutObjectCommand({
-      Bucket: AWS_S3_BUCKET_NAME,
+      Bucket: AMAZON_S3_BUCKET_NAME,
       Key: fileKey,
       Body: buffer,
       ContentType: file.type,
@@ -30,7 +30,7 @@ export async function uploadFileToS3(file: File, treeId: string): Promise<string
 export async function deleteFileFromS3(fileKey: string): Promise<void> {
   await s3.send(
     new DeleteObjectCommand({
-      Bucket: AWS_S3_BUCKET_NAME,
+      Bucket: AMAZON_S3_BUCKET_NAME,
       Key: fileKey,
     })
   )

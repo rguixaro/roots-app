@@ -4,14 +4,14 @@ import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-sec
 
 import { env } from '@/env.mjs'
 
-const { AWS_CLOUDFRONT_KEY_PAIR_ID, NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN } = env
+const { AMAZON_CLOUDFRONT_KEY_PAIR_ID, NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN } = env
 
-const secrets = new SecretsManagerClient({ region: env.AWS_REGION })
+const secrets = new SecretsManagerClient({ region: env.AMAZON_REGION })
 
 async function getPrivateKey() {
   const response = await secrets.send(
     new GetSecretValueCommand({
-      SecretId: env.AWS_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
+      SecretId: env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
     })
   )
   return response.SecretString!
@@ -35,7 +35,7 @@ export async function GET() {
 
   const cookies = getSignedCookies({
     privateKey,
-    keyPairId: AWS_CLOUDFRONT_KEY_PAIR_ID,
+    keyPairId: AMAZON_CLOUDFRONT_KEY_PAIR_ID,
     policy: JSON.stringify(policy),
   })
 

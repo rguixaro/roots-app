@@ -54,6 +54,7 @@ export function NodeInfoTabGeneral({
   t_toasts,
 }: NodeInfoTabGeneralProps) {
   const fullName = form.watch('fullName')
+  const alias = form.watch('alias')
   const birthPlace = form.watch('birthPlace')
   const birthDate = form.watch('birthDate')
   const deathDate = form.watch('deathDate')
@@ -76,6 +77,28 @@ export function NodeInfoTabGeneral({
                     {...field}
                     autoComplete="off"
                     placeholder={t_trees('node-fullname')}
+                    disabled={!editMode || loading}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="alias"
+          render={({ field }) => (
+            <FormItem className="mt-3">
+              <FormLabel>{t_trees('node-alias')}</FormLabel>
+              <FormControl>
+                <div className="py-2">
+                  <Input
+                    {...field}
+                    value={field.value ?? ''}
+                    autoComplete="off"
+                    className="min-w-[16ch]"
+                    placeholder={t_trees('node-alias')}
                     disabled={!editMode || loading}
                   />
                 </div>
@@ -245,7 +268,8 @@ export function NodeInfoTabGeneral({
                   (node?.deathDate ? new Date(node.deathDate).toISOString() : '') &&
                 gender === node?.gender &&
                 birthPlace === node?.birthPlace &&
-                biography === node?.biography)
+                biography === node?.biography &&
+                alias === node?.alias)
             }
           >
             <div className="flex items-center space-x-3">

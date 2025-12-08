@@ -305,6 +305,7 @@ export const updateTreeNode = async (
 
     return { error: false }
   } catch (e) {
+    console.log(e)
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-node-not-found' }
     }

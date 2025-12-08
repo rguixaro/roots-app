@@ -52,8 +52,9 @@ export default auth(async (req) => {
       req.cookies.get('CloudFront-Signature')
 
     if (!hasCookies) {
-      const baseUrl = NextURL.origin
-      await fetch(`${baseUrl}/api/cookies`, { method: 'GET', credentials: 'include' })
+      const returnTo = req.nextUrl.pathname + req.nextUrl.search
+      const cookiesUrl = `${req.nextUrl.origin}/api/cookies?return=${encodeURIComponent(returnTo)}`
+      return NextResponse.redirect(cookiesUrl)
     }
   }
 

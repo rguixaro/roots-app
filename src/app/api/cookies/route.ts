@@ -17,7 +17,10 @@ async function getPrivateKey() {
   return response.SecretString!
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const returnTo = url.searchParams.get('return') || '/'
+
   const privateKey = await getPrivateKey()
 
   const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 6
@@ -26,9 +29,7 @@ export async function GET() {
     Statement: [
       {
         Resource: `${NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/*`,
-        Condition: {
-          DateLessThan: { 'AWS:EpochTime': expires },
-        },
+        Condition: { DateLessThan: { 'AWS:EpochTime': expires } },
       },
     ],
   }
@@ -39,7 +40,8 @@ export async function GET() {
     policy: JSON.stringify(policy),
   })
 
-  const response = NextResponse.json({ success: true })
+  const redirectUrl = new URL(returnTo, req.url)
+  const response = NextResponse.redirect(redirectUrl)
 
   Object.entries(cookies).forEach(([name, value]) => {
     response.cookies.set({

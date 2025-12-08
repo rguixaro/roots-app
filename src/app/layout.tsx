@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
+import { getLocale, getMessages, getTranslations } from 'next-intl/server'
 import { SessionProvider } from 'next-auth/react'
 import 'reactflow/dist/style.css'
 
@@ -9,8 +9,7 @@ import { auth } from '@/auth'
 
 import { ToasterProvider } from '@/providers'
 
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout'
+import { Header, Footer } from '@/components/layout'
 
 import '@/styles/globals.css'
 
@@ -22,9 +21,9 @@ const outfit = localFont({
   weight: '100 900',
 })
 
-export const metadata: Metadata = {
-  title: 'Roots',
-  description: 'Roots application',
+export async function generateMetadata(): Promise<Metadata> {
+  const t_common = await getTranslations('common')
+  return { title: t_common('app-name'), description: t_common('app-description') }
 }
 
 export default async function RootLayout({

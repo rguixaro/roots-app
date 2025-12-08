@@ -20,7 +20,14 @@
     "searching": "Buscando...",
     "share": "Compartir",
     "close": "Cerrar",
-    "download": "Descargar"
+    "download": "Descargar",
+    "app-name": "roots",
+    "app-beta": "versión beta",
+    "app-status": "está actualmente en su",
+    "app-issues": "Si detectas algún problema o error, no dudes en",
+    "app-ticket": "abrir un ticket",
+    "app-source": "en GitHub",
+    "unavailable-feature": "Esta funcionalidad no está disponible en esta versión beta."
   },
   "toasts": {
     "tree-created": "Familia creada con éxito.",
@@ -97,8 +104,7 @@
   },
   "login": {
     "login-to": "Acceder a ",
-    "login-name": "roots",
-    "login-text": "Inicia sesión para acceder a todas tus familias y crear nuevas.",
+    "login-text": "Explora tus conexiones familiares y fortalece tus raíces",
     "login-error": "Se ha producido un error al iniciar sesión.",
     "login-with": "Continuar con ",
     "build-your-tree-title": "Construye tu árbol",

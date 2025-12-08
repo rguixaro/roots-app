@@ -20,7 +20,14 @@
     "searching": "Searching...",
     "share": "Share",
     "close": "Close",
-    "download": "Download"
+    "download": "Download",
+    "app-name": "roots",
+    "app-beta": "beta version",
+    "app-status": "is currently in its",
+    "app-issues": "If you detect any problem or bug, feel free to",
+    "app-ticket": "create an issue",
+    "app-source": "on GitHub",
+    "unavailable-feature": "This feature is not available in this beta version."
   },
   "toasts": {
     "tree-created": "Family created successfully.",
@@ -97,8 +104,7 @@
   },
   "login": {
     "login-to": "Sign in to ",
-    "login-name": "roots",
-    "login-text": "Sign in to access all your families and create new ones.",
+    "login-text": "Explore your family connections and strengthen your roots",
     "login-error": "An error occurred while signing in.",
     "login-with": "Continue with ",
     "build-your-tree-title": "Build Your Tree",

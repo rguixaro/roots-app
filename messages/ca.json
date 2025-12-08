@@ -20,7 +20,14 @@
     "searching": "Buscant...",
     "share": "Compartir",
     "close": "Tancar",
-    "download": "Descarregar"
+    "download": "Descarregar",
+    "app-name": "arrels",
+    "app-beta": "versió beta",
+    "app-status": "es troba actualment en la seva",
+    "app-issues": "Si detectes algun problema o error, no dubtis en",
+    "app-ticket": "obrir un ticket",
+    "app-source": "a GitHub",
+    "unavailable-feature": "Aquesta funcionalitat no està disponible en aquesta versió beta."
   },
   "toasts": {
     "tree-created": "Família creada amb èxit.",
@@ -97,8 +104,7 @@
   },
   "login": {
     "login-to": "Accedeix a ",
-    "login-name": "Arrels",
-    "login-text": "Inicia sessió per accedir a totes les teves famílies i crear-ne de noves.",
+    "login-text": "Explora les teves connexions familiars i enforteix les teves arrels",
     "login-error": "S'ha produït un error en iniciar sessió.",
     "login-with": "Continuar amb ",
     "build-your-tree-title": "Construeix el teu arbre",
@@ -135,6 +141,7 @@
     "tree-create-description": "Omple les dades següents per crear una nova família.",
     "tree-edit": "Editar família",
     "tree-edit-description": "Modifica les dades i la configuració de la teva família a continuació.",
+    "general-tab": "Detalls",
     "general-tab-label": "General",
     "tree-name": "Nom de la família",
     "tree-name-description": "Aquest és el nom que identificarà la teva família dins de l'aplicació.",

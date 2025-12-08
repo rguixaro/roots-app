@@ -263,14 +263,14 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
               <Tabs.Trigger
                 value="general"
                 disabled={canAccessMembers}
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_trees('general-tab-label')}
               </Tabs.Trigger>
               <Tabs.Trigger
                 value="members"
                 disabled={!canAccessMembers}
-                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-black"
+                className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
               >
                 {t_trees('tree-members-tab-label')}
               </Tabs.Trigger>

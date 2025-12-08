@@ -150,7 +150,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const { id, fullName, birthDate, deathDate, edgesFrom, edgesTo } = data.node
+  const { id, fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
   const { withPicture, selectedNodeId } = data
 
   const profilePicture = getProfilePicture(data.node)
@@ -306,6 +306,16 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       )}
     >
       <strong className="relative z-10 leading-none">{fullName}</strong>
+      {alias && (
+        <span
+          className={cn(
+            'relative z-10 mt-1 text-xs leading-none font-medium',
+            'opacity-70 group-hover:opacity-100'
+          )}
+        >
+          {alias}
+        </span>
+      )}
       {birthYear || deathDate ? (
         <div
           className={cn(

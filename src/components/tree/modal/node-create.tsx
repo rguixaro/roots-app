@@ -261,6 +261,33 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                       </FormItem>
                     )}
                   />
+                  {
+                    <FormField
+                      control={form.control}
+                      name="alias"
+                      render={({ field }) => (
+                        <FormItem className="mt-3">
+                          <FormLabel>{t_trees('node-alias')}</FormLabel>
+                          <FormDescription className="mb-2 text-sm opacity-70">
+                            {t_trees('node-alias-description')}
+                          </FormDescription>
+                          <FormControl>
+                            <div className="py-2">
+                              <Input
+                                {...field}
+                                value={field.value ?? ''}
+                                autoComplete="off"
+                                className="min-w-[16ch]"
+                                placeholder={t_trees('node-alias')}
+                                disabled={loading}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  }
                   <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
                   <FormField
                     control={form.control}

@@ -29,6 +29,7 @@ import {
 import { TreeNode } from '@/types'
 
 interface NodeInfoTabGeneralProps {
+  readonly: boolean
   node: TreeNode | null
   form: UseFormReturn<z.infer<typeof UpdateTreeNodeSchema>>
   loading: boolean
@@ -42,6 +43,7 @@ interface NodeInfoTabGeneralProps {
 }
 
 export function NodeInfoTabGeneral({
+  readonly,
   node,
   form,
   loading,
@@ -241,7 +243,7 @@ export function NodeInfoTabGeneral({
         />
       </div>
       <div className="my-6 flex gap-3">
-        {!editMode && (
+        {!editMode && !readonly && (
           <Button type="button" onClick={() => onEditModeChange(true)} disabled={loading}>
             <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
           </Button>

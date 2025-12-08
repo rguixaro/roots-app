@@ -13,6 +13,7 @@ interface PictureContextMenuProps {
   visible: boolean
   x: number
   y: number
+  readonly: boolean
   picture: Picture | null
   profilePictureId?: string | null
   onDownload: (fileKey: string) => void
@@ -26,6 +27,7 @@ export function PictureContextMenu({
   visible,
   x,
   y,
+  readonly,
   picture,
   profilePictureId,
   onDownload,
@@ -70,17 +72,19 @@ export function PictureContextMenu({
             <ArrowDownToLine size={18} className="text-ocean-300" />
             <span>{t_common('download')}</span>
           </DropdownMenu.Item>
-          <DropdownMenu.Item
-            className={className}
-            onSelect={() => {
-              onTags(picture)
-              onClose()
-            }}
-          >
-            <Tags size={18} className="text-ocean-300" />
-            <span>{t_toasts('node-picture-manage-tags')}</span>
-          </DropdownMenu.Item>
-          {profilePictureId !== picture.id && (
+          {!readonly && (
+            <DropdownMenu.Item
+              className={className}
+              onSelect={() => {
+                onTags(picture)
+                onClose()
+              }}
+            >
+              <Tags size={18} className="text-ocean-300" />
+              <span>{t_toasts('node-picture-manage-tags')}</span>
+            </DropdownMenu.Item>
+          )}
+          {!readonly && profilePictureId !== picture.id && (
             <DropdownMenu.Item
               className={className}
               onSelect={() => {
@@ -92,16 +96,18 @@ export function PictureContextMenu({
               <span>{t_toasts('node-picture-set-profile')}</span>
             </DropdownMenu.Item>
           )}
-          <DropdownMenu.Item
-            className={cn(className, 'text-red-500 hover:bg-red-50/70 focus:bg-red-50/70')}
-            onSelect={() => {
-              onDelete(picture.id)
-              onClose()
-            }}
-          >
-            <Trash2 size={18} className="text-red-400" />
-            <span>{t_common('delete')}</span>
-          </DropdownMenu.Item>
+          {!readonly && (
+            <DropdownMenu.Item
+              className={cn(className, 'text-red-500 hover:bg-red-50/70 focus:bg-red-50/70')}
+              onSelect={() => {
+                onDelete(picture.id)
+                onClose()
+              }}
+            >
+              <Trash2 size={18} className="text-red-400" />
+              <span>{t_common('delete')}</span>
+            </DropdownMenu.Item>
+          )}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

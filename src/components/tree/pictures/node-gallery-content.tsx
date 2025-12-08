@@ -12,6 +12,7 @@ import { Picture } from '@/types'
 import { GalleryImage } from './gallery-image'
 
 interface NodeGalleryContentProps {
+  readonly: boolean
   pictures: Picture[]
   loadingPictures: boolean
   loading: boolean
@@ -28,6 +29,7 @@ interface NodeGalleryContentProps {
 }
 
 export function NodeGalleryContent({
+  readonly,
   pictures,
   loadingPictures,
   loading,
@@ -50,23 +52,27 @@ export function NodeGalleryContent({
         <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
           <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
             <p>{t_trees('node-gallery-description')} </p>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={loading}
-              className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-            >
-              <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-            </Button>
+            {!readonly && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+                className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
+              >
+                <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+              </Button>
+            )}
           </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={onFileChange}
-            className="hidden"
-          />
+          {!readonly && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onFileChange}
+              className="hidden"
+            />
+          )}
           {loadingPictures ? (
             <div className="flex items-center justify-center py-8">
               <LoaderIcon size={24} className="text-pale-ocean animate-spin" />
@@ -141,23 +147,27 @@ export function NodeGalleryContent({
           </button>
         </div>
         <p>{t_trees('node-gallery-description')} </p>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={loading}
-          className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-        >
-          <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-        </Button>
+        {!readonly && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
+          >
+            <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+          </Button>
+        )}
       </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={onFileChange}
-        className="hidden"
-      />
+      {!readonly && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          className="hidden"
+        />
+      )}
       {loadingPictures ? (
         <div className="flex items-center justify-center py-8">
           <LoaderIcon size={24} className="text-pale-ocean animate-spin" />

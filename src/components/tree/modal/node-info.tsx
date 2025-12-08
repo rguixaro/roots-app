@@ -28,6 +28,7 @@ import { checkKeyDown, cn } from '@/utils'
 import { TreeNode } from '@/types'
 
 interface NodeInfoModalProps {
+  readonly: boolean
   showModal: boolean
   node: TreeNode | null
   withPicture?: boolean
@@ -39,6 +40,7 @@ interface NodeInfoModalProps {
 }
 
 export function NodeInfoModal({
+  readonly,
   showModal,
   node,
   withPicture,
@@ -227,6 +229,7 @@ export function NodeInfoModal({
                   </Tabs.List>
                   <Tabs.Content value="general">
                     <NodeInfoTabGeneral
+                      readonly={readonly}
                       node={node}
                       form={form}
                       loading={loading}
@@ -242,6 +245,7 @@ export function NodeInfoModal({
                   {isMobile && (
                     <Tabs.Content value="gallery">
                       <NodeGalleryContent
+                        readonly={readonly}
                         pictures={pictureOps.pictures}
                         loadingPictures={pictureOps.loadingPictures}
                         loading={loading}
@@ -288,6 +292,7 @@ export function NodeInfoModal({
               )}
             >
               <NodeGalleryContent
+                readonly={readonly}
                 pictures={pictureOps.pictures}
                 loadingPictures={pictureOps.loadingPictures}
                 loading={loading}
@@ -310,6 +315,7 @@ export function NodeInfoModal({
         visible={pictureOps.pictureMenu.visible}
         x={pictureOps.pictureMenu.x}
         y={pictureOps.pictureMenu.y}
+        readonly={readonly}
         picture={pictureOps.pictureMenu.picture}
         onDownload={pictureOps.onPictureDownload}
         onTags={pictureOps.onPictureTags}

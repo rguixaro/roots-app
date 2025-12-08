@@ -81,6 +81,7 @@ model TreeNode {
 
   birthPlace String?
   biography  String?
+  alias      String?
 
   taggedIn  PictureTag[] @relation("taggedIn")
   edgesFrom TreeEdge[]   @relation("FromNode")

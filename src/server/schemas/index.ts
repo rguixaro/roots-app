@@ -60,8 +60,6 @@ export const TreeSchema = z.object({
   type: z.enum(TreeType),
   nodeImage: z.boolean().default(false),
   nodeGallery: z.boolean().default(false),
-  birthPlace: z.string().nullable().optional(),
-  biography: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -97,6 +95,7 @@ export type UpdateProfileInput = z.TypeOf<typeof UpdateProfileSchema>
 export const CreateTreeNodeSchema = z.object({
   treeId: z.string().min(1),
   fullName: z.string().min(1, { message: 'full-name-required' }),
+  alias: z.string().max(16, { message: 'alias-too-long' }).optional().nullable(),
   birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
   deathDate: z.coerce.date().optional().nullable(),
@@ -114,6 +113,7 @@ export const UpdateTreeNodeSchema = z.object({
   id: z.string(),
   treeId: z.string().min(1),
   fullName: z.string().min(1, { message: 'full-name-required' }),
+  alias: z.string().max(16, { message: 'alias-too-long' }).optional().nullable(),
   birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
   deathDate: z.coerce.date().optional().nullable(),

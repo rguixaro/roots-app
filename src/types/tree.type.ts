@@ -42,6 +42,7 @@ export interface TreeNode {
   treeId: string
 
   fullName: string
+  alias?: string | null
   birthDate?: Date | null
   deathDate?: Date | null
   gender: TreeNodeGender

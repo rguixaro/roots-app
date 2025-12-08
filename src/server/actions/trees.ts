@@ -227,7 +227,7 @@ export const createTreeNode = async (
       data: {
         treeId: values.treeId,
         fullName: values.fullName,
-        aliases: values.alias,
+        alias: values.alias,
         birthDate: values.birthDate,
         deathDate: values.deathDate,
         gender: values.gender,

@@ -2,31 +2,19 @@
  * Routes used for authentication.
  * Auth not required.
  */
-export const AUTH_ROUTES: string[] = [
-	'/auth',
-	'/register',
-	'/auth-error',
-	'/verify',
-	'/reset',
-	'/new-password',
-]
+export const AUTH_ROUTES: string[] = ['/auth', '/auth/error']
 
 /**
  * Routes that require authentication.
  * Auth required.
  */
-export const PROTECTED_ROUTES: string[] = [
-	'/',
-	'/profile',
-	'/families',
-	'/families/new',
-]
+export const PROTECTED_ROUTES: string[] = ['/', '/profile', '/trees', '/trees/new']
 
 /**
- * Families routes prefix.
+ * Trees routes prefix.
  * Auth required.
  */
-export const FAMILIES_ROUTE_PREFIX: string = '/families/'
+export const TREES_ROUTE_PREFIX: string = '/trees/'
 
 /**
  * API Authentication routes prefix.

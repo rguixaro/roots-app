@@ -1,75 +1,218 @@
 generator client {
-    provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider    = "mongodb"
-    url         = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
-enum FamilyType {
-    Human
-    Animal
+enum TreeType {
+  HUMAN
+  ANIMAL
 }
 
-model Family {
-    id                  String     @id @default(auto()) @map("_id") @db.ObjectId
-    slug                String
-    name                String
-    type                FamilyType
-    nodeImage           Boolean    @default(false)
-    nodeGallery         Boolean    @default(false)
-    createdAt           DateTime   @default(now())
-    updatedAt           DateTime   @updatedAt
-    author              User?      @relation(references: [id], fields: [authorId], onDelete: Cascade)
-    authorId            String     @db.ObjectId
-
-    @@unique([name, authorId])
-    @@index([authorId])
+enum TreeAccessRole {
+  VIEWER
+  EDITOR
+  ADMIN
 }
 
+enum TreeEdgeType {
+  PARENT
+  CHILD
+  SPOUSE
+  COUPLE
+}
+
+enum TreeNodeGender {
+  MALE
+  FEMALE
+  OTHER
+  UNSPECIFIED
+}
+
+enum ActivityAction {
+  NODE_CREATED
+  NODE_UPDATED
+  NODE_DELETED
+
+  EDGE_CREATED
+  EDGE_DELETED
+
+  PICTURE_ADDED
+  PICTURE_DELETED
+
+  PICTURE_TAG_CREATED
+  PICTURE_TAG_DELETED
+
+  TREE_UPDATED
+}
+
+model Tree {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  slug        String
+  name        String
+  type        TreeType
+  nodeImage   Boolean  @default(false)
+  nodeGallery Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  nodes       TreeNode[]
+  accesses    TreeAccess[]
+  TreeEdge    TreeEdge[]
+  Picture     Picture[]
+  ActivityLog ActivityLog[]
+
+  @@unique([slug])
+}
+
+model TreeNode {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  fullName  String
+  birthDate DateTime?
+  deathDate DateTime?
+  gender    TreeNodeGender @default(UNSPECIFIED)
+
+  birthPlace String?
+  biography  String?
+
+  taggedIn  PictureTag[] @relation("taggedIn")
+  edgesFrom TreeEdge[]   @relation("FromNode")
+  edgesTo   TreeEdge[]   @relation("ToNode")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TreeEdge {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  fromNode   TreeNode @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  fromNodeId String   @db.ObjectId
+  toNode     TreeNode @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+  toNodeId   String   @db.ObjectId
+
+  type      TreeEdgeType
+  createdAt DateTime     @default(now())
+
+  @@index([fromNodeId])
+  @@index([toNodeId])
+}
+
+model TreeAccess {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
+
+  role TreeAccessRole @default(VIEWER)
+
+  createdAt DateTime @default(now())
+
+  @@unique([treeId, userId])
+  @@index([userId])
+}
 
 model Account {
-    id                  String      @id @default(auto()) @map("_id") @db.ObjectId
-    userId              String      @db.ObjectId
-    type                String
-    provider            String
-    providerAccountId   String
-    refresh_token       String?
-    access_token        String?
-    expires_at          Int?
-    token_type          String?
-    scope               String?
-    id_token            String?
-    session_state       String?
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
 
-    user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
-    @@unique([provider, providerAccountId])
-    @@index([userId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
-    id                  String      @id @default(auto()) @map("_id") @db.ObjectId
-    sessionToken        String      @unique
-    expires             DateTime
-    user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId              String      @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.ObjectId
 
-    @@index([userId])
+  sessionToken String   @unique
+  expires      DateTime
+
+  @@index([userId])
 }
 
 model User {
-    id                  String      @id @default(auto()) @map("_id") @db.ObjectId
-    createdAt           DateTime    @default(now())
-    updatedAt           DateTime    @updatedAt
-    image               String
-    name                String
-    email               String     @unique
-    emailVerified       DateTime?
-    password            String?
-    isPrivate           Boolean     @default(true)
-    accounts            Account[]
-    sessions            Session[]
-    families            Family[]
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  image         String
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  isPrivate     Boolean   @default(true)
+
+  accounts Account[]
+  sessions Session[]
+
+  TreeAccess  TreeAccess[]
+  ActivityLog ActivityLog[]
+}
+
+model Picture {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  fileKey    String
+  uploadedBy String @db.ObjectId
+
+  tags PictureTag[] @relation("tags")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PictureTag {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  picture   Picture @relation("tags", fields: [pictureId], references: [id], onDelete: Cascade)
+  pictureId String  @db.ObjectId
+
+  node   TreeNode @relation("taggedIn", fields: [nodeId], references: [id], onDelete: Cascade)
+  nodeId String   @db.ObjectId
+
+  isProfile Boolean @default(false)
+
+  @@unique([pictureId, nodeId])
+}
+
+model ActivityLog {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  action ActivityAction
+
+  entityId String
+
+  metadata Json?
+
+  user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdBy String @db.ObjectId
+
+  createdAt DateTime @default(now())
 }

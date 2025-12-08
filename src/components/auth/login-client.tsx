@@ -235,7 +235,7 @@ export function LoginClient({
                 variants={textVariants}
                 className="text-ocean-50 relative text-3xl font-extrabold md:text-4xl"
               >
-                {loginName}
+                {loginName.toLowerCase()}
                 <motion.span
                   className="text-ocean-100 absolute right-0 text-sm font-semibold sm:text-lg"
                   initial={{ opacity: 0, x: 0, y: 12 }}

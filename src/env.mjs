@@ -14,6 +14,8 @@ export const env = createEnv({
 
     // Auth
     AUTH_SECRET: z.string(),
+    AUTH_URL: z.string().url().optional(),
+    AUTH_TRUST_HOST: z.string().optional(),
 
     // Google OAuth
     GOOGLE_ID: z.string(),
@@ -24,6 +26,8 @@ export const env = createEnv({
     AMAZON_S3_BUCKET_NAME: z.string(),
     AMAZON_CLOUDFRONT_KEY_PAIR_ID: z.string(),
     AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME: z.string(),
+
+    // Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: z.string().url(),
   },
   runtimeEnv: {
@@ -35,6 +39,8 @@ export const env = createEnv({
 
     // Auth
     AUTH_SECRET: process.env.AUTH_SECRET,
+    AUTH_URL: process.env.AUTH_URL,
+    AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST,
 
     // Google OAuth
     GOOGLE_ID: process.env.GOOGLE_CLIENT_ID,
@@ -46,6 +52,8 @@ export const env = createEnv({
     AMAZON_CLOUDFRONT_KEY_PAIR_ID: process.env.AMAZON_CLOUDFRONT_KEY_PAIR_ID,
     AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME:
       process.env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
+
+    // Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

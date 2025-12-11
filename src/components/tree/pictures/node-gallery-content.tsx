@@ -95,7 +95,7 @@ export function NodeGalleryContent({
                   }
                 >
                   <GalleryImage
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/${picture.fileKey}`}
+                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
                     alt={`Picture ${idx + 1}`}
                     className="min-h-[124px] w-full"
                     hasError={errorGalleryPicture[picture.id]}
@@ -187,7 +187,7 @@ export function NodeGalleryContent({
               )}
             >
               <GalleryImage
-                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/${picture.fileKey}`}
+                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
                 alt={`Picture ${idx + 1}`}
                 className="shadow-center-sm bg-ocean-300 mb-2 min-h-[124px] w-full"
                 hasError={errorGalleryPicture[picture.id]}

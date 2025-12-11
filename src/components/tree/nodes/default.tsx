@@ -454,7 +454,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
                       'h-full w-full object-cover transition-all duration-500 ease-out',
                       isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     )}
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/${profilePicture.fileKey}`}
+                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
                     alt="Profile"
                     onLoad={handlePictureLoad}
                     onError={handlePictureError}

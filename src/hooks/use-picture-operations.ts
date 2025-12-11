@@ -132,7 +132,7 @@ export function usePictureOperations({
       try {
         const element = document.createElement('a')
         element.style.display = 'none'
-        element.href = `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/${fileKey}`
+        element.href = `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${fileKey}`
         element.download = fileKey.split('/').pop() || 'image.jpg'
         element.target = '_blank'
         document.body.appendChild(element)

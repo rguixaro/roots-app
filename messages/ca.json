@@ -54,7 +54,8 @@
     "node-picture-set-profile": "Establir com a imatge de perfil",
     "node-picture-profile-set": "Imatge de perfil establerta amb èxit.",
     "node-picture-delete-confirm": "Eliminar imatge?",
-    "node-picture-delete-confirm-description": "Estàs segur que vols eliminar aquesta imatge de la galeria? Aquesta acció no es pot desfer."
+    "node-picture-delete-confirm-description": "Estàs segur que vols eliminar aquesta imatge de la galeria? Aquesta acció no es pot desfer.",
+    "node-picture-deleted": "Imatge eliminada amb èxit."
   },
   "errors": {
     "error": "S'ha produït un error.",

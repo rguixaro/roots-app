@@ -25,8 +25,7 @@ export async function GET(req: Request) {
 
   const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 6
 
-  const urlPath = new URL(NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN)
-  const resourcePath = `${urlPath.pathname}/*`
+  const resourcePath = `${NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/*`
   const policy = {
     Statement: [
       { Resource: resourcePath, Condition: { DateLessThan: { 'AWS:EpochTime': expires } } },

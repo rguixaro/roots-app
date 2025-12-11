@@ -76,7 +76,7 @@ export function ProfilePictureDisplay({
             'h-full w-full object-cover transition-all duration-500 ease-out',
             isLoading || errorProfilePicture ? 'invisible' : 'visible'
           )}
-          src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+          src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/roots/${profilePicture.fileKey}`}
           alt="Profile picture"
           onLoad={handleLoad}
           onError={handleError}

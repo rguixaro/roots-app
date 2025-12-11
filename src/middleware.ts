@@ -27,16 +27,19 @@ export default auth(async (req) => {
   const isAuthRoute = AUTH_ROUTES.includes(NextURL.pathname)
   const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
 
-  /* Api Route */
+  /// If this is an OAuth callback (has 'state' or 'code' params)
+  const isOAuthCallback = NextURL.searchParams.has('state') || NextURL.searchParams.has('code')
+
+  /// API Route
   if (isApiAuthRoute) return NextResponse.next()
 
-  /* Auth Route */
+  /// Auth Route
   if (isAuthRoute) {
     if (isLoggedIn) return NextResponse.redirect(new URL(DEFAULT_AUTH_REDIRECT_URL, NextURL))
     return NextResponse.next()
   }
 
-  /* Protected route */
+  /// Protected route
   if (!isLoggedIn && (isProtectedRoute || isTreeRoute)) {
     let callbackURL = NextURL.pathname
     if (NextURL.search) callbackURL += NextURL.search
@@ -44,8 +47,8 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL(`/auth?callbackUrl=${encodedCallbackURL}`, NextURL))
   }
 
-  /* CloudFront cookies for authenticated users */
-  if (isLoggedIn) {
+  /// CloudFront cookies for authenticated users
+  if (isLoggedIn && !isOAuthCallback) {
     const hasCookies =
       req.cookies.get('CloudFront-Key-Pair-Id') &&
       req.cookies.get('CloudFront-Policy') &&
@@ -58,7 +61,7 @@ export default auth(async (req) => {
     }
   }
 
-  /* Public route */
+  /// Default: proceed to the requested route
   return NextResponse.next()
 })
 

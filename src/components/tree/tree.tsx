@@ -68,6 +68,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
       <NodeInfoModal
         readonly={readonly}
         showModal={treeState.displayInfo}
+        treeType={tree.type}
         node={treeState.selectedNode}
         withPicture={tree.nodeImage}
         withGallery={tree.nodeGallery}
@@ -81,6 +82,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         }}
       />
       <NodeCreateModal
+        treeType={tree.type}
         showModal={treeState.displayCreate}
         form={nodeCreateForm.form}
         onCreate={nodeCreateForm.onSubmit}

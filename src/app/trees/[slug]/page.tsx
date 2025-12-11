@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { auth } from '@/auth'
 import { getTreeRoots } from '@/server/queries'
 
-import { GoBack, NotFoundClient } from '@/components/layout'
+import { NotFoundClient } from '@/components/layout'
 import { TreeWrapper } from '@/components/tree'
 
 import { TypographyH4 } from '@/ui'

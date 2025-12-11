@@ -25,11 +25,12 @@ import { ConfirmDialog, Form, TypographyH4 } from '@/ui'
 
 import { checkKeyDown, cn } from '@/utils'
 
-import { TreeNode } from '@/types'
+import { TreeNode, TreeType } from '@/types'
 
 interface NodeInfoModalProps {
   readonly: boolean
   showModal: boolean
+  treeType: TreeType
   node: TreeNode | null
   withPicture?: boolean
   withGallery?: boolean
@@ -42,6 +43,7 @@ interface NodeInfoModalProps {
 export function NodeInfoModal({
   readonly,
   showModal,
+  treeType,
   node,
   withPicture,
   withGallery,
@@ -230,6 +232,7 @@ export function NodeInfoModal({
                   <Tabs.Content value="general">
                     <NodeInfoTabGeneral
                       readonly={readonly}
+                      treeType={treeType}
                       node={node}
                       form={form}
                       loading={loading}

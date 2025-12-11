@@ -187,6 +187,8 @@
     "node-gender-male": "Home",
     "node-gender-female": "Dona",
     "node-gender-other": "Altre",
+    "node-gender-male-animal": "Mascle",
+    "node-gender-female-animal": "Femella",
     "node-gender-unspecified": "No especificat",
     "node-biography": "Biografia",
     "node-biography-description": "Aquí pots escriure una breu biografia o notes sobre aquest membre de la família.",

@@ -187,6 +187,8 @@
     "node-gender-male": "Hombre",
     "node-gender-female": "Mujer",
     "node-gender-other": "Otro",
+    "node-gender-male-animal": "Macho",
+    "node-gender-female-animal": "Hembra",
     "node-gender-unspecified": "No especificado",
     "node-biography": "Biografía",
     "node-biography-description": "Aquí puedes escribir una breve biografía o notas sobre este miembro de la familia.",

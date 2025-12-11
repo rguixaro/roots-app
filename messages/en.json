@@ -187,6 +187,8 @@
     "node-gender-male": "Male",
     "node-gender-female": "Female",
     "node-gender-other": "Other",
+    "node-gender-male-animal": "Male",
+    "node-gender-female-animal": "Female",
     "node-gender-unspecified": "Unspecified",
     "node-biography": "Biography",
     "node-biography-description": "Here you can write a brief biography or notes about this family member.",

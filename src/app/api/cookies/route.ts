@@ -4,7 +4,7 @@ import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-sec
 
 import { env } from '@/env.mjs'
 
-const { AMAZON_CLOUDFRONT_KEY_PAIR_ID, NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN } = env
+const { AMAZON_CLOUDFRONT_KEY_PAIR_ID, NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN, COOKIES_DOMAIN } = env
 
 const secrets = new SecretsManagerClient({ region: env.AMAZON_REGION })
 
@@ -29,10 +29,7 @@ export async function GET(req: Request) {
   const resourcePath = `${urlPath.pathname}/*`
   const policy = {
     Statement: [
-      {
-        Resource: resourcePath,
-        Condition: { DateLessThan: { 'AWS:EpochTime': expires } },
-      },
+      { Resource: resourcePath, Condition: { DateLessThan: { 'AWS:EpochTime': expires } } },
     ],
   }
 
@@ -53,7 +50,7 @@ export async function GET(req: Request) {
       httpOnly: false,
       secure: true,
       sameSite: 'lax',
-      domain: '.rguixaro.dev',
+      domain: COOKIES_DOMAIN,
       maxAge: 60 * 60 * 6,
     })
   })

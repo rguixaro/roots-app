@@ -27,16 +27,16 @@ export default auth(async (req) => {
   const isAuthRoute = AUTH_ROUTES.includes(NextURL.pathname)
   const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
 
-  /* Api Route */
+  /// API Route
   if (isApiAuthRoute) return NextResponse.next()
 
-  /* Auth Route */
+  /// Auth Route
   if (isAuthRoute) {
     if (isLoggedIn) return NextResponse.redirect(new URL(DEFAULT_AUTH_REDIRECT_URL, NextURL))
     return NextResponse.next()
   }
 
-  /* Protected route */
+  /// Protected route
   if (!isLoggedIn && (isProtectedRoute || isTreeRoute)) {
     let callbackURL = NextURL.pathname
     if (NextURL.search) callbackURL += NextURL.search
@@ -44,20 +44,21 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL(`/auth?callbackUrl=${encodedCallbackURL}`, NextURL))
   }
 
-  /* CloudFront cookies for authenticated users */
-  if (isLoggedIn) {
+  /// CloudFront cookies for authenticated users
+  if (isLoggedIn && isTreeRoute) {
     const hasCookies =
       req.cookies.get('CloudFront-Key-Pair-Id') &&
       req.cookies.get('CloudFront-Policy') &&
       req.cookies.get('CloudFront-Signature')
 
     if (!hasCookies) {
-      const baseUrl = NextURL.origin
-      await fetch(`${baseUrl}/api/cookies`, { method: 'GET', credentials: 'include' })
+      const returnTo = req.nextUrl.pathname + req.nextUrl.search
+      const cookiesUrl = `${req.nextUrl.origin}/api/cookies?return=${encodeURIComponent(returnTo)}`
+      return NextResponse.redirect(cookiesUrl)
     }
   }
 
-  /* Public route */
+  /// Default: proceed to the requested route
   return NextResponse.next()
 })
 

@@ -101,7 +101,8 @@ export const updateTree = async (
     }
 
     return { error: false, tree: updatedTree || undefined }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tree-exists' }
     }
@@ -250,7 +251,8 @@ export const createTreeNode = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
@@ -304,7 +306,8 @@ export const updateTreeNode = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-node-not-found' }
     }
@@ -372,7 +375,8 @@ export const createTreeEdge = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
@@ -422,7 +426,8 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
     revalidatePath(`/trees/${treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-nodes-not-found' }
     }
@@ -474,7 +479,8 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
     })
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-edge-not-found' }
     }

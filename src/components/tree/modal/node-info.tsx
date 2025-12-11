@@ -25,10 +25,12 @@ import { ConfirmDialog, Form, TypographyH4 } from '@/ui'
 
 import { checkKeyDown, cn } from '@/utils'
 
-import { TreeNode } from '@/types'
+import { TreeNode, TreeType } from '@/types'
 
 interface NodeInfoModalProps {
+  readonly: boolean
   showModal: boolean
+  treeType: TreeType
   node: TreeNode | null
   withPicture?: boolean
   withGallery?: boolean
@@ -39,7 +41,9 @@ interface NodeInfoModalProps {
 }
 
 export function NodeInfoModal({
+  readonly,
   showModal,
+  treeType,
   node,
   withPicture,
   withGallery,
@@ -227,6 +231,8 @@ export function NodeInfoModal({
                   </Tabs.List>
                   <Tabs.Content value="general">
                     <NodeInfoTabGeneral
+                      readonly={readonly}
+                      treeType={treeType}
                       node={node}
                       form={form}
                       loading={loading}
@@ -242,6 +248,7 @@ export function NodeInfoModal({
                   {isMobile && (
                     <Tabs.Content value="gallery">
                       <NodeGalleryContent
+                        readonly={readonly}
                         pictures={pictureOps.pictures}
                         loadingPictures={pictureOps.loadingPictures}
                         loading={loading}
@@ -288,6 +295,7 @@ export function NodeInfoModal({
               )}
             >
               <NodeGalleryContent
+                readonly={readonly}
                 pictures={pictureOps.pictures}
                 loadingPictures={pictureOps.loadingPictures}
                 loading={loading}
@@ -310,6 +318,7 @@ export function NodeInfoModal({
         visible={pictureOps.pictureMenu.visible}
         x={pictureOps.pictureMenu.x}
         y={pictureOps.pictureMenu.y}
+        readonly={readonly}
         picture={pictureOps.pictureMenu.picture}
         onDownload={pictureOps.onPictureDownload}
         onTags={pictureOps.onPictureTags}

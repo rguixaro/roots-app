@@ -14,11 +14,10 @@ import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { toPng } from 'html-to-image'
 
 import { useCopyToClipboard } from '@/hooks'
 
-import { cn, SITE_URL } from '@/utils'
+import { cn } from '@/utils'
 
 import { Tree } from '@/types'
 
@@ -188,9 +187,11 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
       >
         <span className="text-ocean-50 text-lg font-extrabold md:text-xl">{tree.name}</span>
         <div className="bg-ocean-300 hidden h-4 w-0.5 sm:block" />
-        <IconButton onClick={onCreateNode} className="hidden sm:block">
-          <Plus size={20} className={iconClassName} />
-        </IconButton>
+        {!readonly && (
+          <IconButton onClick={onCreateNode} className="hidden sm:block">
+            <Plus size={20} className={iconClassName} />
+          </IconButton>
+        )}
         <IconButton onClick={onResetView} className="hidden sm:block">
           <Minimize2 size={20} className={iconClassName} />
         </IconButton>
@@ -232,9 +233,11 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
           !readonly ? 'justify-between' : 'justify-center gap-8'
         )}
       >
-        <IconButton onClick={onCreateNode}>
-          <Plus size={20} className={iconClassName} />
-        </IconButton>
+        {!readonly && (
+          <IconButton onClick={onCreateNode}>
+            <Plus size={20} className={iconClassName} />
+          </IconButton>
+        )}
         <IconButton onClick={onResetView}>
           <Minimize2 size={20} className={iconClassName} />
         </IconButton>

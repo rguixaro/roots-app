@@ -13,7 +13,7 @@ export async function uploadFileToS3(file: File, treeId: string): Promise<string
 
   const extension = file.name.split('.').pop() || 'jpg'
   const uniqueId = randomUUID()
-  const fileKey = `images/tree_${treeId}/${uniqueId}.${extension}`
+  const fileKey = `roots/images/tree_${treeId}/${uniqueId}.${extension}`
 
   await s3.send(
     new PutObjectCommand({

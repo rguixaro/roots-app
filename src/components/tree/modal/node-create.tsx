@@ -29,15 +29,23 @@ import {
 } from '@/ui'
 
 import { checkKeyDown, cn } from '@/utils'
+import { TreeType } from '@/types'
 
 interface NodeCreateModalProps {
+  treeType: TreeType
   showModal: boolean
   form: UseFormReturn<z.infer<typeof CreateTreeNodeSchema>>
   onCreate: (values: z.infer<typeof CreateTreeNodeSchema>) => Promise<void>
   onClose: () => void
 }
 
-export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCreateModalProps) {
+export function NodeCreateModal({
+  treeType,
+  showModal,
+  form,
+  onCreate,
+  onClose,
+}: NodeCreateModalProps) {
   const t_common = useTranslations('common')
   const t_trees = useTranslations('trees')
 
@@ -397,9 +405,15 @@ export function NodeCreateModal({ showModal, form, onCreate, onClose }: NodeCrea
                                 <SelectValue placeholder={'-'} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="MALE">{t_trees('node-gender-male')}</SelectItem>
+                                <SelectItem value="MALE">
+                                  {t_trees(
+                                    `${'node-gender-male'}${treeType === 'ANIMAL' ? '-animal' : ''}`
+                                  )}
+                                </SelectItem>
                                 <SelectItem value="FEMALE">
-                                  {t_trees('node-gender-female')}
+                                  {t_trees(
+                                    `${'node-gender-female'}${treeType === 'ANIMAL' ? '-animal' : ''}`
+                                  )}
                                 </SelectItem>
                                 <SelectItem value="OTHER">
                                   {t_trees('node-gender-other')}

@@ -49,11 +49,11 @@ export default async function RootLayout({
           'bg-ocean-50 selection:bg-ocean-200/15 flex justify-center overflow-x-hidden'
         )}
       >
-        <div className="h-screen w-full">
+        <div className="flex min-h-screen w-full flex-col">
           <SessionProvider>
             <NextIntlClientProvider messages={messages}>
               <Header username={userName || ''} />
-              {children}
+              <main className="flex-1">{children}</main>
               <Footer />
               <ToasterProvider />
             </NextIntlClientProvider>

@@ -60,13 +60,15 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
   return (
     <div className="relative h-full w-full overflow-hidden">
       <TreeOverlay
-        tree={tree}
         readonly={readonly}
+        tree={tree}
         onCreateNode={treeState.createNode}
         onResetView={treeState.resetView}
       />
       <NodeInfoModal
+        readonly={readonly}
         showModal={treeState.displayInfo}
+        treeType={tree.type}
         node={treeState.selectedNode}
         withPicture={tree.nodeImage}
         withGallery={tree.nodeGallery}
@@ -80,6 +82,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         }}
       />
       <NodeCreateModal
+        treeType={tree.type}
         showModal={treeState.displayCreate}
         form={nodeCreateForm.form}
         onCreate={nodeCreateForm.onSubmit}
@@ -111,7 +114,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         <Background gap={32} size={1} color={ocean[300]} />
       </ReactFlow>
       <EdgeContextMenu
-        visible={treeState.edgeContextMenu.visible}
+        visible={treeState.edgeContextMenu.visible && !readonly}
         x={treeState.edgeContextMenu.x}
         y={treeState.edgeContextMenu.y}
         edgeId={treeState.edgeContextMenu.edgeId}

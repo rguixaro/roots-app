@@ -88,12 +88,13 @@ export const createPicture = async (
     revalidatePath(`/trees/${node.treeId}`)
 
     return { error: false, picture }
-  } catch (e) {
+  } catch (e: any) {
     if (fileKey) {
       try {
         await deleteFileFromS3(fileKey)
       } catch (_) {}
     }
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -144,7 +145,8 @@ export const deletePicture = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -200,7 +202,8 @@ export const createPictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false, tag: newTag }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tag-already-exists' }
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
@@ -264,7 +267,8 @@ export const deletePictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -312,7 +316,8 @@ export const setProfilePictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }

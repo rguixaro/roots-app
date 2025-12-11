@@ -26,9 +26,11 @@ import {
   TypographyH5,
 } from '@/ui'
 
-import { TreeNode } from '@/types'
+import { TreeNode, TreeType } from '@/types'
 
 interface NodeInfoTabGeneralProps {
+  readonly: boolean
+  treeType: TreeType
   node: TreeNode | null
   form: UseFormReturn<z.infer<typeof UpdateTreeNodeSchema>>
   loading: boolean
@@ -42,6 +44,8 @@ interface NodeInfoTabGeneralProps {
 }
 
 export function NodeInfoTabGeneral({
+  readonly,
+  treeType,
   node,
   form,
   loading,
@@ -200,8 +204,14 @@ export function NodeInfoTabGeneral({
                       <SelectValue placeholder={'-'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="MALE">{t_trees('node-gender-male')}</SelectItem>
-                      <SelectItem value="FEMALE">{t_trees('node-gender-female')}</SelectItem>
+                      <SelectItem value="MALE">
+                        {t_trees(`${'node-gender-male'}${treeType === 'ANIMAL' ? '-animal' : ''}`)}
+                      </SelectItem>
+                      <SelectItem value="FEMALE">
+                        {t_trees(
+                          `${'node-gender-female'}${treeType === 'ANIMAL' ? '-animal' : ''}`
+                        )}
+                      </SelectItem>
                       <SelectItem value="OTHER">{t_trees('node-gender-other')}</SelectItem>
                       <SelectItem value="UNSPECIFIED">
                         {t_trees('node-gender-unspecified')}
@@ -241,7 +251,7 @@ export function NodeInfoTabGeneral({
         />
       </div>
       <div className="my-6 flex gap-3">
-        {!editMode && (
+        {!editMode && !readonly && (
           <Button type="button" onClick={() => onEditModeChange(true)} disabled={loading}>
             <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
           </Button>

@@ -48,7 +48,7 @@ export const getTree = cache(async (slug: string) => {
  * Get a tree tree by its slug.
  * Auth required.
  * @param slug Tree slug
- * @returns Promise<TreeResult>
+ * @returns Promise<{ tree: Tree; nodes: TreeNode[]; edges: TreeEdge[] } | { error: true; message: string } >
  */
 export const getTreeRoots = cache(async (slug: string) => {
   try {

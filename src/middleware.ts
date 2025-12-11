@@ -27,9 +27,6 @@ export default auth(async (req) => {
   const isAuthRoute = AUTH_ROUTES.includes(NextURL.pathname)
   const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
 
-  /// If this is an OAuth callback (has 'state' or 'code' params)
-  const isOAuthCallback = NextURL.searchParams.has('state') || NextURL.searchParams.has('code')
-
   /// API Route
   if (isApiAuthRoute) return NextResponse.next()
 
@@ -48,7 +45,7 @@ export default auth(async (req) => {
   }
 
   /// CloudFront cookies for authenticated users
-  if (isLoggedIn && !isOAuthCallback) {
+  if (isLoggedIn && isTreeRoute) {
     const hasCookies =
       req.cookies.get('CloudFront-Key-Pair-Id') &&
       req.cookies.get('CloudFront-Policy') &&

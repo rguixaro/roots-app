@@ -181,6 +181,8 @@
     "node-birth-place-description": "Introduce el lugar de nacimiento del nuevo miembro (opcional).",
     "node-birth-date": "Fecha de nacimiento",
     "node-birth-date-description": "Introduce la fecha de nacimiento del nuevo miembro.",
+    "node-death-place": "Lugar de defunción",
+    "node-death-place-description": "Introduce el lugar de defunción del nuevo miembro (opcional).",
     "node-death-date": "Fecha de defunción",
     "node-death-date-description": "Introduce la fecha de defunción del nuevo miembro (opcional).",
     "node-gender": "Género",

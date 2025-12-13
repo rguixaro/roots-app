@@ -103,7 +103,9 @@
     "editor": "Editor",
     "viewer": "Viewer",
     "public": "Public",
-    "private": "Private"
+    "private": "Private",
+    "compact": "Compact",
+    "loose": "Loose"
   },
   "login": {
     "login-to": "Sign in to ",
@@ -154,6 +156,8 @@
     "tree-types-alert": "Bear in mind that this choice is permanent and cannot be changed later.",
     "settings-tab": "Tree configuration",
     "settings-tab-label": "Settings",
+    "tree-node-compact": "Compact nodes",
+    "tree-node-compact-info": "If enabled, tree nodes will be displayed in a more compact format.",
     "tree-node-image": "Node images",
     "tree-node-image-info": "If enabled, each tree node will display an image representing the family member.",
     "tree-node-gallery": "Image gallery",
@@ -250,6 +254,7 @@
     "edited-by": "Edited by",
     "name": "Name",
     "type": "Type",
+    "compact": "Compact nodes",
     "nodeImage": "Node images",
     "nodeGallery": "Image gallery",
     "fullName": "Full name",

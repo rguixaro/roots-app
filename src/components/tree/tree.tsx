@@ -104,14 +104,13 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         zoomOnScroll
         deleteKeyCode={null}
         nodesDraggable={true}
-        snapGrid={[15, 15]}
         className="bg-ocean-50 h-full w-full shadow-inner"
         onlyRenderVisibleElements
         proOptions={{ hideAttribution: true }}
         fitView
         fitViewOptions={{ padding: 0.2 }}
       >
-        <Background gap={32} size={1} color={ocean[300]} />
+        <Background gap={24} size={1} color={ocean[300]} />
       </ReactFlow>
       <EdgeContextMenu
         visible={treeState.edgeContextMenu.visible && !readonly}

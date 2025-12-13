@@ -55,6 +55,7 @@ model Tree {
   slug        String
   name        String
   type        TreeType
+  compact     Boolean  @default(false)
   nodeImage   Boolean  @default(false)
   nodeGallery Boolean  @default(false)
   createdAt   DateTime @default(now())

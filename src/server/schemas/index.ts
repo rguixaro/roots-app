@@ -37,6 +37,7 @@ export const CreateTreeSchema = z.object({
     .min(3, { message: 'tree-name-too-short' })
     .max(24, { message: 'tree-name-too-long' }),
   type: z.enum(TreeType, { required_error: 'tree-type-required' }),
+  compact: z.boolean({ required_error: 'tree-option-required' }),
   nodeImage: z.boolean({ required_error: 'tree-option-required' }),
   nodeGallery: z.boolean({ required_error: 'tree-option-required' }),
   members: z
@@ -58,6 +59,7 @@ export const TreeSchema = z.object({
   slug: z.string(),
   name: z.string(),
   type: z.enum(TreeType),
+  compact: z.boolean().default(false),
   nodeImage: z.boolean().default(false),
   nodeGallery: z.boolean().default(false),
   createdAt: z.date(),

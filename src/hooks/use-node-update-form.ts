@@ -32,6 +32,7 @@ export function useNodeUpdateForm(tree: Tree, node: TreeNode | null, onSuccess?:
       alias: node.alias ?? '',
       birthPlace: node.birthPlace ?? '',
       birthDate: node.birthDate ? new Date(node.birthDate) : null,
+      deathPlace: node.deathPlace ?? '',
       deathDate: node.deathDate ? new Date(node.deathDate) : null,
       gender: node.gender ?? '',
       biography: node.biography ?? '',

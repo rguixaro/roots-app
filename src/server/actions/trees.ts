@@ -229,7 +229,9 @@ export const createTreeNode = async (
         treeId: values.treeId,
         fullName: values.fullName,
         alias: values.alias,
+        birthPlace: values.birthPlace,
         birthDate: values.birthDate,
+        deathPlace: values.deathPlace,
         deathDate: values.deathDate,
         gender: values.gender,
       },
@@ -281,9 +283,12 @@ export const updateTreeNode = async (
       data: {
         fullName: values.fullName,
         alias: values.alias,
+        birthPlace: values.birthPlace,
         birthDate: values.birthDate,
+        deathPlace: values.deathPlace,
         deathDate: values.deathDate,
         gender: values.gender,
+        biography: values.biography,
       },
       include: { edgesFrom: true, edgesTo: true },
     })

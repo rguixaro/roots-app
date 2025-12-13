@@ -17,7 +17,14 @@ export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
 
   const form = useForm<z.infer<typeof CreateTreeNodeSchema>>({
     resolver: zodResolver(CreateTreeNodeSchema),
-    defaultValues: { treeId: tree.id, fullName: '', alias: '', birthPlace: '', biography: '' },
+    defaultValues: {
+      treeId: tree.id,
+      fullName: '',
+      alias: '',
+      birthPlace: '',
+      deathPlace: '',
+      biography: '',
+    },
   })
 
   /**

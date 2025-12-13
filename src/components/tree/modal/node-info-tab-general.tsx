@@ -61,6 +61,7 @@ export function NodeInfoTabGeneral({
   const alias = form.watch('alias')
   const birthPlace = form.watch('birthPlace')
   const birthDate = form.watch('birthDate')
+  const deathPlace = form.watch('deathPlace')
   const deathDate = form.watch('deathDate')
   const gender = form.watch('gender')
   const biography = form.watch('biography')
@@ -102,7 +103,6 @@ export function NodeInfoTabGeneral({
                     value={field.value ?? ''}
                     autoComplete="off"
                     className="min-w-[16ch]"
-                    placeholder={t_trees('node-alias')}
                     disabled={!editMode || loading}
                   />
                 </div>
@@ -125,7 +125,6 @@ export function NodeInfoTabGeneral({
                     value={field.value ?? ''}
                     autoComplete="off"
                     className="min-w-[16ch]"
-                    placeholder={t_trees('node-birth-place')}
                     disabled={!editMode || loading}
                   />
                 </div>
@@ -151,7 +150,27 @@ export function NodeInfoTabGeneral({
                     }
                     type="date"
                     autoComplete="off"
-                    placeholder={t_trees('node-birth-date')}
+                    disabled={!editMode || loading}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="deathPlace"
+          render={({ field }) => (
+            <FormItem className="mt-3">
+              <FormLabel>{t_trees('node-death-place')}</FormLabel>
+              <FormControl>
+                <div className="py-2">
+                  <Input
+                    {...field}
+                    value={field.value ?? ''}
+                    autoComplete="off"
+                    className="min-w-[16ch]"
                     disabled={!editMode || loading}
                   />
                 </div>
@@ -177,7 +196,6 @@ export function NodeInfoTabGeneral({
                     }
                     type="date"
                     autoComplete="off"
-                    placeholder={t_trees('node-death-date')}
                     disabled={!editMode || loading}
                   />
                 </div>
@@ -278,6 +296,7 @@ export function NodeInfoTabGeneral({
                   (node?.deathDate ? new Date(node.deathDate).toISOString() : '') &&
                 gender === node?.gender &&
                 birthPlace === node?.birthPlace &&
+                deathPlace === node?.deathPlace &&
                 biography === node?.biography &&
                 alias === node?.alias)
             }

@@ -103,7 +103,9 @@
     "editor": "Editor",
     "viewer": "Espectador",
     "public": "Público",
-    "private": "Privado"
+    "private": "Privado",
+    "compact": "Compacto",
+    "loose": "Espacioso"
   },
   "login": {
     "login-to": "Acceder a ",
@@ -154,6 +156,8 @@
     "tree-types-alert": "Ten en cuenta que esta elección es permanente y no se puede cambiar más tarde.",
     "settings-tab": "Configuración del árbol",
     "settings-tab-label": "Ajustes",
+    "tree-node-compact": "Nodos compactos",
+    "tree-node-compact-info": "Si está habilitado, los nodos del árbol se mostrarán en un formato más compacto.",
     "tree-node-image": "Imágenes de nodos",
     "tree-node-image-info": "Si está habilitado, cada nodo del árbol mostrará una imagen que representa al miembro de la familia.",
     "tree-node-gallery": "Galería de imágenes",
@@ -250,6 +254,7 @@
     "edited-by": "Editado por",
     "name": "Nombre",
     "type": "Tipo",
+    "compact": "Nodes compactes",
     "nodeImage": "Imágenes de nodos",
     "nodeGallery": "Galería de imágenes",
     "fullName": "Nombre",

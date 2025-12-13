@@ -103,7 +103,9 @@
     "editor": "Editor",
     "viewer": "Espectador",
     "public": "Públic",
-    "private": "Privat"
+    "private": "Privat",
+    "compact": "Compacte",
+    "loose": "Espaiat"
   },
   "login": {
     "login-to": "Accedeix a ",
@@ -154,6 +156,8 @@
     "tree-types-alert": "Tingues en compte que aquesta elecció és permanent i no es pot canviar més tard.",
     "settings-tab": "Configuració de l'arbre",
     "settings-tab-label": "Preferències",
+    "tree-node-compact": "Nodes compactes",
+    "tree-node-compact-info": "Si està habilitat, els nodes de l'arbre es mostraran en un format més compacte.",
     "tree-node-image": "Imatges de nodes",
     "tree-node-image-info": "Si està habilitat, cada node de l'arbre mostrarà una imatge que representa el membre de la família.",
     "tree-node-gallery": "Galeria d'imatges",
@@ -250,6 +254,7 @@
     "edited-by": "Editat per",
     "name": "Nom",
     "type": "Tipus",
+    "compact": "Nodes compactes",
     "nodeImage": "Imatges de nodes",
     "nodeGallery": "Galeria d'imatges",
     "fullName": "Nom complet",

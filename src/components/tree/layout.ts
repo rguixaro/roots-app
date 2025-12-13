@@ -69,7 +69,7 @@ export function computedLayout(
       animated: true,
       sourceHandle: isSpouse ? 'right' : 'bottom',
       targetHandle: isSpouse ? 'left' : 'top',
-      style: { stroke: ocean[100], strokeWidth: 2 },
+      style: { stroke: ocean[100], strokeWidth: 3 },
     }
   })
 

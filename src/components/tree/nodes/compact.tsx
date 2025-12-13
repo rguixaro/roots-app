@@ -9,7 +9,7 @@ import { cn, getProfilePicture } from '@/utils'
 
 import { TreeNode } from '@/types'
 
-interface StyledNodeProps {
+interface SStyledNodeCompactProps {
   node: TreeNode
   withPicture?: boolean
   selectedNodeId: string | null
@@ -35,22 +35,6 @@ const nodeContainerVariants: Variants = {
   tap: {
     scale: 0.98,
     transition: { type: 'spring', stiffness: 400, damping: 25 },
-  },
-}
-
-/**
- * Animation variants for the top expanding section (picture)
- */
-const topExpandVariants: Variants = {
-  collapsed: {
-    scaleY: 0,
-    opacity: 0,
-    transition: { type: 'spring', stiffness: 400, damping: 30 },
-  },
-  expanded: {
-    scaleY: 1,
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 400, damping: 25, mass: 0.8 },
   },
 }
 
@@ -99,11 +83,7 @@ const pictureHoverVariants: Variants = {
  */
 const infoIconVariants: Variants = {
   collapsed: { opacity: 0, scale: 0.5 },
-  expanded: {
-    opacity: 1,
-    scale: 1,
-    transition: { type: 'spring', stiffness: 400, damping: 15, delay: 0.15 },
-  },
+  expanded: { opacity: 1, scale: 1 },
 }
 
 /**
@@ -138,10 +118,10 @@ const handleVariants = {
 
 /**
  * A styled node in the tree.
- * @param param0 {NodeProps<StyledNodeProps>}
+ * @param param0 {NodeProps<SStyledNodeCompactProps>}
  * @returns {JSX.Element}
  */
-export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
+export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>): JSX.Element {
   const [isExpanded, setIsExpand] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isInModal, setIsInModal] = useState(false)
@@ -261,9 +241,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
     return cn(HandleVisualStyles, {
       'bg-ocean-100 h-8 w-3': isConnected,
-      'border-ocean-200 bg-ocean-100 w-3': isHoveredOrExpanded,
-      'border-ocean-200 bg-pale-ocean h-8': isHoveredAndNotConnected,
-      'border-ocean-200 bg-ocean-100 h-10': isExpanded,
+      'border-ocean-100 bg-ocean-100 w-3': isHoveredOrExpanded,
+      'border-ocean-100 bg-ocean-50 h-8': isHoveredAndNotConnected,
+      'border-ocean-100 bg-ocean-200 h-10': isExpanded,
       'bg-ocean-300': isExpandedAndIsConnected,
       'border-pale-ocean bg-ocean-200 h-8 w-3': isMobileAndNotConnected,
     })
@@ -283,10 +263,10 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
     return cn(HandleVisualStyles, {
       'bg-ocean-100 h-3 w-10': isConnected,
-      'border-ocean-200 bg-ocean-100 h-3': isHoveredOrExpanded,
-      'border-ocean-200 bg-pale-ocean h-3 w-10': isHoveredAndNotConnected,
-      'border-ocean-200 w-0 bg-ocean-100': isExpanded,
-      'bg-ocean-300': isExpandedAndIsConnected,
+      'border-ocean-100 bg-ocean-200 h-3': isHoveredOrExpanded,
+      'border-ocean-100 bg-ocean-50 h-3 w-10': isHoveredAndNotConnected,
+      'border-ocean-100 bg-ocean-200 h-3 w-20': isExpanded,
+      'bg-ocean-300 h-3 w-20': isExpandedAndIsConnected,
       'border-pale-ocean bg-ocean-200 h-3 w-10': isMobileAndNotConnected,
     })
   }
@@ -301,37 +281,78 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       whileHover="hover"
       whileTap="tap"
       className={cn(
-        'text-ocean-400 group relative flex h-20 w-52 cursor-pointer flex-col items-center justify-center rounded-lg',
-        'shadow-center-sm hover:bg-ocean-200 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
-        isExpanded &&
-          `bg-ocean-200 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`,
-        isInModal &&
-          `bg-ocean-200 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`
+        'text-ocean-400 group relative flex h-20 w-auto cursor-pointer items-center justify-start rounded-lg',
+        'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
+        isExpanded && `bg-ocean-200 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
+        isInModal && `bg-ocean-200 text-pale-ocean ${withPicture && 'rounded-b-none'}`
       )}
     >
-      <strong className="relative z-10 leading-none">{fullName}</strong>
-      {alias && (
-        <span
-          className={cn(
-            'relative z-10 mt-1 text-xs leading-none font-medium',
-            'opacity-70 group-hover:opacity-100'
-          )}
+      <motion.div variants={pictureContentVariants} className="px-2">
+        <motion.div
+          variants={pictureHoverVariants}
+          initial="idle"
+          whileHover="hover"
+          className="relative h-12 w-12 cursor-pointer overflow-hidden rounded-lg"
         >
-          {alias}
-        </span>
-      )}
-      {birthYear || deathDate ? (
-        <div
-          className={cn(
-            'relative z-10 mt-1 flex w-full justify-center space-x-2 text-xs font-medium',
-            'opacity-70 group-hover:opacity-100'
+          <div
+            className={cn(
+              'bg-ocean-100 absolute inset-0 flex items-center justify-center',
+              showPictureLoader ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
+          >
+            <motion.div variants={loaderPulseVariants} animate="animate">
+              <LoaderIcon size={20} className="animate-spin" />
+            </motion.div>
+          </div>
+          <div
+            className={cn(
+              'bg-ocean-50 group-hover:bg-ocean-100 absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out',
+              showPicturePlaceholder
+                ? 'scale-100 opacity-100'
+                : 'pointer-events-none scale-95 opacity-0'
+            )}
+          >
+            <Image size={24} />
+          </div>
+          {profilePicture && !pictureError && (
+            <img
+              className={cn(
+                'h-full w-full object-cover transition-all duration-300 ease-out',
+                isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+              )}
+              src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+              alt="Profile"
+              onLoad={handlePictureLoad}
+              onError={handlePictureError}
+            />
           )}
-        >
-          {birthYear && <p>{birthYear}</p>}
-          {deathYear && birthYear && <span>-</span>}
-          {deathYear && <p>{deathYear}</p>}
-        </div>
-      ) : null}
+        </motion.div>
+      </motion.div>
+      <div className="justify-star flex w-full flex-col items-start px-2">
+        <strong className="relative z-10 leading-none">{fullName}</strong>
+        {alias && (
+          <span
+            className={cn(
+              'relative z-10 mt-1 text-xs leading-none font-medium',
+              'opacity-70 group-hover:opacity-100'
+            )}
+          >
+            {alias}
+          </span>
+        )}
+        {birthYear || deathDate ? (
+          <div
+            className={cn(
+              'w relative z-10 mt-1 flex space-x-2 text-xs font-medium',
+              'opacity-70 group-hover:opacity-100'
+            )}
+          >
+            {birthYear && <p>{birthYear}</p>}
+            {deathYear && birthYear && <span>-</span>}
+            {deathYear && <p>{deathYear}</p>}
+          </div>
+        ) : null}
+      </div>
       <Handle
         type="source"
         id="right"
@@ -357,11 +378,9 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         id="top"
         position={Position.Top}
         className={cn(
-          'border-0! transition-all',
+          'pointer-events-auto border-0! transition-all',
           'top-0! -translate-y-1/2! opacity-0!',
-          isHovered && !isExpanded
-            ? 'pointer-events-auto h-12! w-12!'
-            : 'pointer-events-none! h-0! w-0!'
+          isExpanded || isHovered ? 'h-12! w-12!' : 'h-0! w-0!'
         )}
       />
       <Handle
@@ -411,12 +430,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           }
           className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2"
         >
-          <div
-            className={cn(
-              getVerticalHandlesClass(!!hasTopConnection),
-              isExpanded && withPicture && 'h-0!'
-            )}
-          />
+          <div className={cn(getVerticalHandlesClass(!!hasTopConnection))} />
         </motion.div>
         <motion.div
           variants={handleVariants.bottom}
@@ -433,62 +447,6 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           />
         </motion.div>
       </div>
-      {withPicture && (
-        <motion.div
-          onClick={(e) => e.stopPropagation()}
-          variants={topExpandVariants}
-          initial="collapsed"
-          animate={isExpanded ? 'expanded' : 'collapsed'}
-          className={cn(
-            'bg-ocean-200 absolute bottom-full left-1/2 flex w-full origin-bottom -translate-x-1/2 justify-evenly',
-            '-mb-px cursor-default overflow-hidden rounded-t-xl'
-          )}
-        >
-          <div className={cn('flex w-full items-center justify-center pt-3 pb-1')}>
-            <motion.div variants={pictureContentVariants} className="relative">
-              <motion.div
-                variants={pictureHoverVariants}
-                initial="idle"
-                whileHover="hover"
-                className="border-pale-ocean relative h-16 w-16 cursor-pointer overflow-hidden rounded-lg border-2"
-              >
-                <div
-                  className={cn(
-                    'bg-ocean-200 absolute inset-0 flex items-center justify-center',
-                    showPictureLoader ? 'opacity-100' : 'pointer-events-none opacity-0'
-                  )}
-                >
-                  <motion.div variants={loaderPulseVariants} animate="animate">
-                    <LoaderIcon size={20} className="animate-spin" />
-                  </motion.div>
-                </div>
-                <div
-                  className={cn(
-                    'bg-ocean-200 absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out',
-                    showPicturePlaceholder
-                      ? 'scale-100 opacity-100'
-                      : 'pointer-events-none scale-95 opacity-0'
-                  )}
-                >
-                  <Image size={24} />
-                </div>
-                {profilePicture && !pictureError && (
-                  <img
-                    className={cn(
-                      'h-full w-full object-cover transition-all duration-500 ease-out',
-                      isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-                    )}
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
-                    alt="Profile"
-                    onLoad={handlePictureLoad}
-                    onError={handlePictureError}
-                  />
-                )}
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.div>
-      )}
       <motion.div
         onClick={(e) => e.stopPropagation()}
         variants={bottomExpandVariants}
@@ -496,7 +454,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         animate={isExpanded ? 'expanded' : 'collapsed'}
         className={cn(
           'shadow-center absolute top-full left-1/2 flex w-full origin-top -translate-x-1/2 justify-evenly',
-          'bg-ocean-400 cursor-default overflow-hidden rounded-b-xl',
+          'bg-ocean-300 cursor-default overflow-hidden rounded-b-xl',
           isExpanded ? 'pointer-events-auto' : 'pointer-events-none'
         )}
       >
@@ -504,7 +462,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           variants={infoIconVariants}
           onClick={onInfoClick}
           className={cn(
-            'text-ocean-400 bg-ocean-400 flex w-full cursor-pointer items-center justify-center p-2',
+            'text-ocean-400 bg-ocean-300 flex w-full cursor-pointer items-center justify-center p-2',
             'group/info hover:bg-ocean-400 transition-colors duration-300 outline-none focus:outline-none'
           )}
         >

@@ -6,6 +6,8 @@ import { ItemTree } from '@/components/trees'
 
 import { Tree } from '@/types'
 
+import { cn } from '@/utils'
+
 export const TreesFeed = async () => {
   const t_common = await getTranslations('common')
 
@@ -21,7 +23,14 @@ export const TreesFeed = async () => {
           </div>
         </div>
       </div>
-      <div className="no-scrollbar mx-auto w-full overflow-x-auto overflow-y-hidden sm:w-[90%] md:w-[75%] lg:w-[65%] xl:w-[55%]">
+      <div
+        className={cn(
+          'no-scrollbar mx-auto flex w-full overflow-x-auto overflow-y-hidden',
+          'sm:w-[90%] md:w-[75%] lg:w-[65%] xl:w-[55%]',
+          treesWithAdd.length <= 2 ? 'justify-center' : 'justify-start',
+          treesWithAdd.length === 3 && 'sm:justify-center'
+        )}
+      >
         <div className="flex w-max flex-row gap-2 px-4">
           {treesWithAdd.map((item, i) => (
             <ItemTree key={i} tree={item} index={i} />

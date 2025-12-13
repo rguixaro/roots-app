@@ -80,6 +80,7 @@ model TreeNode {
   gender    TreeNodeGender @default(UNSPECIFIED)
 
   birthPlace String?
+  deathPlace String?
   biography  String?
   alias      String?
 

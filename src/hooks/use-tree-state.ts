@@ -6,7 +6,7 @@ import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
 import { TreeNode, TreeEdge, Tree } from '@/types'
 
 import { createTreeLayout, computedLayout, positionCoupleNodes } from '@/components/tree/layout'
-import { StyledNode, VoidNode } from '@/components/tree/nodes'
+import { StyledNode, StyledNodeCompact, VoidNode } from '@/components/tree/nodes'
 
 export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   /**
@@ -51,7 +51,14 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
    * Node types mapping
    * @return {object} Node types mapping
    */
-  const nodeTypes = useMemo(() => ({ [tree.type]: StyledNode, COUPLE: VoidNode }), [tree.type])
+  const nodeTypes = useMemo(
+    () => ({
+      COMPACT: tree.compact ? StyledNodeCompact : StyledNode,
+      LOOSE: tree.compact ? StyledNodeCompact : StyledNode,
+      COUPLE: VoidNode,
+    }),
+    [tree.compact]
+  )
 
   /**
    * Reset the view to fit all nodes

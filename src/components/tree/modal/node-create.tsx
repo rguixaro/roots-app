@@ -355,6 +355,31 @@ export function NodeCreateModal({
                   />
                   <FormField
                     control={form.control}
+                    name="deathPlace"
+                    render={({ field }) => (
+                      <FormItem className="mt-3">
+                        <FormLabel>{t_trees('node-death-place')}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_trees('node-death-place-description')}
+                        </FormDescription>
+                        <FormControl>
+                          <div className="py-2">
+                            <Input
+                              {...field}
+                              value={field.value ?? ''}
+                              autoComplete="off"
+                              className="min-w-[16ch]"
+                              placeholder={t_trees('node-death-place')}
+                              disabled={loading}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="deathDate"
                     render={({ field }) => (
                       <FormItem className="mt-3">

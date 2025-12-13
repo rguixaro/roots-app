@@ -37,6 +37,7 @@ export const CreateTreeSchema = z.object({
     .min(3, { message: 'tree-name-too-short' })
     .max(24, { message: 'tree-name-too-long' }),
   type: z.enum(TreeType, { required_error: 'tree-type-required' }),
+  compact: z.boolean({ required_error: 'tree-option-required' }),
   nodeImage: z.boolean({ required_error: 'tree-option-required' }),
   nodeGallery: z.boolean({ required_error: 'tree-option-required' }),
   members: z
@@ -58,6 +59,7 @@ export const TreeSchema = z.object({
   slug: z.string(),
   name: z.string(),
   type: z.enum(TreeType),
+  compact: z.boolean().default(false),
   nodeImage: z.boolean().default(false),
   nodeGallery: z.boolean().default(false),
   createdAt: z.date(),
@@ -98,6 +100,7 @@ export const CreateTreeNodeSchema = z.object({
   alias: z.string().max(16, { message: 'alias-too-long' }).optional().nullable(),
   birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
+  deathPlace: z.string().nullable().optional(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
   biography: z.string().nullable().optional(),
@@ -116,6 +119,7 @@ export const UpdateTreeNodeSchema = z.object({
   alias: z.string().max(16, { message: 'alias-too-long' }).optional().nullable(),
   birthPlace: z.string().nullable().optional(),
   birthDate: z.coerce.date().optional().nullable(),
+  deathPlace: z.string().nullable().optional(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
   biography: z.string().nullable().optional(),

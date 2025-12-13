@@ -12,6 +12,7 @@ export interface Tree {
   slug: string
   name: string
   type: TreeType
+  compact: boolean
   nodeImage: boolean
   nodeGallery: boolean
   createdAt: Date
@@ -47,6 +48,7 @@ export interface TreeNode {
   deathDate?: Date | null
   gender: TreeNodeGender
   birthPlace?: string | null
+  deathPlace?: string | null
   biography?: string | null
   createdAt: Date
   updatedAt: Date

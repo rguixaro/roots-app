@@ -69,7 +69,7 @@ export function computedLayout(
       animated: true,
       sourceHandle: isSpouse ? 'right' : 'bottom',
       targetHandle: isSpouse ? 'left' : 'top',
-      style: { stroke: ocean[100], strokeWidth: 2 },
+      style: { stroke: ocean[100], strokeWidth: 3 },
     }
   })
 
@@ -107,7 +107,7 @@ export function createTreeLayout(
     const edgesTo = edges.filter((e) => e.toNodeId === node.id)
     return {
       id: node.id,
-      type: tree.type,
+      type: tree.compact ? 'COMPACT' : 'LOOSE',
       data: {
         node: { ...node, edgesFrom, edgesTo },
         withPicture: tree.nodeImage,

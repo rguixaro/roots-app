@@ -239,6 +239,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     defaultValues: {
       name: currentTree.name,
       type: currentTree.type as TreeType,
+      compact: currentTree.compact,
       nodeImage: currentTree.nodeImage,
       nodeGallery: currentTree.nodeGallery,
       members: currentTree.accesses?.map((a) => ({
@@ -253,6 +254,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
 
   const treeName = form.watch('name')
+  const compact = form.watch('compact')
   const nodeImage = form.watch('nodeImage')
   const nodeGallery = form.watch('nodeGallery')
 
@@ -337,6 +339,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     form.reset({
       name: tree.name,
       type: tree.type,
+      compact: tree.compact,
       nodeImage: tree.nodeImage,
       nodeGallery: tree.nodeGallery,
       members: tree.accesses?.map((a) => ({
@@ -446,6 +449,27 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded-lg border-2 bg-white p-3">
                 <FormField
                   control={form.control}
+                  name="compact"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>{t_trees('tree-node-compact')}</FormLabel>
+                      <FormDescription className="mb-2 text-sm opacity-70">
+                        {t_trees('tree-node-compact-info')}
+                      </FormDescription>
+                      <FormControl>
+                        <StyledSelector
+                          types={['Compact', 'Loose'] as const}
+                          value={form.getValues('compact') ? 'Compact' : 'Loose'}
+                          setValue={(value) => form.setValue('compact', value === 'Compact')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
+                <FormField
+                  control={form.control}
                   name="nodeImage"
                   render={() => (
                     <FormItem>
@@ -491,7 +515,9 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                   type="submit"
                   disabled={
                     loading ||
-                    (nodeImage === currentTree.nodeImage && nodeGallery === currentTree.nodeGallery)
+                    (compact == currentTree.compact &&
+                      nodeImage === currentTree.nodeImage &&
+                      nodeGallery === currentTree.nodeGallery)
                   }
                   className="bg-ocean-200 hover:bg-ocean-300 rounded-lg p-2 px-5 text-white shadow transition-colors duration-300"
                 >
@@ -549,7 +575,6 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               )}
             </Tabs.Content>
           </Tabs.Root>
-
           <ConfirmDialog
             open={dialogOpen}
             title={t_trees('tree-member-remove-confirm')}

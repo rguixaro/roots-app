@@ -103,7 +103,9 @@
     "editor": "Editor",
     "viewer": "Espectador",
     "public": "Público",
-    "private": "Privado"
+    "private": "Privado",
+    "compact": "Compacto",
+    "loose": "Espacioso"
   },
   "login": {
     "login-to": "Acceder a ",
@@ -154,6 +156,8 @@
     "tree-types-alert": "Ten en cuenta que esta elección es permanente y no se puede cambiar más tarde.",
     "settings-tab": "Configuración del árbol",
     "settings-tab-label": "Ajustes",
+    "tree-node-compact": "Nodos compactos",
+    "tree-node-compact-info": "Si está habilitado, los nodos del árbol se mostrarán en un formato más compacto.",
     "tree-node-image": "Imágenes de nodos",
     "tree-node-image-info": "Si está habilitado, cada nodo del árbol mostrará una imagen que representa al miembro de la familia.",
     "tree-node-gallery": "Galería de imágenes",
@@ -181,6 +185,8 @@
     "node-birth-place-description": "Introduce el lugar de nacimiento del nuevo miembro (opcional).",
     "node-birth-date": "Fecha de nacimiento",
     "node-birth-date-description": "Introduce la fecha de nacimiento del nuevo miembro.",
+    "node-death-place": "Lugar de defunción",
+    "node-death-place-description": "Introduce el lugar de defunción del nuevo miembro (opcional).",
     "node-death-date": "Fecha de defunción",
     "node-death-date-description": "Introduce la fecha de defunción del nuevo miembro (opcional).",
     "node-gender": "Género",
@@ -248,6 +254,7 @@
     "edited-by": "Editado por",
     "name": "Nombre",
     "type": "Tipo",
+    "compact": "Nodes compactes",
     "nodeImage": "Imágenes de nodos",
     "nodeGallery": "Galería de imágenes",
     "fullName": "Nombre",

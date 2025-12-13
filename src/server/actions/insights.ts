@@ -4,7 +4,6 @@ import { db } from '@/server/db'
 import { assertAuthenticated } from '@/server/utils'
 
 import { HighlightsResponse, MilestonesResponse, Milestone, Highlight } from '@/types'
-import { TreeEdgeType } from '../schemas'
 
 /**
  * Get milestones for the authenticated user's trees
@@ -30,7 +29,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
 
   trees.forEach((tree) => {
     tree.nodes.forEach((n) => {
-      if (n.birthDate) {
+      if (n.birthDate && !n.deathDate) {
         const bDate = new Date(n.birthDate)
         let nextBirthday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate())
         if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)

@@ -52,7 +52,13 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
 
   const form = useForm<z.infer<typeof CreateTreeSchema>>({
     resolver: zodResolver(CreateTreeSchema),
-    defaultValues: { name: '', nodeImage: undefined, nodeGallery: undefined, members: [] },
+    defaultValues: {
+      name: '',
+      compact: false,
+      nodeImage: undefined,
+      nodeGallery: undefined,
+      members: [],
+    },
   })
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
@@ -327,6 +333,30 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
               </div>
               <TypographyH5 className="mt-5">{t_trees('settings-tab')}</TypographyH5>
               <div className="border-ocean-200/50 shadow-center flex-col items-start rounded border-2 bg-white px-3 py-2">
+                <FormField
+                  control={form.control}
+                  name="compact"
+                  render={() => {
+                    const value = form.getValues('compact')
+                    return (
+                      <FormItem>
+                        <FormLabel>{t_trees('tree-node-compact')}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_trees('tree-node-compact-info')}
+                        </FormDescription>
+                        <FormControl>
+                          <StyledSelector
+                            types={['Compact', 'Loose'] as const}
+                            value={form.getValues('compact') ? 'Compact' : 'Loose'}
+                            setValue={(value) => form.setValue('compact', value === 'Compact')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
+                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
                 <FormField
                   control={form.control}
                   name="nodeImage"

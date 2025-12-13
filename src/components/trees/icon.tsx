@@ -39,6 +39,8 @@ const otherDefaultIcons: Record<string, keyof typeof icons> = {
   disabled: 'X',
   public: 'LockKeyholeOpen',
   private: 'UserLock',
+  compact: 'StretchHorizontal',
+  loose: 'StretchVertical',
 }
 
 export const Icon: React.FC<IconProps> = ({

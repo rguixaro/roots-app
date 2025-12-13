@@ -16,8 +16,8 @@ export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: numb
 
   const motions: Variants = {
     hover: { scale: 1.02, transition: { type: 'spring', stiffness: 400, damping: 15 } },
-    offscreen: { opacity: 0, x: 150, scale: 1 },
-    onscreen: {
+    hidden: { opacity: 0, x: 150, scale: 1 },
+    visible: {
       opacity: 1,
       x: 0,
       transition: { type: 'spring', bounce: 0.2, duration: 0.8, delay: index * 0.15 },
@@ -33,11 +33,10 @@ export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: numb
 
   return (
     <motion.div
-      initial="offscreen"
-      whileInView="onscreen"
+      initial="hidden"
+      animate="visible"
       whileHover="hover"
       variants={motions}
-      viewport={{ once: true, amount: 0.01 }}
       className={cn('aspect-square h-32 w-24 p-2', tree && 'w-48')}
     >
       {tree ? (

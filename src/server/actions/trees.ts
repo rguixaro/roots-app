@@ -37,6 +37,7 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
         slug: slugify(values.name),
         name: values.name,
         type: values.type,
+        compact: values.compact ?? false,
         nodeImage: values.nodeImage ?? false,
         nodeGallery: values.nodeGallery ?? false,
         accesses: { create: { userId, role: 'ADMIN' } },
@@ -79,6 +80,7 @@ export const updateTree = async (
       data: {
         name: values.name,
         type: values.type,
+        compact: values.compact,
         nodeImage: values.nodeImage,
         nodeGallery: values.nodeGallery,
         slug: slugify(values.name),
@@ -86,7 +88,13 @@ export const updateTree = async (
       include: { accesses: { include: { user: true } } },
     })
 
-    const changes = getChanges(prevTree, values, ['name', 'type', 'nodeImage', 'nodeGallery'])
+    const changes = getChanges(prevTree, values, [
+      'name',
+      'type',
+      'compact',
+      'nodeImage',
+      'nodeGallery',
+    ])
 
     if (changes) {
       await db.activityLog.create({

@@ -52,8 +52,12 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
    * @return {object} Node types mapping
    */
   const nodeTypes = useMemo(
-    () => ({ ['ANIMAL']: StyledNodeCompact, ['HUMAN']: StyledNode, COUPLE: VoidNode }),
-    [tree.type]
+    () => ({
+      COMPACT: tree.compact ? StyledNodeCompact : StyledNode,
+      LOOSE: tree.compact ? StyledNodeCompact : StyledNode,
+      COUPLE: VoidNode,
+    }),
+    [tree.compact]
   )
 
   /**

@@ -107,7 +107,7 @@ export function createTreeLayout(
     const edgesTo = edges.filter((e) => e.toNodeId === node.id)
     return {
       id: node.id,
-      type: tree.type,
+      type: tree.compact ? 'COMPACT' : 'LOOSE',
       data: {
         node: { ...node, edgesFrom, edgesTo },
         withPicture: tree.nodeImage,

@@ -84,6 +84,7 @@
     "error-cannot-connect-siblings": "Cannot create a parent-child relationship between siblings.",
     "error-child-has-max-parents": "A child cannot have more than 2 parents.",
     "error-picture-upload": "An error occurred while uploading the image.",
+    "error-picture-too-large": "The image file is too large. Maximum size is 20MB.",
     "error-picture-delete": "An error occurred while deleting the image.",
     "error-picture-not-found": "Picture not found.",
     "error-picture-at-least-one-tag": "The picture must have at least one tag.",

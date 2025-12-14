@@ -8,11 +8,11 @@ import { assertRole, assertAuthenticated } from '@/server/utils'
 
 import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
 
-import { Picture, PictureTag } from '@/types'
+import { Picture, PictureMetadata, PictureTag } from '@/types'
 
 /**
  * Get all pictures for a specific node
- * @param nodeId TreeNode id
+ * @param nodeId {string} TreeNode id
  * @returns Promise<Picture[]>
  */
 export const getPictures = async (nodeId: string) => {
@@ -26,9 +26,12 @@ export const getPictures = async (nodeId: string) => {
           include: { tags: { include: { node: { select: { id: true, fullName: true } } } } },
         },
       },
-      orderBy: { picture: { createdAt: 'desc' } },
+      orderBy: { picture: { date: 'desc' } },
     })
-    return pictures.map((tag) => tag.picture)
+    return pictures.map((i) => ({
+      ...i.picture,
+      metadata: i.picture?.metadata as PictureMetadata | null,
+    }))
   } catch (error) {
     return []
   }
@@ -55,10 +58,12 @@ export const createPicture = async (
 
     await assertRole(node.treeId, userId)
 
-    fileKey = await uploadFileToS3(file, node.treeId)
+    let date: Date
+    let metadata: PictureMetadata
+    ;[fileKey, date, metadata] = await uploadFileToS3(file, node.treeId)
 
     const picture = await db.picture.create({
-      data: { treeId: node.treeId, fileKey, uploadedBy: userId },
+      data: { treeId: node.treeId, fileKey, uploadedBy: userId, date, metadata },
     })
 
     const newTag = await db.pictureTag.create({
@@ -87,7 +92,14 @@ export const createPicture = async (
 
     revalidatePath(`/trees/${node.treeId}`)
 
-    return { error: false, picture }
+    return {
+      error: false,
+      picture: {
+        ...picture,
+        tags: [{ ...newTag, node: { id: node.id, fullName: node.fullName } }],
+        metadata: picture.metadata as PictureMetadata | null,
+      },
+    }
   } catch (e: any) {
     if (fileKey) {
       try {

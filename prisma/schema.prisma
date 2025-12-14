@@ -184,7 +184,8 @@ model Picture {
   fileKey    String
   uploadedBy String @db.ObjectId
 
-  date DateTime?
+  date     DateTime?
+  metadata Json?
 
   tags PictureTag[] @relation("tags")
 

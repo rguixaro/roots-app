@@ -50,6 +50,8 @@ export const createPicture = async (
 ): Promise<{ error: boolean; picture?: Picture; message?: string }> => {
   let fileKey: string | null = null
 
+  if (file.size > 20 * 1024 * 1024) return { error: true, message: 'error-picture-too-large' }
+
   try {
     const userId = await assertAuthenticated()
 

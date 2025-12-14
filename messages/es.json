@@ -84,6 +84,7 @@
     "error-cannot-connect-siblings": "No se puede crear una relación padre-hijo entre hermanos.",
     "error-child-has-max-parents": "Un hijo no puede tener más de 2 padres.",
     "error-picture-upload": "Se ha producido un error al subir la imagen.",
+    "error-picture-too-large": "La imagen es demasiado grande. El tamaño máximo es de 20 MB.",
     "error-picture-delete": "Se ha producido un error al eliminar la imagen.",
     "error-picture-not-found": "Imagen no encontrada.",
     "error-picture-at-least-one-tag": "La imagen debe tener al menos una etiqueta.",

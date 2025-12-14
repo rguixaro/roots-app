@@ -3,6 +3,8 @@ import { cache } from 'react'
 import { db } from '@/server/db'
 import { assertAuthenticated } from '@/server/utils/auth'
 
+import { PictureMetadata } from '@/types'
+
 /**
  * Get trees that a user has access to.
  * Auth required.
@@ -65,9 +67,20 @@ export const getTreeRoots = cache(async (slug: string) => {
       where: { treeId: tree.id },
       include: { taggedIn: { where: { isProfile: true }, include: { picture: true } } },
     })
+
+    const typedNodes = nodes.map((node) => ({
+      ...node,
+      taggedIn: node.taggedIn.map((tag) => ({
+        ...tag,
+        picture: {
+          ...tag.picture,
+          metadata: tag.picture.metadata as unknown as PictureMetadata,
+        },
+      })),
+    }))
     const edges = await db.treeEdge.findMany({ where: { treeId: tree.id } })
 
-    return { tree, nodes, edges }
+    return { tree, nodes: typedNodes, edges }
   } catch (error) {}
 })
 

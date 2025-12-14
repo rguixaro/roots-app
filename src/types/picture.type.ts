@@ -20,6 +20,7 @@ export interface Picture {
   fileKey: string
 
   uploadedBy: string
+  date?: Date | null
 
   createdAt: Date
   updatedAt: Date

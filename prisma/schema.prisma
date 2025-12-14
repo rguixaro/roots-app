@@ -184,6 +184,8 @@ model Picture {
   fileKey    String
   uploadedBy String @db.ObjectId
 
+  date DateTime?
+
   tags PictureTag[] @relation("tags")
 
   createdAt DateTime @default(now())

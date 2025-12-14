@@ -24,6 +24,10 @@ export const env = createEnv({
     GOOGLE_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
 
+    /// Sentry
+    SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ORG: z.string().optional(),
+
     /// AWS
     AMAZON_REGION: z.string(),
     AMAZON_S3_BUCKET_NAME: z.string(),
@@ -51,6 +55,10 @@ export const env = createEnv({
     /// Google OAuth
     GOOGLE_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+
+    /// Sentry
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
 
     /// AWS
     AMAZON_REGION: process.env.AMAZON_REGION,

@@ -26,6 +26,7 @@ export const env = createEnv({
 
     /// Sentry
     SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ORG: z.string().optional(),
 
     /// AWS
     AMAZON_REGION: z.string(),
@@ -57,6 +58,7 @@ export const env = createEnv({
 
     /// Sentry
     SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
 
     /// AWS
     AMAZON_REGION: process.env.AMAZON_REGION,

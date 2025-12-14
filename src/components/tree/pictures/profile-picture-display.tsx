@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Image, LoaderIcon } from 'lucide-react'
+import Image from 'next/image'
+import { Image as ImageIcon, LoaderIcon } from 'lucide-react'
 
 import { cn } from '@/utils'
 
@@ -24,11 +25,7 @@ export function ProfilePictureDisplay({
    * Reset loading state when profile picture or error state changes
    */
   useEffect(() => {
-    if (!profilePicture) {
-      setIsLoading(false)
-    } else if (!errorProfilePicture) {
-      setIsLoading(true)
-    }
+    setIsLoading(!!profilePicture && !errorProfilePicture)
   }, [profilePicture, errorProfilePicture])
 
   /**
@@ -68,19 +65,24 @@ export function ProfilePictureDisplay({
           showPlaceholder ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
         )}
       >
-        <Image size={48} />
+        <ImageIcon size={48} />
       </div>
       {profilePicture && (
-        <img
+        <div
           className={cn(
-            'h-full w-full object-cover transition-all duration-500 ease-out',
+            'h-full w-full transition-all duration-500 ease-out',
             isLoading || errorProfilePicture ? 'invisible' : 'visible'
           )}
-          src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
-          alt="Profile picture"
-          onLoad={handleLoad}
-          onError={handleError}
-        />
+        >
+          <Image
+            src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+            alt="Profile picture"
+            fill
+            style={{ objectFit: 'cover' }}
+            onLoadingComplete={handleLoad}
+            onError={handleError}
+          />
+        </div>
       )}
     </div>
   )

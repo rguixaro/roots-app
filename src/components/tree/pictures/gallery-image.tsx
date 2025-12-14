@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Image, LoaderIcon } from 'lucide-react'
+import Image from 'next/image'
+import { Image as ImageIcon, LoaderIcon } from 'lucide-react'
 
 import { cn } from '@/utils'
 
@@ -29,13 +30,8 @@ export function GalleryImage({
    * Reset loading state when src or hasError changes
    */
   useEffect(() => {
-    if (!src) {
-      setIsLoading(false)
-      setLoadError(true)
-    } else if (!hasError) {
-      setIsLoading(true)
-      setLoadError(false)
-    }
+    setIsLoading(!!src && !hasError)
+    setLoadError(!src || !!hasError)
   }, [src, hasError])
 
   const showError = hasError || loadError
@@ -72,19 +68,24 @@ export function GalleryImage({
           showPlaceholder ? 'scale-100 opacity-100' : 'pointer-events-none scale-95 opacity-0'
         )}
       >
-        <Image size={iconSize} />
+        <ImageIcon size={iconSize} />
       </div>
       {src && (
-        <img
-          src={src}
-          alt={alt}
-          onLoad={handleLoad}
-          onError={handleError}
+        <div
           className={cn(
-            'h-full w-full object-cover transition-all duration-500 ease-out',
+            'h-full w-full transition-all duration-500 ease-out',
             isLoading || showError ? 'invisible' : 'visible'
           )}
-        />
+        >
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            style={{ objectFit: 'cover' }}
+            onLoadingComplete={handleLoad}
+            onError={handleError}
+          />
+        </div>
       )}
     </div>
   )

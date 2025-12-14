@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, JSX, useEffect } from 'react'
+import Image from 'next/image'
 import { Position, Handle, NodeProps } from 'reactflow'
-import { Info, Image, LoaderIcon } from 'lucide-react'
+import { Info, Image as ImageIcon, LoaderIcon } from 'lucide-react'
 import { motion, Variants } from 'framer-motion'
 
 import { cn, getProfilePicture } from '@/utils'
@@ -261,11 +262,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
     return cn(HandleVisualStyles, {
       'bg-ocean-100 h-8 w-3': isConnected,
-      'border-ocean-200 bg-ocean-100 w-3': isHoveredOrExpanded,
-      'border-ocean-200 bg-pale-ocean h-8': isHoveredAndNotConnected,
-      'border-ocean-200 bg-ocean-100 h-10': isExpanded,
-      'bg-ocean-300': isExpandedAndIsConnected,
-      'border-pale-ocean bg-ocean-200 h-8 w-3': isMobileAndNotConnected,
+      'border-ocean-100 bg-ocean-200 w-3': isHoveredOrExpanded,
+      'border-ocean-100 bg-ocean-50 h-8': isHoveredAndNotConnected,
+      'border-ocean-100 bg-ocean-200 h-8': isExpanded,
+      'bg-ocean-300 h-12': isExpandedAndIsConnected,
+      'border-pale-ocean bg-ocean-50 h-8 w-3': isMobileAndNotConnected,
     })
   }
 
@@ -283,11 +284,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
     return cn(HandleVisualStyles, {
       'bg-ocean-100 h-3 w-10': isConnected,
-      'border-ocean-200 bg-ocean-100 h-3': isHoveredOrExpanded,
-      'border-ocean-200 bg-pale-ocean h-3 w-10': isHoveredAndNotConnected,
-      'border-ocean-200 w-0 bg-ocean-100': isExpanded,
+      'border-ocean-100 bg-ocean-200 h-3': isHoveredOrExpanded,
+      'border-ocean-100 bg-ocean-50 h-3 w-10': isHoveredAndNotConnected,
+      'border-ocean-100 bg-ocean-200 w-0': isExpanded,
       'bg-ocean-300': isExpandedAndIsConnected,
-      'border-pale-ocean bg-ocean-200 h-3 w-10': isMobileAndNotConnected,
+      'border-pale-ocean bg-ocean-50 h-3 w-10': isMobileAndNotConnected,
     })
   }
 
@@ -302,11 +303,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       whileTap="tap"
       className={cn(
         'text-ocean-400 group relative flex h-20 w-52 cursor-pointer flex-col items-center justify-center rounded-lg',
-        'shadow-center-sm hover:bg-ocean-200 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
+        'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
         isExpanded &&
-          `bg-ocean-200 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`,
+          `bg-ocean-100 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`,
         isInModal &&
-          `bg-ocean-200 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`
+          `bg-ocean-100 text-pale-ocean ${withPicture ? 'rounded-none' : 'rounded-b-none'}`
       )}
     >
       <strong className="relative z-10 leading-none">{fullName}</strong>
@@ -440,7 +441,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           initial="collapsed"
           animate={isExpanded ? 'expanded' : 'collapsed'}
           className={cn(
-            'bg-ocean-200 absolute bottom-full left-1/2 flex w-full origin-bottom -translate-x-1/2 justify-evenly',
+            'bg-ocean-100 absolute bottom-full left-1/2 flex w-full origin-bottom -translate-x-1/2 justify-evenly',
             '-mb-px cursor-default overflow-hidden rounded-t-xl'
           )}
         >
@@ -454,7 +455,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
               >
                 <div
                   className={cn(
-                    'bg-ocean-200 absolute inset-0 flex items-center justify-center',
+                    'bg-ocean-100 absolute inset-0 flex items-center justify-center',
                     showPictureLoader ? 'opacity-100' : 'pointer-events-none opacity-0'
                   )}
                 >
@@ -464,25 +465,30 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
                 </div>
                 <div
                   className={cn(
-                    'bg-ocean-200 absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out',
+                    'bg-ocean-100 absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out',
                     showPicturePlaceholder
                       ? 'scale-100 opacity-100'
                       : 'pointer-events-none scale-95 opacity-0'
                   )}
                 >
-                  <Image size={24} />
+                  <ImageIcon size={24} />
                 </div>
                 {profilePicture && !pictureError && (
-                  <img
+                  <div
                     className={cn(
-                      'h-full w-full object-cover transition-all duration-500 ease-out',
+                      'h-full w-full transition-all duration-500 ease-out',
                       isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     )}
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
-                    alt="Profile"
-                    onLoad={handlePictureLoad}
-                    onError={handlePictureError}
-                  />
+                  >
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+                      alt="Profile"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      onLoadingComplete={handlePictureLoad}
+                      onError={handlePictureError}
+                    />
+                  </div>
                 )}
               </motion.div>
             </motion.div>
@@ -496,7 +502,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         animate={isExpanded ? 'expanded' : 'collapsed'}
         className={cn(
           'shadow-center absolute top-full left-1/2 flex w-full origin-top -translate-x-1/2 justify-evenly',
-          'bg-ocean-400 cursor-default overflow-hidden rounded-b-xl',
+          'bg-ocean-300 cursor-default overflow-hidden rounded-b-xl',
           isExpanded ? 'pointer-events-auto' : 'pointer-events-none'
         )}
       >
@@ -504,7 +510,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
           variants={infoIconVariants}
           onClick={onInfoClick}
           className={cn(
-            'text-ocean-400 bg-ocean-400 flex w-full cursor-pointer items-center justify-center p-2',
+            'text-ocean-400 bg-ocean-300 flex w-full cursor-pointer items-center justify-center p-2',
             'group/info hover:bg-ocean-400 transition-colors duration-300 outline-none focus:outline-none'
           )}
         >

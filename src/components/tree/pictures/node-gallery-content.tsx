@@ -7,12 +7,14 @@ import { Button, TypographyH5 } from '@/ui'
 
 import { cn } from '@/utils'
 
-import { Picture } from '@/types'
+import { Picture, TreeType } from '@/types'
 
 import { GalleryImage } from './gallery-image'
+import { Icon } from '@/components/trees/icon'
 
 interface NodeGalleryContentProps {
   readonly: boolean
+  treeType: TreeType
   pictures: Picture[]
   loadingPictures: boolean
   loading: boolean
@@ -30,6 +32,7 @@ interface NodeGalleryContentProps {
 
 export function NodeGalleryContent({
   readonly,
+  treeType,
   pictures,
   loadingPictures,
   loading,
@@ -123,6 +126,19 @@ export function NodeGalleryContent({
                       <Menu size={18} />
                     </button>
                   </div>
+                  <div
+                    className={cn(
+                      'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-sm opacity-0',
+                      'shadow-center-sm transition-opacity duration-300',
+                      tappedImageId === picture.id ? 'opacity-100' : 'opacity-0'
+                    )}
+                  >
+                    <span>{picture.date?.toLocaleDateString()}</span>
+                    <div className="flex items-center space-x-1">
+                      <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                      <span>{picture.tags?.length}</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -132,7 +148,6 @@ export function NodeGalleryContent({
     )
   }
 
-  // Desktop version
   return (
     <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
       <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
@@ -207,6 +222,18 @@ export function NodeGalleryContent({
                 >
                   <Menu size={18} />
                 </button>
+              </div>
+              <div
+                className={cn(
+                  'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-sm opacity-0',
+                  'shadow-center-sm transition-opacity duration-300 group-hover:opacity-100'
+                )}
+              >
+                <span>{picture.date?.toLocaleDateString()}</span>
+                <div className="flex items-center space-x-1">
+                  <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                  <span>{picture.tags?.length}</span>
+                </div>
               </div>
             </div>
           ))}

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useCallback, JSX, useEffect } from 'react'
+import Image from 'next/image'
 import { Position, Handle, NodeProps } from 'reactflow'
-import { Info, Image, LoaderIcon } from 'lucide-react'
+import { Info, Image as ImageIcon, LoaderIcon } from 'lucide-react'
 import { motion, Variants } from 'framer-motion'
 
 import { cn, getProfilePicture } from '@/utils'
@@ -243,9 +244,9 @@ export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>):
       'bg-ocean-100 h-8 w-3': isConnected,
       'border-ocean-100 bg-ocean-100 w-3': isHoveredOrExpanded,
       'border-ocean-100 bg-ocean-50 h-8': isHoveredAndNotConnected,
-      'border-ocean-100 bg-ocean-200 h-10': isExpanded,
-      'bg-ocean-300': isExpandedAndIsConnected,
-      'border-pale-ocean bg-ocean-200 h-8 w-3': isMobileAndNotConnected,
+      'border-ocean-100 bg-ocean-200 h-8': isExpanded,
+      'bg-ocean-300 h-12': isExpandedAndIsConnected,
+      'border-pale-ocean bg-ocean-50 h-8 w-3': isMobileAndNotConnected,
     })
   }
 
@@ -265,9 +266,9 @@ export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>):
       'bg-ocean-100 h-3 w-10': isConnected,
       'border-ocean-100 bg-ocean-200 h-3': isHoveredOrExpanded,
       'border-ocean-100 bg-ocean-50 h-3 w-10': isHoveredAndNotConnected,
-      'border-ocean-100 bg-ocean-200 h-3 w-20': isExpanded,
+      'border-ocean-100 bg-ocean-200 h-3 w-10': isExpanded,
       'bg-ocean-300 h-3 w-20': isExpandedAndIsConnected,
-      'border-pale-ocean bg-ocean-200 h-3 w-10': isMobileAndNotConnected,
+      'border-pale-ocean bg-ocean-50 h-3 w-10': isMobileAndNotConnected,
     })
   }
 
@@ -283,8 +284,8 @@ export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>):
       className={cn(
         'text-ocean-400 group relative flex h-20 w-auto cursor-pointer items-center justify-start rounded-lg',
         'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
-        isExpanded && `bg-ocean-200 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
-        isInModal && `bg-ocean-200 text-pale-ocean ${withPicture && 'rounded-b-none'}`
+        isExpanded && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
+        isInModal && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`
       )}
     >
       <motion.div variants={pictureContentVariants} className="px-2">
@@ -307,24 +308,30 @@ export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>):
           <div
             className={cn(
               'bg-ocean-50 group-hover:bg-ocean-100 absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out',
+              isExpanded && 'bg-ocean-100',
               showPicturePlaceholder
                 ? 'scale-100 opacity-100'
                 : 'pointer-events-none scale-95 opacity-0'
             )}
           >
-            <Image size={24} />
+            <ImageIcon size={24} />
           </div>
           {profilePicture && !pictureError && (
-            <img
+            <div
               className={cn(
-                'h-full w-full object-cover transition-all duration-300 ease-out',
+                'h-full w-full transition-all duration-300 ease-out',
                 isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
               )}
-              src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
-              alt="Profile"
-              onLoad={handlePictureLoad}
-              onError={handlePictureError}
-            />
+            >
+              <Image
+                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+                alt="Profile"
+                fill
+                style={{ objectFit: 'cover' }}
+                onLoadingComplete={handlePictureLoad}
+                onError={handlePictureError}
+              />
+            </div>
           )}
         </motion.div>
       </motion.div>

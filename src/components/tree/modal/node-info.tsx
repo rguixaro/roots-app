@@ -249,6 +249,7 @@ export function NodeInfoModal({
                     <Tabs.Content value="gallery">
                       <NodeGalleryContent
                         readonly={readonly}
+                        treeType={treeType}
                         pictures={pictureOps.pictures}
                         loadingPictures={pictureOps.loadingPictures}
                         loading={loading}
@@ -296,6 +297,7 @@ export function NodeInfoModal({
             >
               <NodeGalleryContent
                 readonly={readonly}
+                treeType={treeType}
                 pictures={pictureOps.pictures}
                 loadingPictures={pictureOps.loadingPictures}
                 loading={loading}

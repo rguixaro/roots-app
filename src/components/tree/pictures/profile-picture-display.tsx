@@ -67,7 +67,7 @@ export function ProfilePictureDisplay({
       >
         <ImageIcon size={48} />
       </div>
-      {profilePicture && (
+      {profilePicture && !errorProfilePicture && (
         <div
           className={cn(
             'h-full w-full transition-all duration-500 ease-out',
@@ -75,10 +75,10 @@ export function ProfilePictureDisplay({
           )}
         >
           <Image
-            src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
-            alt="Profile picture"
-            fill
-            style={{ objectFit: 'cover' }}
+            src={`/api/proxy?url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`)}`}
+            alt="Profile"
+            className="object-cover"
+            fill={true}
             onLoadingComplete={handleLoad}
             onError={handleError}
           />

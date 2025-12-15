@@ -1,4 +1,4 @@
-import { NextResponse, NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 import NextAuth from 'next-auth'
 
 import AuthConfig from './auth.config'
@@ -18,47 +18,46 @@ const { auth } = NextAuth(AuthConfig)
  * @returns {NextResponse} The response object.
  */
 export default auth(async (req) => {
-  const { nextUrl: NextURL } = req
+  const { nextUrl } = req
+  const { pathname, search, origin, href } = nextUrl
 
-  const isLoggedIn = !!req.auth
+  const isLoggedIn = Boolean(req.auth)
 
-  const isApiAuthRoute = NextURL.pathname.startsWith(API_AUTH_PREFIX)
-  const isProtectedRoute = PROTECTED_ROUTES.includes(NextURL.pathname)
-  const isAuthRoute = AUTH_ROUTES.includes(NextURL.pathname)
-  const isTreeRoute = NextURL.pathname.startsWith(TREES_ROUTE_PREFIX)
+  const isApiAuthRoute = nextUrl.pathname.startsWith(API_AUTH_PREFIX)
+  const isProtectedRoute = PROTECTED_ROUTES.includes(nextUrl.pathname)
+  const isAuthRoute = AUTH_ROUTES.includes(nextUrl.pathname)
+  const isTreeRoute = nextUrl.pathname.startsWith(TREES_ROUTE_PREFIX)
+  const isSettingsRoute = nextUrl.pathname.startsWith('/profile')
 
   /// API Route
   if (isApiAuthRoute) return NextResponse.next()
 
   /// Auth Route
   if (isAuthRoute) {
-    if (isLoggedIn) return NextResponse.redirect(new URL(DEFAULT_AUTH_REDIRECT_URL, NextURL))
-    return NextResponse.next()
+    return isLoggedIn
+      ? NextResponse.redirect(new URL(DEFAULT_AUTH_REDIRECT_URL, origin))
+      : NextResponse.next()
   }
 
   /// Protected route
   if (!isLoggedIn && (isProtectedRoute || isTreeRoute)) {
-    let callbackURL = NextURL.pathname
-    if (NextURL.search) callbackURL += NextURL.search
-    const encodedCallbackURL = encodeURIComponent(callbackURL)
-    return NextResponse.redirect(new URL(`/auth?callbackUrl=${encodedCallbackURL}`, NextURL))
+    const callbackUrl = encodeURIComponent(`${pathname}${search}`)
+    return NextResponse.redirect(new URL(`/auth?callbackUrl=${callbackUrl}`, origin))
   }
 
   /// CloudFront cookies for authenticated users
-  if (isLoggedIn && isTreeRoute) {
-    const hasCookies =
-      req.cookies.get('CloudFront-Key-Pair-Id') &&
-      req.cookies.get('CloudFront-Policy') &&
-      req.cookies.get('CloudFront-Signature')
+  if (isLoggedIn && !isSettingsRoute) {
+    const hasCloudFrontCookies =
+      req.cookies.has('CloudFront-Key-Pair-Id') &&
+      req.cookies.has('CloudFront-Policy') &&
+      req.cookies.has('CloudFront-Signature')
 
-    if (!hasCookies) {
-      const returnTo = req.nextUrl.pathname + req.nextUrl.search
-      const cookiesUrl = `${req.nextUrl.origin}/api/cookies?return=${encodeURIComponent(returnTo)}`
+    if (!hasCloudFrontCookies) {
+      const cookiesUrl = `${origin}/api/cookies?return=${encodeURIComponent(href)}`
       return NextResponse.redirect(cookiesUrl)
     }
   }
 
-  /// Default: proceed to the requested route
   return NextResponse.next()
 })
 

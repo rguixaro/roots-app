@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, type ReactNode, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { LoaderIcon } from 'lucide-react'
@@ -28,15 +28,27 @@ export const LogoutAccount = (props: LogoutAccountProps) => {
   const t_profile = useTranslations('profile')
 
   const [loading, setLoading] = useState<boolean>(false)
+  const [isPending, startTransition] = useTransition()
 
   /**
-   * Handle account logout.
+   * Handle account logout using a server action
    */
-  async function handleLogoutAccount() {
+  const handleLogoutAccount = () => {
     setLoading(true)
-    toast.promise(handleSignOut, {
-      loading: t_profile('account-logout-logging-out'),
-      error: t_profile('account-logout-logged-out'),
+
+    startTransition(() => {
+      const promise = toast.promise(
+        (async () => {
+          await fetch('/api/logout', { method: 'POST', credentials: 'include' })
+          await handleSignOut()
+        })(),
+        {
+          loading: t_profile('account-logout-logging-out'),
+          success: t_profile('account-logout-logged-out'),
+          error: t_profile('account-logout-error'),
+        }
+      )
+      promise.unwrap().finally(() => setLoading(false))
     })
   }
 
@@ -50,12 +62,12 @@ export const LogoutAccount = (props: LogoutAccountProps) => {
         </DialogHeader>
         <DialogFooter className="mt-3">
           <DialogClose asChild>
-            <Button variant="ghost" disabled={loading} className="font-bold">
+            <Button variant="ghost" disabled={loading || isPending} className="font-bold">
               {t_common('cancel')}
             </Button>
           </DialogClose>
-          <Button disabled={loading} onClick={handleLogoutAccount}>
-            {loading ?? <LoaderIcon size={16} className="animate-spin" />}
+          <Button disabled={loading || isPending} onClick={handleLogoutAccount}>
+            {(loading || isPending) && <LoaderIcon size={16} className="mr-2 animate-spin" />}
             <span>{t_profile('account-logout')}</span>
           </Button>
         </DialogFooter>

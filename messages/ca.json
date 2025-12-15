@@ -210,6 +210,7 @@
     "node-gallery-tags-currently": "Actualment etiquetats",
     "node-gallery-tags-add": "Etiqueta membres",
     "node-gallery-tags-add-none": "No hi ha membres disponibles per etiquetar",
+    "node-gallery-tags-search": "Cerca per nom o sobrenom...",
     "recent-activity": "Activitat recent",
     "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família."
   },

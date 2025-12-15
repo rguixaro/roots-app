@@ -23,7 +23,9 @@ export const getPictures = async (nodeId: string) => {
       where: { nodeId },
       include: {
         picture: {
-          include: { tags: { include: { node: { select: { id: true, fullName: true } } } } },
+          include: {
+            tags: { include: { node: { select: { id: true, fullName: true, alias: true } } } },
+          },
         },
       },
       orderBy: { picture: { date: 'desc' } },
@@ -98,7 +100,12 @@ export const createPicture = async (
       error: false,
       picture: {
         ...picture,
-        tags: [{ ...newTag, node: { id: node.id, fullName: node.fullName } }],
+        tags: [
+          {
+            ...newTag,
+            node: { id: node.id, fullName: node.fullName, alias: node.alias },
+          },
+        ],
         metadata: picture.metadata as PictureMetadata | null,
       },
     }
@@ -200,7 +207,7 @@ export const createPictureTag = async (
 
     const newTag = await db.pictureTag.create({
       data: { pictureId, nodeId, isProfile: false },
-      include: { node: { select: { id: true, fullName: true } } },
+      include: { node: { select: { id: true, fullName: true, alias: true } } },
     })
 
     await db.activityLog.create({

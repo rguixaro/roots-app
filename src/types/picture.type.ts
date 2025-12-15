@@ -10,6 +10,7 @@ export interface PictureTag {
   node?: {
     id: string
     fullName: string
+    alias: string | null
   }
 }
 

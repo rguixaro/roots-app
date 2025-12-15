@@ -43,7 +43,9 @@ export function usePictureOperations({
   const [showTagsModal, setShowTagsModal] = useState(false)
   const [tappedImageId, setTappedImageId] = useState<string | null>(null)
   const [selectedPicture, setSelectedPicture] = useState<Picture | null>(null)
-  const [availableNodes, setAvailableNodes] = useState<Array<{ id: string; fullName: string }>>([])
+  const [availableNodes, setAvailableNodes] = useState<
+    Array<{ id: string; fullName: string; alias: string | null }>
+  >([])
 
   const [loading, setLoading] = useState(false)
 
@@ -159,7 +161,7 @@ export function usePictureOperations({
         const taggedNodeIds = picture.tags?.map((tag) => tag.nodeId) || []
         const available = nodes
           .filter((node) => !taggedNodeIds.includes(node.id))
-          .map((n) => ({ id: n.id, fullName: n.fullName }))
+          .map((n) => ({ id: n.id, fullName: n.fullName, alias: n.alias || null }))
         setAvailableNodes(available)
       } catch (error) {
         toast.error(t_errors('error'))
@@ -230,7 +232,11 @@ export function usePictureOperations({
         if (tagToRemove.node)
           setAvailableNodes((prev) => [
             ...prev,
-            { id: tagToRemove.nodeId, fullName: tagToRemove.node!.fullName },
+            {
+              id: tagToRemove.nodeId,
+              fullName: tagToRemove.node!.fullName,
+              alias: tagToRemove.node!.alias,
+            },
           ])
 
         toast.success(t_toasts('node-picture-tag-removed'))

@@ -210,6 +210,7 @@
     "node-gallery-tags-currently": "Currently tagged",
     "node-gallery-tags-add": "Tag members",
     "node-gallery-tags-add-none": "No members available to tag",
+    "node-gallery-tags-search": "Search by name or alias...",
     "recent-activity": "Recent activity",
     "recent-activity-description": "Here you can see the most recent changes made to this family."
   },

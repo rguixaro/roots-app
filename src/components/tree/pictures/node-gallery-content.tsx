@@ -128,14 +128,14 @@ export function NodeGalleryContent({
                   </div>
                   <div
                     className={cn(
-                      'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-sm opacity-0',
+                      'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-xs opacity-0',
                       'shadow-center-sm transition-opacity duration-300',
                       tappedImageId === picture.id ? 'opacity-100' : 'opacity-0'
                     )}
                   >
                     <span>{picture.date?.toLocaleDateString()}</span>
                     <div className="flex items-center space-x-1">
-                      <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                      <Icon size={12} type={treeType} className="stroke-ocean-400" />
                       <span>{picture.tags?.length}</span>
                     </div>
                   </div>
@@ -225,13 +225,13 @@ export function NodeGalleryContent({
               </div>
               <div
                 className={cn(
-                  'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-sm opacity-0',
+                  'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-xs opacity-0',
                   'shadow-center-sm transition-opacity duration-300 group-hover:opacity-100'
                 )}
               >
                 <span>{picture.date?.toLocaleDateString()}</span>
                 <div className="flex items-center space-x-1">
-                  <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                  <Icon size={12} type={treeType} className="stroke-ocean-400" />
                   <span>{picture.tags?.length}</span>
                 </div>
               </div>

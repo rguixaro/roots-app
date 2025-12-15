@@ -324,10 +324,10 @@ export function StyledNodeCompact({ data }: NodeProps<SStyledNodeCompactProps>):
               )}
             >
               <Image
-                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`}
+                src={`/api/proxy?url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`)}`}
                 alt="Profile"
-                fill
-                style={{ objectFit: 'cover' }}
+                className="object-cover"
+                fill={true}
                 onLoadingComplete={handlePictureLoad}
                 onError={handlePictureError}
               />

@@ -70,18 +70,18 @@ export function GalleryImage({
       >
         <ImageIcon size={iconSize} />
       </div>
-      {src && (
+      {src && !showError && (
         <div
           className={cn(
             'h-full w-full transition-all duration-500 ease-out',
-            isLoading || showError ? 'invisible' : 'visible'
+            isLoading ? 'invisible' : 'visible'
           )}
         >
           <Image
-            src={src}
+            src={`/api/proxy?url=${encodeURIComponent(src)}`}
             alt={alt}
-            fill
-            style={{ objectFit: 'cover' }}
+            className="object-cover"
+            fill={true}
             onLoadingComplete={handleLoad}
             onError={handleError}
           />

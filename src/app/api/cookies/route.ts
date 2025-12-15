@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
+
 import { getSignedCookies } from '@aws-sdk/cloudfront-signer'
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
 
 import { env } from '@/env.mjs'
-
-const { AMAZON_CLOUDFRONT_KEY_PAIR_ID, NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN, COOKIES_DOMAIN } = env
 
 const secrets = new SecretsManagerClient({ region: env.AMAZON_REGION })
 
@@ -19,16 +18,16 @@ async function getPrivateKey() {
 
 export async function GET(req: Request) {
   const url = new URL(req.url)
-  const returnTo = url.searchParams.get('return') || '/'
+  const returnTo = url.searchParams.get('return') ?? '/'
+  const redirectUrl = new URL(returnTo)
 
   const privateKey = await getPrivateKey()
-
   const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 6
 
   const policy = {
     Statement: [
       {
-        Resource: `${NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/*`,
+        Resource: `${env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/*`,
         Condition: { DateLessThan: { 'AWS:EpochTime': expires } },
       },
     ],
@@ -36,11 +35,10 @@ export async function GET(req: Request) {
 
   const cookies = getSignedCookies({
     privateKey,
-    keyPairId: AMAZON_CLOUDFRONT_KEY_PAIR_ID,
+    keyPairId: env.AMAZON_CLOUDFRONT_KEY_PAIR_ID,
     policy: JSON.stringify(policy),
   })
 
-  const redirectUrl = new URL(returnTo, req.url)
   const response = NextResponse.redirect(redirectUrl)
 
   Object.entries(cookies).forEach(([name, value]) => {
@@ -51,7 +49,7 @@ export async function GET(req: Request) {
       httpOnly: false,
       secure: true,
       sameSite: 'lax',
-      domain: COOKIES_DOMAIN,
+      domain: env.COOKIES_DOMAIN,
       maxAge: 60 * 60 * 6,
     })
   })

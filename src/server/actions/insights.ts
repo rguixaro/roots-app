@@ -16,7 +16,18 @@ export async function getMilestones(): Promise<MilestonesResponse> {
     where: { accesses: { some: { userId } } },
     include: {
       nodes: {
-        select: { id: true, fullName: true, birthDate: true, deathDate: true, treeId: true },
+        select: {
+          id: true,
+          fullName: true,
+          birthDate: true,
+          deathDate: true,
+          treeId: true,
+          taggedIn: {
+            where: { isProfile: true },
+            select: { picture: { select: { fileKey: true } } },
+            take: 1,
+          },
+        },
       },
     },
   })
@@ -38,15 +49,15 @@ export async function getMilestones(): Promise<MilestonesResponse> {
           (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
         )
 
-        if (daysUntil >= 0 && daysUntil <= 30) {
-          const age = today.getFullYear() - bDate.getFullYear()
+        if (daysUntil >= 0 && daysUntil <= 240) {
           allBirthdays.push({
             id: n.id,
             name: n.fullName,
             treeName: tree.name,
             treeSlug: tree.slug,
             date: n.birthDate.toISOString().split('T')[0],
-            age,
+            age: today.getFullYear() - bDate.getFullYear(),
+            picture: n.taggedIn[0]?.picture.fileKey || null,
             daysUntil,
           })
         }
@@ -62,6 +73,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
             treeSlug: tree.slug,
             date: bDate.toISOString().split('T')[0],
             yearsAgo: today.getFullYear() - bDate.getFullYear(),
+            picture: n.taggedIn[0]?.picture.fileKey || null,
             type: 'birth' as const,
           })
         }
@@ -77,6 +89,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
             treeSlug: tree.slug,
             date: dDate.toISOString().split('T')[0],
             yearsAgo: today.getFullYear() - dDate.getFullYear(),
+            picture: n.taggedIn[0]?.picture.fileKey || null,
             type: 'death' as const,
           })
         }

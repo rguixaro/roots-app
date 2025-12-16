@@ -8,6 +8,7 @@ export interface Milestone {
   day?: number
   daysUntil?: number
   yearsAgo?: number
+  picture?: string | null
   type?: 'birth' | 'death'
 }
 

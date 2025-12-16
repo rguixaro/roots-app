@@ -3,6 +3,8 @@
 import React from 'react'
 import { LoaderIcon, Menu, X } from 'lucide-react'
 
+import { Icon } from '@/components/trees/icon'
+
 import { Button, TypographyH5 } from '@/ui'
 
 import { cn } from '@/utils'
@@ -10,7 +12,6 @@ import { cn } from '@/utils'
 import { Picture, TreeType } from '@/types'
 
 import { GalleryImage } from './gallery-image'
-import { Icon } from '@/components/trees/icon'
 
 interface NodeGalleryContentProps {
   readonly: boolean

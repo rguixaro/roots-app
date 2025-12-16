@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
@@ -15,13 +15,9 @@ import { PictureContextMenu } from '@/components/tree/context'
 import { NodeInfoTabGeneral } from '@/components/tree/modal'
 import { ModalBackdrop } from '@/components/tree/modal'
 
-import {
-  ProfilePictureDisplay,
-  NodeGalleryContent,
-  PictureTagsModal,
-} from '@/components/tree/pictures'
+import { NodeGalleryContent, PictureTagsModal } from '@/components/tree/pictures'
 
-import { ConfirmDialog, Form, TypographyH4 } from '@/ui'
+import { ConfirmDialog, Form, Picture, TypographyH4 } from '@/ui'
 
 import { checkKeyDown, cn } from '@/utils'
 
@@ -193,10 +189,10 @@ export function NodeInfoModal({
                   <div className="my-4 flex flex-col items-start gap-x-3 gap-y-2">
                     <div className="flex w-full items-center space-x-3">
                       {withPicture && (
-                        <ProfilePictureDisplay
-                          profilePicture={pictureOps.profilePicture}
-                          errorProfilePicture={pictureOps.errorProfilePicture}
-                          onError={() => pictureOps.setErrorProfilePicture(true)}
+                        <Picture
+                          fileKey={pictureOps.profilePicture?.fileKey}
+                          classNameContainer="h-24 w-24 border-4 border-ocean-300"
+                          iconSize={48}
                         />
                       )}
                       <div className="flex flex-1 items-center">

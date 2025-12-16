@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Image as ImageIcon, LoaderIcon } from 'lucide-react'
+
+import { usePictureState } from '@/hooks'
 
 import { cn } from '@/utils'
 
@@ -23,32 +24,21 @@ export function GalleryImage({
   onError,
   hasError = false,
 }: GalleryImageProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState(false)
-
-  /**
-   * Reset loading state when src or hasError changes
-   */
-  useEffect(() => {
-    setIsLoading(!!src && !hasError)
-    setLoadError(!src || !!hasError)
-  }, [src, hasError])
+  const {
+    isLoading,
+    hasError: loadError,
+    onLoad,
+    onError: internalOnError,
+  } = usePictureState(src, hasError)
 
   const showError = hasError || loadError
   const showPlaceholder = (!src || showError) && !isLoading
   const showLoader = isLoading && src && !showError
 
-  /**
-   * Handle image load event
-   */
-  const handleLoad = () => setIsLoading(false)
+  const loader = ({ src }: { src: string }) => src
 
-  /**
-   * Handle image error event
-   */
   const handleError = () => {
-    setIsLoading(false)
-    setLoadError(true)
+    internalOnError()
     onError?.()
   }
 
@@ -62,6 +52,7 @@ export function GalleryImage({
       >
         <LoaderIcon size={24} className="animate-spin opacity-70" />
       </div>
+
       <div
         className={cn(
           'absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out',
@@ -70,6 +61,7 @@ export function GalleryImage({
       >
         <ImageIcon size={iconSize} />
       </div>
+
       {src && !showError && (
         <div
           className={cn(
@@ -80,9 +72,12 @@ export function GalleryImage({
           <Image
             src={`/api/proxy?url=${encodeURIComponent(src)}`}
             alt={alt}
-            className="object-cover"
-            fill={true}
-            onLoadingComplete={handleLoad}
+            loader={loader}
+            width={400}
+            height={0}
+            sizes="(max-width: 640px) 100vw, 96px"
+            className="h-auto w-full object-cover"
+            onLoadingComplete={onLoad}
             onError={handleError}
           />
         </div>

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useCallback, JSX, useEffect } from 'react'
-import Image from 'next/image'
 import { Position, Handle, NodeProps } from 'reactflow'
-import { Info, Image as ImageIcon, LoaderIcon } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { motion, Variants } from 'framer-motion'
+
+import { Picture } from '@/ui'
 
 import { cn, getProfilePicture } from '@/utils'
 
@@ -85,17 +86,6 @@ const pictureContentVariants: Variants = {
 }
 
 /**
- * Animation variants for picture hover effect
- */
-const pictureHoverVariants: Variants = {
-  idle: { scale: 1 },
-  hover: {
-    scale: 1.08,
-    transition: { type: 'spring', stiffness: 300, damping: 20 },
-  },
-}
-
-/**
  * Animation variants for the info icon with bounce
  */
 const infoIconVariants: Variants = {
@@ -104,17 +94,6 @@ const infoIconVariants: Variants = {
     opacity: 1,
     scale: 1,
     transition: { type: 'spring', stiffness: 400, damping: 15, delay: 0.15 },
-  },
-}
-
-/**
- * Animation variants for loader pulse
- */
-const loaderPulseVariants: Variants = {
-  animate: {
-    scale: [1, 1.2, 1],
-    opacity: [0.7, 1, 0.7],
-    transition: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' },
   },
 }
 
@@ -146,8 +125,6 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isExpanded, setIsExpand] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [isInModal, setIsInModal] = useState(false)
-  const [isPictureLoading, setIsPictureLoading] = useState(true)
-  const [pictureError, setPictureError] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -177,35 +154,6 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
-  /**
-   * Reset picture loading state when profile picture changes
-   * If there's no picture, immediately set loading to false
-   */
-  useEffect(() => {
-    if (profilePicture) {
-      setIsPictureLoading(true)
-      setPictureError(false)
-    } else {
-      setIsPictureLoading(false)
-    }
-  }, [profilePicture])
-
-  /**
-   * Handle picture load event
-   */
-  const handlePictureLoad = useCallback(() => setIsPictureLoading(false), [])
-
-  /**
-   * Handle picture error event
-   */
-  const handlePictureError = useCallback(() => {
-    setIsPictureLoading(false)
-    setPictureError(true)
-  }, [])
-
-  const showPicturePlaceholder = (!profilePicture || pictureError) && !isPictureLoading
-  const showPictureLoader = isPictureLoading && !pictureError
 
   const birthYear = birthDate ? birthDate.getFullYear() : null
   const deathYear = deathDate ? deathDate.getFullYear() : null
@@ -447,50 +395,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         >
           <div className={cn('flex w-full items-center justify-center pt-3 pb-1')}>
             <motion.div variants={pictureContentVariants} className="relative">
-              <motion.div
-                variants={pictureHoverVariants}
-                initial="idle"
-                whileHover="hover"
-                className="border-pale-ocean relative h-16 w-16 cursor-pointer overflow-hidden rounded-lg border-2"
-              >
-                <div
-                  className={cn(
-                    'bg-ocean-100 absolute inset-0 flex items-center justify-center',
-                    showPictureLoader ? 'opacity-100' : 'pointer-events-none opacity-0'
-                  )}
-                >
-                  <motion.div variants={loaderPulseVariants} animate="animate">
-                    <LoaderIcon size={20} className="animate-spin" />
-                  </motion.div>
-                </div>
-                <div
-                  className={cn(
-                    'bg-ocean-100 absolute inset-0 flex items-center justify-center transition-all duration-500 ease-out',
-                    showPicturePlaceholder
-                      ? 'scale-100 opacity-100'
-                      : 'pointer-events-none scale-95 opacity-0'
-                  )}
-                >
-                  <ImageIcon size={24} />
-                </div>
-                {profilePicture && !pictureError && (
-                  <div
-                    className={cn(
-                      'h-full w-full transition-all duration-500 ease-out',
-                      isPictureLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-                    )}
-                  >
-                    <Image
-                      src={`/api/proxy?url=${encodeURIComponent(`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${profilePicture.fileKey}`)}`}
-                      alt="Profile"
-                      className="object-cover"
-                      fill={true}
-                      onLoadingComplete={handlePictureLoad}
-                      onError={handlePictureError}
-                    />
-                  </div>
-                )}
-              </motion.div>
+              <Picture
+                fileKey={profilePicture?.fileKey}
+                classNameContainer={'relative h-16 w-16 cursor-pointer overflow-hidden rounded-lg'}
+                classNamePicture="bg-ocean-100"
+              />
             </motion.div>
           </div>
         </motion.div>

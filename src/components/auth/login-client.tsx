@@ -137,7 +137,7 @@ export function LoginClient({
           custom={-1}
           animate="animate"
           variants={backgroundOrbVariants}
-          className="bg-ocean-500 absolute -right-32 -bottom-32 h-[500px] w-[500px] rounded-full opacity-60 blur-3xl"
+          className="bg-ocean-500 absolute -right-32 -bottom-32 h-125 w-125 rounded-full opacity-60 blur-3xl"
         />
         <motion.div
           custom={0.5}

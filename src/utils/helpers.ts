@@ -65,3 +65,32 @@ export function isKnownRoute(pathname: string): boolean {
 
   return false
 }
+
+/**
+ * Get localized day with ordinal suffix if applicable
+ * @param date {Date}
+ * @param locale {string}
+ * @returns {string} - Localized day with ordinal suffix
+ */
+export function getLocalizedDay(date: Date, locale: string): string {
+  const dayNumber = date.getDate()
+
+  if (locale.startsWith('en')) {
+    const s = ['th', 'st', 'nd', 'rd']
+    const v = dayNumber % 100
+    const suffix = s[(v - 20) % 10] || s[v] || s[0]
+    return `${dayNumber}${suffix}`
+  }
+
+  return String(dayNumber)
+}
+
+/**
+ * Get localized month name
+ * @param date {Date}
+ * @param locale {string}
+ * @returns {string} - Localized month name
+ */
+export function getLocalizedMonth(date: Date, locale: string): string {
+  return date.toLocaleString(locale, { month: 'long' })
+}

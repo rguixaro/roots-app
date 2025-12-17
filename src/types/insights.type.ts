@@ -15,6 +15,7 @@ export interface Milestone {
 export interface MilestonesResponse {
   birthdays: Milestone[]
   anniversaries: Milestone[]
+  memories: Milestone[]
 }
 
 export interface Highlight {
@@ -27,6 +28,7 @@ export interface Highlight {
   birthYear?: number
   childrenCount?: number
   photoCount?: number
+  picture?: string | null
 }
 
 export interface HighlightsResponse {
@@ -43,4 +45,5 @@ export type HighlightCard = {
   subtitle: string
   treeName: string
   treeSlug: string
+  picture?: string | null
 }

@@ -85,7 +85,7 @@ export const SocialLogin = () => {
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                 >
-                  <Loader className="text-ocean-100" size={20} />
+                  <Loader size={20} />
                 </motion.div>
               </motion.div>
             ) : (

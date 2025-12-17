@@ -35,6 +35,7 @@ export async function Highlights() {
       }),
       treeName: highlights.oldest.treeName,
       treeSlug: highlights.oldest.treeSlug,
+      picture: highlights.oldest.picture,
     },
     highlights.newest &&
       highlights.newest.addedAt && {
@@ -45,6 +46,7 @@ export async function Highlights() {
         }),
         treeName: highlights.newest.treeName,
         treeSlug: highlights.newest.treeSlug,
+        picture: highlights.newest.picture,
       },
     highlights.largest && {
       title: t_insights('most-children-title'),
@@ -54,15 +56,17 @@ export async function Highlights() {
       }),
       treeName: highlights.largest.treeName,
       treeSlug: highlights.largest.treeSlug,
+      picture: highlights.largest.picture,
     },
     highlights.mostPhotos && {
-      title: t_insights('most-documented-title'),
+      title: t_insights('most-pictures-title'),
       value: highlights.mostPhotos.name,
-      subtitle: t_insights('most-documented-subtitle', {
+      subtitle: t_insights('most-pictures-subtitle', {
         count: highlights.mostPhotos.photoCount ?? 0,
       }),
       treeName: highlights.mostPhotos.treeName,
       treeSlug: highlights.mostPhotos.treeSlug,
+      picture: highlights.mostPhotos.picture,
     },
   ].filter(Boolean) as NonNullable<(typeof cards)[number]>[]
 

@@ -1,9 +1,16 @@
 'use server'
 
 import { db } from '@/server/db'
-import { assertAuthenticated } from '@/server/utils'
+import { assertAuthenticated, calculateDaysUntil } from '@/server/utils'
 
-import { HighlightsResponse, MilestonesResponse, Milestone, Highlight } from '@/types'
+import {
+  HighlightsResponse,
+  MilestonesResponse,
+  Milestone,
+  Highlight,
+  TreeNode,
+  Tree,
+} from '@/types'
 
 /**
  * Get milestones for the authenticated user's trees
@@ -16,7 +23,19 @@ export async function getMilestones(): Promise<MilestonesResponse> {
     where: { accesses: { some: { userId } } },
     include: {
       nodes: {
-        select: { id: true, fullName: true, birthDate: true, deathDate: true, treeId: true },
+        select: {
+          id: true,
+          fullName: true,
+          birthDate: true,
+          deathDate: true,
+          treeId: true,
+          taggedIn: {
+            select: {
+              isProfile: true,
+              picture: { select: { fileKey: true, date: true, tags: true } },
+            },
+          },
+        },
       },
     },
   })
@@ -24,71 +43,94 @@ export async function getMilestones(): Promise<MilestonesResponse> {
   const today = new Date()
   const todayMD = { month: today.getMonth(), day: today.getDate() }
 
-  const allBirthdays: Milestone[] = []
-  const allAnniversaries: Milestone[] = []
+  const birthdays: Milestone[] = []
+  const anniversaries: Milestone[] = []
+  const memories: Milestone[] = []
+
+  const addedPics = new Set<string>()
+
+  const _getProfilePic = (node: TreeNode) => node.taggedIn?.find((tag) => tag.isProfile)?.picture
+  const _getNodeName = (tree: Tree, nodeId: string) =>
+    tree.nodes?.find((n) => n.id === nodeId)?.fullName || null
+
+  const _addBirthday = (tree: Tree, node: TreeNode, birthDate: Date) => {
+    let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())
+    if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)
+    const daysUntil = calculateDaysUntil(nextBirthday)
+
+    if (daysUntil >= 0 && daysUntil <= 30) {
+      birthdays.push({
+        id: node.id,
+        name: node.fullName,
+        treeName: tree.name,
+        treeSlug: tree.slug,
+        date: birthDate.toISOString().split('T')[0],
+        age: today.getFullYear() - birthDate.getFullYear() + (daysUntil === 0 ? 0 : 1),
+        picture: _getProfilePic(node)?.fileKey || null,
+        daysUntil,
+      })
+    }
+  }
+
+  const _addAnniversary = (tree: Tree, node: TreeNode, date: Date, type: 'birth' | 'death') => {
+    if (date.getMonth() === todayMD.month && date.getDate() === todayMD.day) {
+      anniversaries.push({
+        id: node.id,
+        name: node.fullName,
+        treeName: tree.name,
+        treeSlug: tree.slug,
+        date: date.toISOString().split('T')[0],
+        yearsAgo: today.getFullYear() - date.getFullYear(),
+        picture: _getProfilePic(node)?.fileKey || null,
+        type,
+      })
+    }
+  }
+
+  const _addMemories = (tree: Tree, node: TreeNode) => {
+    node.taggedIn?.forEach((tag) => {
+      const pic = tag.picture
+      if (!pic?.date || addedPics.has(pic.fileKey)) return
+
+      const taken = new Date(pic.date)
+      if (taken.getMonth() === todayMD.month /* && taken.getDate() === todayMD.day */) {
+        const allNames = pic.tags
+          ?.map((t) => _getNodeName(tree, t.nodeId))
+          .filter((n): n is string => !!n)
+
+        memories.push({
+          id: node.id,
+          name: allNames && allNames.length > 0 ? allNames.join(', ') : node.fullName,
+          treeName: tree.name,
+          treeSlug: tree.slug,
+          picture: pic.fileKey,
+          yearsAgo: today.getFullYear() - taken.getFullYear(),
+          date: taken.toISOString().split('T')[0],
+        })
+        addedPics.add(pic.fileKey)
+      }
+    })
+  }
 
   trees.forEach((tree) => {
-    tree.nodes.forEach((n) => {
-      if (n.birthDate && !n.deathDate) {
-        const bDate = new Date(n.birthDate)
-        let nextBirthday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate())
-        if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)
+    tree.nodes?.forEach((node) => {
+      const birthDate = node.birthDate ? new Date(node.birthDate) : null
+      const deathDate = node.deathDate ? new Date(node.deathDate) : null
 
-        const daysUntil = Math.ceil(
-          (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        )
-
-        if (daysUntil >= 0 && daysUntil <= 30) {
-          const age = today.getFullYear() - bDate.getFullYear()
-          allBirthdays.push({
-            id: n.id,
-            name: n.fullName,
-            treeName: tree.name,
-            treeSlug: tree.slug,
-            date: n.birthDate.toISOString().split('T')[0],
-            age,
-            daysUntil,
-          })
-        }
-      }
-
-      if (n.birthDate) {
-        const bDate = new Date(n.birthDate)
-        if (bDate.getMonth() === todayMD.month && bDate.getDate() === todayMD.day) {
-          allAnniversaries.push({
-            id: n.id,
-            name: n.fullName,
-            treeName: tree.name,
-            treeSlug: tree.slug,
-            date: bDate.toISOString().split('T')[0],
-            yearsAgo: today.getFullYear() - bDate.getFullYear(),
-            type: 'birth' as const,
-          })
-        }
-      }
-
-      if (n.deathDate) {
-        const dDate = new Date(n.deathDate)
-        if (dDate.getMonth() === todayMD.month && dDate.getDate() === todayMD.day) {
-          allAnniversaries.push({
-            id: n.id,
-            name: n.fullName,
-            treeName: tree.name,
-            treeSlug: tree.slug,
-            date: dDate.toISOString().split('T')[0],
-            yearsAgo: today.getFullYear() - dDate.getFullYear(),
-            type: 'death' as const,
-          })
-        }
-      }
+      if (birthDate && !deathDate) _addBirthday(tree as Tree, node as TreeNode, birthDate)
+      if (birthDate) _addAnniversary(tree as Tree, node as TreeNode, birthDate, 'birth')
+      if (deathDate) _addAnniversary(tree as Tree, node as TreeNode, deathDate, 'death')
+      _addMemories(tree as Tree, node as TreeNode)
     })
   })
 
   return {
-    birthdays: allBirthdays.sort((a, b) => (a.day ?? 0) - (b.day ?? 0)),
-    anniversaries: allAnniversaries.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
+    birthdays: birthdays.sort((a, b) => (a.daysUntil ?? 0) - (b.daysUntil ?? 0)),
+    anniversaries: anniversaries.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
+    memories: memories.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
   }
 }
+
 /**
  * Get highlights for the authenticated user's trees
  * @returns { Promise<HighlightsResponse> } Highlights data
@@ -99,99 +141,112 @@ export async function getHighlights(): Promise<HighlightsResponse> {
   const trees = await db.tree.findMany({
     where: { accesses: { some: { userId } } },
     include: {
-      nodes: { include: { taggedIn: true, edgesFrom: true, edgesTo: true } },
-      Picture: true,
+      nodes: {
+        include: {
+          edgesFrom: true,
+          edgesTo: true,
+          taggedIn: {
+            select: { id: true, isProfile: true, picture: { select: { fileKey: true } } },
+          },
+        },
+      },
     },
   })
+
   let oldestAncestor: Highlight | null = null
   let newestMember: Highlight | null = null
   let mostPhotos: Highlight | null = null
-  let largestBranch: Highlight | null = null
+  let mostChildren: Highlight | null = null
 
   trees.forEach((t) => {
-    const treeOldest = t.nodes
+    const oldest = t.nodes
       .filter((n) => n.birthDate)
       .sort((a, b) => new Date(a.birthDate!).getTime() - new Date(b.birthDate!).getTime())[0]
     if (
-      treeOldest &&
+      oldest &&
       (!oldestAncestor ||
-        new Date(treeOldest.birthDate!).getTime() < new Date(oldestAncestor.birthDate!).getTime())
+        new Date(oldest.birthDate!).getTime() < new Date(oldestAncestor.birthDate!).getTime())
     ) {
+      const picture = oldest.taggedIn.find((tag) => tag.isProfile)?.picture
       oldestAncestor = {
-        id: treeOldest.id,
-        name: treeOldest.fullName,
+        id: oldest.id,
+        name: oldest.fullName,
         treeName: t.name,
         treeSlug: t.slug,
-        birthDate: treeOldest.birthDate!.toISOString(),
-        birthYear: new Date(treeOldest.birthDate!).getFullYear(),
-        addedAt: treeOldest.createdAt.toISOString(),
+        picture: picture?.fileKey,
+        birthDate: oldest.birthDate!.toISOString(),
+        birthYear: new Date(oldest.birthDate!).getFullYear(),
+        addedAt: oldest.createdAt.toISOString(),
       }
     }
-    const treeNewest = t.nodes.sort(
+    const youngest = t.nodes.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )[0]
 
     if (
-      treeNewest &&
+      youngest &&
       (!newestMember ||
-        new Date(treeNewest.createdAt).getTime() > new Date(newestMember.addedAt!).getTime())
+        new Date(youngest.createdAt).getTime() > new Date(newestMember.addedAt!).getTime())
     ) {
+      const picture = youngest.taggedIn.find((tag) => tag.isProfile)?.picture
       newestMember = {
-        id: treeNewest.id,
-        name: treeNewest.fullName,
+        id: youngest.id,
+        name: youngest.fullName,
         treeName: t.name,
         treeSlug: t.slug,
-        addedAt: treeNewest.createdAt.toISOString(),
+        picture: picture?.fileKey,
+        addedAt: youngest.createdAt.toISOString(),
       }
     }
-    const treeMostPhotos = t.nodes
+    const mostPictures = t.nodes
       .map((n) => ({
         n,
         photoCount: n.taggedIn.length,
         treeName: t.name,
         treeSlug: t.slug,
+        picture: n.taggedIn.find((tag) => tag.isProfile)?.picture?.fileKey,
       }))
       .filter((i) => i.photoCount > 0)
       .sort((a, b) => b.photoCount - a.photoCount)[0]
 
-    if (
-      treeMostPhotos &&
-      (!mostPhotos || treeMostPhotos.photoCount > (mostPhotos.photoCount ?? 0))
-    ) {
+    if (mostPictures && (!mostPhotos || mostPictures.photoCount > (mostPhotos.photoCount ?? 0))) {
       mostPhotos = {
-        id: treeMostPhotos.n.id,
-        name: treeMostPhotos.n.fullName,
+        id: mostPictures.n.id,
+        name: mostPictures.n.fullName,
         treeName: t.name,
         treeSlug: t.slug,
-        photoCount: treeMostPhotos.photoCount,
+        photoCount: mostPictures.photoCount,
+        picture: mostPictures?.picture,
       }
     }
-    const treeLargestBranch = t.nodes
+    const largestBranch = t.nodes
       .map((n) => ({
         n,
         childrenCount: n.edgesFrom.filter((e) => e.type === 'PARENT').length,
         treeName: t.name,
         treeSlug: t.slug,
+        picture: n.taggedIn.find((tag) => tag.isProfile)?.picture?.fileKey,
       }))
       .filter((i) => i.childrenCount > 0)
       .sort((a, b) => b.childrenCount - a.childrenCount)[0]
     if (
-      treeLargestBranch &&
-      (!largestBranch || treeLargestBranch.childrenCount > (largestBranch.childrenCount ?? 0))
+      largestBranch &&
+      (!mostChildren || largestBranch.childrenCount > (mostChildren.childrenCount ?? 0))
     ) {
-      largestBranch = {
-        id: treeLargestBranch.n.id,
-        name: treeLargestBranch.n.fullName,
+      mostChildren = {
+        id: largestBranch.n.id,
+        name: largestBranch.n.fullName,
         treeName: t.name,
         treeSlug: t.slug,
-        childrenCount: treeLargestBranch.childrenCount,
+        childrenCount: largestBranch.childrenCount,
+        picture: largestBranch?.picture,
       }
     }
   })
   return {
     oldest: oldestAncestor,
     newest: newestMember,
-    largest: largestBranch,
+    largest: mostChildren,
     mostPhotos,
   }
 }

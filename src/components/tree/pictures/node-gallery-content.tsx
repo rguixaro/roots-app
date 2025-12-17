@@ -3,6 +3,8 @@
 import React from 'react'
 import { LoaderIcon, Menu, X } from 'lucide-react'
 
+import { Icon } from '@/components/trees/icon'
+
 import { Button, TypographyH5 } from '@/ui'
 
 import { cn } from '@/utils'
@@ -10,7 +12,6 @@ import { cn } from '@/utils'
 import { Picture, TreeType } from '@/types'
 
 import { GalleryImage } from './gallery-image'
-import { Icon } from '@/components/trees/icon'
 
 interface NodeGalleryContentProps {
   readonly: boolean
@@ -135,7 +136,7 @@ export function NodeGalleryContent({
                   >
                     <span>{picture.date?.toLocaleDateString()}</span>
                     <div className="flex items-center space-x-1">
-                      <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                      <Icon size={12} type={treeType} className="stroke-ocean-400" />
                       <span>{picture.tags?.length}</span>
                     </div>
                   </div>
@@ -231,7 +232,7 @@ export function NodeGalleryContent({
               >
                 <span>{picture.date?.toLocaleDateString()}</span>
                 <div className="flex items-center space-x-1">
-                  <Icon size={14} type={treeType} className="stroke-ocean-400" />
+                  <Icon size={12} type={treeType} className="stroke-ocean-400" />
                   <span>{picture.tags?.length}</span>
                 </div>
               </div>

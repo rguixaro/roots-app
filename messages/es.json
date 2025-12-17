@@ -128,6 +128,8 @@
     "birthdays-this-month": "Cumpleaños de este mes",
     "birthday-description": "{name} cumple {age, plural, one {# año} other {# años}} {daysUntil, plural, =0 {hoy} one {en 1 día} other {en # días}}",
     "anniversary-description": "{type, select, birth {{name} nació hace {yearsAgo, plural, one {# año} other {# años}} hoy} death {En memoria de {name}, hace {yearsAgo, plural, one {# año} other {# años}}} other {}}",
+    "memories-on-this-day": "Recuerdos del {day} de {month}",
+    "memory-description": "{yearsAgo, plural, =0 {Este año} one {Hace # año} other {Hace # años}}",
     "highlights": "Aspectos destacados de tus familias",
     "highlights-description": "Descubre datos interesantes y estadísticas sobre tus árboles genealógicos.",
     "highlights-empty": "No hay aspectos destacados disponibles para tus familias aún. Comienza a añadir miembros y relaciones para ver información interesante aquí.",
@@ -137,8 +139,8 @@
     "recently-added-subtitle": "Agregado {relativeTime}",
     "most-children-title": "Más hijos",
     "most-children-subtitle": "{count} hijos",
-    "most-documented-title": "Más documentado",
-    "most-documented-subtitle": "{count, plural, one {# foto} other {# fotos}}"
+    "most-pictures-title": "Más fotos",
+    "most-pictures-subtitle": "{count, plural, one {# foto} other {# fotos}}"
   },
   "trees": {
     "title": "Familias",
@@ -210,6 +212,7 @@
     "node-gallery-tags-currently": "Actualmente etiquetados",
     "node-gallery-tags-add": "Etiquetar miembros",
     "node-gallery-tags-add-none": "No hay miembros disponibles para etiquetar",
+    "node-gallery-tags-search": "Buscar por nombre o apodo...",
     "recent-activity": "Actividad reciente",
     "recent-activity-description": "Aquí puedes ver los cambios más recientes realizados en esta familia."
   },

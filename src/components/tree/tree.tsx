@@ -105,7 +105,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         deleteKeyCode={null}
         nodesDraggable={true}
         className="bg-ocean-50 h-full w-full shadow-inner"
-        onlyRenderVisibleElements
+        onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}
         fitView
         fitViewOptions={{ padding: 0.2 }}

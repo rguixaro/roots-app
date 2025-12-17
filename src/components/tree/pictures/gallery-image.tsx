@@ -35,7 +35,9 @@ export function GalleryImage({
   const showPlaceholder = (!src || showError) && !isLoading
   const showLoader = isLoading && src && !showError
 
-  const loader = ({ src }: { src: string }) => src
+  const loader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
+    return `/api/proxy?url=${encodeURIComponent(src)}&w=${width}${quality ? `&q=${quality}` : ''}`
+  }
 
   const handleError = () => {
     internalOnError()
@@ -61,7 +63,6 @@ export function GalleryImage({
       >
         <ImageIcon size={iconSize} />
       </div>
-
       {src && !showError && (
         <div
           className={cn(
@@ -70,14 +71,14 @@ export function GalleryImage({
           )}
         >
           <Image
-            src={`/api/proxy?url=${encodeURIComponent(src)}`}
+            src={src}
             alt={alt}
             loader={loader}
             width={400}
             height={0}
             sizes="(max-width: 640px) 100vw, 96px"
             className="h-auto w-full object-cover"
-            onLoadingComplete={onLoad}
+            onLoad={onLoad}
             onError={handleError}
           />
         </div>

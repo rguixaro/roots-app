@@ -93,7 +93,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
       if (!pic?.date || addedPics.has(pic.fileKey)) return
 
       const taken = new Date(pic.date)
-      if (taken.getMonth() === todayMD.month /* && taken.getDate() === todayMD.day */) {
+      if (taken.getMonth() === todayMD.month && taken.getDate() === todayMD.day) {
         const allNames = pic.tags
           ?.map((t) => _getNodeName(tree, t.nodeId))
           .filter((n): n is string => !!n)

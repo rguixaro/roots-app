@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
 
+import { Picture } from '@/ui'
+
 import { HighlightCard } from '@/types'
 
 export function HighlightItem({
@@ -31,10 +33,16 @@ export function HighlightItem({
       viewport={{ once: true, amount: 0.01 }}
       className="text-ocean-400 bg-pale-ocean shadow-center-sm flex flex-col space-y-2 rounded-lg p-4 text-sm"
     >
-      <h3 className="font-bold uppercase">{item.title}</h3>
+      <h3 className="font-bold">{item.title}</h3>
       <div className="bg-pale-ocean shadow-center-sm h-0.5 w-3/4 rounded opacity-70" />
       <div className="flex grow flex-col justify-between gap-2">
-        <p className="mb-2 leading-tight font-medium">{item.value}</p>
+        <div className="mb-2 flex items-center space-x-2">
+          <Picture
+            fileKey={item.picture}
+            classNameContainer="h-12 w-12 shadow-center-sm border-ocean-400 flex-shrink-0"
+          />
+          <span className="leading-tight font-medium">{item.value}</span>
+        </div>
         <div className="flex flex-col text-xs font-medium opacity-70">
           <span>{item.subtitle}</span>
           <Link

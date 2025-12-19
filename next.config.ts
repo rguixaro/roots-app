@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx'],
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    serverActions: { bodySizeLimit: '20mb' },
+    serverActions: { bodySizeLimit: '50mb' },
   },
   images: {
     remotePatterns: assetsHostname ? [{ protocol: 'https', hostname: assetsHostname }] : [],

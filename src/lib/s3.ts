@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { randomUUID } from 'crypto'
 import exifr from 'exifr'
+import sharp from 'sharp'
 
 import { env } from '@/env.mjs'
 
@@ -24,6 +25,13 @@ export async function uploadFileToS3(
   const buffer = Buffer.from(arrayBuffer)
 
   const exif = await exifr.parse(buffer)
+
+  const compressedBuffer = await sharp(buffer)
+    .resize(2048, 2048, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 85 })
+    .withMetadata()
+    .toBuffer()
+    .catch((_) => buffer)
 
   const takenAt = exif?.DateTimeOriginal ?? exif?.CreateDate
 
@@ -53,16 +61,15 @@ export async function uploadFileToS3(
 
   const date = takenAt ?? (file.lastModified ? new Date(file.lastModified) : new Date())
 
-  const extension = file.type?.split('/')[1] || file.name.split('.').pop() || 'jpg'
   const uniqueId = randomUUID()
-  const fileKey = `images/tree_${treeId}/${uniqueId}.${extension}`
+  const fileKey = `images/tree_${treeId}/${uniqueId}.jpg`
 
   await s3.send(
     new PutObjectCommand({
       Bucket: AMAZON_S3_BUCKET_NAME,
       Key: `roots/${fileKey}`,
-      Body: buffer,
-      ContentType: file.type,
+      Body: compressedBuffer,
+      ContentType: 'image/jpeg',
     })
   )
 

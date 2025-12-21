@@ -72,3 +72,13 @@ export interface TreeEdge {
   fromNode?: TreeNode
   toNode?: TreeNode
 }
+
+export interface TimelineEvent {
+  type: 'birth' | 'death'
+  date: Date
+  name: string
+  place?: string
+  picture?: string
+}
+
+export type TimelineNode = { type: 'event'; item: TimelineEvent } | { type: 'gap'; years: number }

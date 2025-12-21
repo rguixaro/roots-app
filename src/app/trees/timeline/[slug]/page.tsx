@@ -4,11 +4,13 @@ import { FileQuestion } from 'lucide-react'
 
 import { auth } from '@/auth'
 
-import { ActivityFeed } from '@/components/trees'
+import { getTimelineEvents } from '@/server/actions'
+
+import { Timeline } from '@/components/trees'
 
 import { TypographyH4 } from '@/ui'
 
-export default async function TreeLogsPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TreeTimelinePage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth()
   if (!session) return null
 
@@ -17,7 +19,7 @@ export default async function TreeLogsPage({ params }: { params: Promise<{ slug:
   if (!slug) {
     const t_common = await getTranslations('common')
     return (
-      <div className="text-ocean-200 mt-32 flex flex-col items-center justify-center">
+      <div className="text-ocean-200 mt-32 flex w-3/4 flex-col items-center justify-center sm:w-3/4">
         <FileQuestion size={24} />
         <TypographyH4 className="mt-2 mb-5">{t_common('tree-not-found')}</TypographyH4>
         <Link href="/" className="mt-5 font-medium underline decoration-dotted underline-offset-4">
@@ -27,5 +29,7 @@ export default async function TreeLogsPage({ params }: { params: Promise<{ slug:
     )
   }
 
-  return await ActivityFeed(slug)
+  const events = (await getTimelineEvents(slug)) ?? {}
+
+  return <Timeline events={events} slug={slug} />
 }

@@ -41,7 +41,6 @@ export async function getMilestones(): Promise<MilestonesResponse> {
   })
 
   const today = new Date()
-  const todayMD = { month: today.getMonth(), day: today.getDate() }
 
   const birthdays: Milestone[] = []
   const anniversaries: Milestone[] = []

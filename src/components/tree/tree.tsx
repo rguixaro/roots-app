@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
 import { useTranslations } from 'next-intl'
 

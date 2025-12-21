@@ -9,6 +9,7 @@ import {
   Share2Icon,
   ArrowDownToLine,
   Settings2,
+  CalendarDays,
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
@@ -205,12 +206,16 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
           'shadow-center-lg items-center justify-center rounded-lg rounded-t-none rounded-r-none rounded-bl-lg'
         )}
       >
+        <IconLink href={`/trees/timeline/${tree?.slug}`}>
+          <CalendarDays size={20} className={iconClassName} />
+        </IconLink>
         <IconButton onClick={handleShare}>
           <Share2Icon size={20} className={iconClassName} />
         </IconButton>
         <IconButton onClick={handleDownload}>
           <ArrowDownToLine size={20} className={iconClassName} />
         </IconButton>
+
         {!readonly && (
           <>
             <div className="bg-ocean-300 h-0.5 w-4" />
@@ -241,6 +246,9 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         <IconButton onClick={onResetView}>
           <Minimize2 size={20} className={iconClassName} />
         </IconButton>
+        <IconLink href={`/trees/timeline/${tree?.slug}`}>
+          <CalendarDays size={20} className={iconClassName} />
+        </IconLink>
         <IconButton onClick={handleShare}>
           <Share2Icon size={20} className={iconClassName} />
         </IconButton>

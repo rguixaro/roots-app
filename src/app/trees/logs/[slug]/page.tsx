@@ -4,7 +4,7 @@ import { FileQuestion } from 'lucide-react'
 
 import { auth } from '@/auth'
 
-import { ActivityFeed } from '@/components/trees/activity/feed'
+import { ActivityFeed } from '@/components/trees'
 
 import { TypographyH4 } from '@/ui'
 

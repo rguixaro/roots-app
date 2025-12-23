@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/server/db'
-import { assertAuthenticated, calculateDaysUntil } from '@/server/utils'
+import { assertAuthenticated, calculateDaysUntil, isInCurrentWeekOfYear } from '@/server/utils'
 
 import {
   HighlightsResponse,
@@ -41,7 +41,6 @@ export async function getMilestones(): Promise<MilestonesResponse> {
   })
 
   const today = new Date()
-  const todayMD = { month: today.getMonth(), day: today.getDate() }
 
   const birthdays: Milestone[] = []
   const anniversaries: Milestone[] = []
@@ -73,7 +72,8 @@ export async function getMilestones(): Promise<MilestonesResponse> {
   }
 
   const _addAnniversary = (tree: Tree, node: TreeNode, date: Date, type: 'birth' | 'death') => {
-    if (date.getMonth() === todayMD.month && date.getDate() === todayMD.day) {
+    const daysUntil = calculateDaysUntil(date, { ignoreYear: true })
+    if (daysUntil >= 0 && daysUntil <= 30) {
       anniversaries.push({
         id: node.id,
         name: node.fullName,
@@ -93,7 +93,8 @@ export async function getMilestones(): Promise<MilestonesResponse> {
       if (!pic?.date || addedPics.has(pic.fileKey)) return
 
       const taken = new Date(pic.date)
-      if (taken.getMonth() === todayMD.month && taken.getDate() === todayMD.day) {
+
+      if (isInCurrentWeekOfYear(taken)) {
         const allNames = pic.tags
           ?.map((t) => _getNodeName(tree, t.nodeId))
           .filter((n): n is string => !!n)

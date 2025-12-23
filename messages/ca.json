@@ -124,11 +124,11 @@
     "milestones": "Aniversaris i efemèrides",
     "milestones-description": "Aquí pots veure els propers aniversaris i esdeveniments destacats dels membres de la teva família.",
     "milestones-empty": "No hi ha aniversaris ni efemèrides en els pròxims dies.",
-    "on-this-day": "Efemèrides",
+    "on-the-next-thirty-days": "Efemèrides en els pròxims 30 dies",
     "birthdays-this-month": "Aniversaris d'aquest mes",
     "birthday-description": "{name} farà {age, plural, one {# any} other {# anys}} {daysUntil, plural, =0 {avui} one {d'aquí 1 dia} other {d'aquí # dies}}",
-    "anniversary-description": "{type, select, birth {{name} va néixer fa {yearsAgo, plural, one {# any} other {# anys}} avui} death {En memòria de {name}, fa {yearsAgo, plural, one {# any} other {# anys}}} other {}}",
-    "memories-on-this-day": "Records del {day} de {month}",
+    "anniversary-description": "{type, select, birth {{name} va néixer fa {yearsAgo, plural, one {# any} other {# anys}}} death {En memòria de {name}, fa {yearsAgo, plural, one {# any} other {# anys}}} other {}}",
+    "memories-on-this-week": "Records d'aquesta setmana al llarg dels anys",
     "memory-description": "{yearsAgo, plural, =0 {Aquest any} one {Fa # any} other {Fa # anys}}",
     "highlights": "Aspectes destacats de les teves famílies",
     "highlights-description": "Descobreix dades interessants i estadístiques sobre els teus arbres genealògics.",
@@ -214,7 +214,12 @@
     "node-gallery-tags-add-none": "No hi ha membres disponibles per etiquetar",
     "node-gallery-tags-search": "Cerca per nom o sobrenom...",
     "recent-activity": "Activitat recent",
-    "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família."
+    "recent-activity-description": "Aquí pots veure els canvis més recents realitzats en aquesta família.",
+    "timeline": "Línia del temps",
+    "timeline-description": "Explora els esdeveniments i moments importants de la història d'aquesta família.",
+    "timeline-gap": "{years} {years, plural, one {any} other {anys}}",
+    "timeline-event-birth": "Naixement",
+    "timeline-event-death": "Defunció"
   },
   "profile": {
     "title": "Preferències",

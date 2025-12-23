@@ -124,11 +124,11 @@
     "milestones": "Cumpleaños y efemérides",
     "milestones-description": "Aquí puedes ver los próximos cumpleaños y acontecimientos destacados de los miembros de tu familia.",
     "milestones-empty": "No hay cumpleaños ni efemérides en los próximos días.",
-    "on-this-day": "Efemérides",
+    "on-the-next-thirty-days": "Efemérides en los próximos 30 días",
     "birthdays-this-month": "Cumpleaños de este mes",
     "birthday-description": "{name} cumple {age, plural, one {# año} other {# años}} {daysUntil, plural, =0 {hoy} one {en 1 día} other {en # días}}",
-    "anniversary-description": "{type, select, birth {{name} nació hace {yearsAgo, plural, one {# año} other {# años}} hoy} death {En memoria de {name}, hace {yearsAgo, plural, one {# año} other {# años}}} other {}}",
-    "memories-on-this-day": "Recuerdos del {day} de {month}",
+    "anniversary-description": "{type, select, birth {{name} nació hace {yearsAgo, plural, one {# año} other {# años}}} death {En memoria de {name}, hace {yearsAgo, plural, one {# año} other {# años}}} other {}}",
+    "memories-on-this-week": "Recuerdos de esta semana a lo largo de los años",
     "memory-description": "{yearsAgo, plural, =0 {Este año} one {Hace # año} other {Hace # años}}",
     "highlights": "Aspectos destacados de tus familias",
     "highlights-description": "Descubre datos interesantes y estadísticas sobre tus árboles genealógicos.",
@@ -214,7 +214,12 @@
     "node-gallery-tags-add-none": "No hay miembros disponibles para etiquetar",
     "node-gallery-tags-search": "Buscar por nombre o apodo...",
     "recent-activity": "Actividad reciente",
-    "recent-activity-description": "Aquí puedes ver los cambios más recientes realizados en esta familia."
+    "recent-activity-description": "Aquí puedes ver los cambios más recientes realizados en esta familia.",
+    "timeline": "Línea del tiempo",
+    "timeline-description": "Explora los eventos y momentos importantes en la historia de esta familia.",
+    "timeline-gap": "{years} {years, plural, one {año} other {años}}",
+    "timeline-event-birth": "Nacimiento",
+    "timeline-event-death": "Fallecimiento"
   },
   "profile": {
     "title": "Configuración",

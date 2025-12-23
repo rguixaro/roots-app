@@ -36,7 +36,7 @@ export async function Milestones() {
           <div className="p-4">
             <span className="flex items-center gap-2 font-bold">
               <Calendar size={20} />
-              {t_insights('on-this-day')}
+              {t_insights('on-the-next-thirty-days')}
             </span>
             <div className="mt-2 space-y-3">
               {anniversaries.map((item, i) => (
@@ -120,10 +120,7 @@ export async function Milestones() {
           <div className="p-4">
             <span className="flex items-center gap-2 font-bold">
               <Camera size={20} />
-              {t_insights('memories-on-this-day', {
-                month: getLocalizedMonth(new Date(), locale),
-                day: getLocalizedDay(new Date(), locale),
-              })}
+              {t_insights('memories-on-this-week')}
             </span>
             <div className="mt-2 space-y-3">
               {memories.map((item, i) => (

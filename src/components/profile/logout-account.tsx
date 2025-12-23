@@ -40,7 +40,6 @@ export const LogoutAccount = (props: LogoutAccountProps) => {
       const promise = toast.promise(
         (async () => {
           await fetch('/api/logout', { method: 'POST', credentials: 'include' })
-          await handleSignOut()
         })(),
         {
           loading: t_profile('account-logout-logging-out'),
@@ -48,7 +47,10 @@ export const LogoutAccount = (props: LogoutAccountProps) => {
           error: t_profile('account-logout-error'),
         }
       )
-      promise.unwrap().finally(() => setLoading(false))
+      promise
+        .unwrap()
+        .then(() => handleSignOut())
+        .finally(() => setLoading(false))
     })
   }
 

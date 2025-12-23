@@ -14,7 +14,7 @@ import type {
 } from '@/server/schemas'
 import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
 
-import { Tree, TreeNode } from '@/types'
+import { Tree, TreeNode, TimelineEvent } from '@/types'
 
 interface TreeResult {
   error: boolean
@@ -511,6 +511,69 @@ export const getTreeNodes = async (treeId: string): Promise<TreeNode[]> => {
     await assertAuthenticated()
 
     return await db.treeNode.findMany({ where: { treeId } })
+  } catch (error) {
+    return []
+  }
+}
+
+/**
+ * Get all major events (births and deaths) for a specific tree by slug
+ * @param slug Tree slug
+ * @returns Promise<TimelineEvent[]>
+ */
+export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> => {
+  try {
+    await assertAuthenticated()
+
+    const tree = await db.tree.findUnique({
+      where: { slug },
+      include: {
+        nodes: {
+          select: {
+            id: true,
+            fullName: true,
+            birthDate: true,
+            deathDate: true,
+            birthPlace: true,
+            deathPlace: true,
+            taggedIn: {
+              select: {
+                isProfile: true,
+                picture: { select: { fileKey: true, date: true, tags: true } },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!tree) return []
+
+    const events: TimelineEvent[] = []
+
+    tree.nodes.forEach((node) => {
+      if (node.birthDate) {
+        events.push({
+          type: 'birth',
+          date: node.birthDate,
+          name: node.fullName,
+          place: node.birthPlace ?? undefined,
+          picture: node.taggedIn.find((tag) => tag.isProfile)?.picture.fileKey,
+        })
+      }
+
+      if (node.deathDate) {
+        events.push({
+          type: 'death',
+          date: node.deathDate,
+          name: node.fullName,
+          place: node.deathPlace ?? undefined,
+          picture: node.taggedIn.find((tag) => tag.isProfile)?.picture.fileKey,
+        })
+      }
+    })
+
+    return events.sort((a, b) => a.date.getTime() - b.date.getTime())
   } catch (error) {
     return []
   }

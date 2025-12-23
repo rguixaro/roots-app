@@ -124,11 +124,11 @@
     "milestones": "Birthdays and milestones",
     "milestones-description": "Here you can see upcoming birthdays and notable events of your family members.",
     "milestones-empty": "There are no birthdays or anniversaries in the coming days.",
-    "on-this-day": "On this day",
+    "on-the-next-thirty-days": "Events in the next 30 days",
     "birthdays-this-month": "Birthdays this month",
     "birthday-description": "{name} is turning {age, plural, one {# year} other {# years}} {daysUntil, plural, =0 {today} one {in 1 day} other {in # days}}",
-    "anniversary-description": "{type, select, birth {{name} was born {yearsAgo, plural, one {# year ago} other {# years ago}} today} death {In memory of {name}, {yearsAgo, plural, one {# year ago} other {# years ago}}} other {}}",
-    "memories-on-this-day": "Memories on {day} of {month}",
+    "anniversary-description": "{type, select, birth {{name} was born {yearsAgo, plural, one {# year ago} other {# years ago}}} death {In memory of {name}, {yearsAgo, plural, one {# year ago} other {# years ago}}} other {}}",
+    "memories-on-this-week": "Memories of this week over the years",
     "memory-description": "{yearsAgo, plural, =0 {This year} one {# year ago} other {# years ago}}",
     "highlights": "Family highlights",
     "highlights-description": "Discover interesting facts and statistics about your family trees.",
@@ -214,7 +214,12 @@
     "node-gallery-tags-add-none": "No members available to tag",
     "node-gallery-tags-search": "Search by name or alias...",
     "recent-activity": "Recent activity",
-    "recent-activity-description": "Here you can see the most recent changes made to this family."
+    "recent-activity-description": "Here you can see the most recent changes made to this family.",
+    "timeline": "Timeline",
+    "timeline-description": "Explore the events and important moments in the history of this family.",
+    "timeline-gap": "{years} {years, plural, one {year} other {years}}",
+    "timeline-event-birth": "Birth",
+    "timeline-event-death": "Death"
   },
   "profile": {
     "title": "Settings",

@@ -6,6 +6,8 @@ import { HighlightCard } from '@/types'
 
 import { TypographyH5 } from '@/ui'
 
+import { cn } from '@/utils'
+
 import { HighlightItem } from './card'
 
 function formatRelativeTime(dateString: string): string {
@@ -72,17 +74,24 @@ export async function Highlights() {
 
   if (!cards.length)
     return (
-      <div>
-        <TypographyH5>{t_insights('highlights')}</TypographyH5>
-        <p className="mt-2 mb-4">{t_insights('highlights-empty')} </p>
+      <div className="w-3/4 self-center sm:w-3/4">
+        <div className="text-ocean-400 flex h-full items-center justify-center">
+          <div className="h-full w-full sm:w-4/5 md:w-3/5">
+            <p>{t_insights('highlights-empty')} </p>
+          </div>
+        </div>
       </div>
     )
 
   return (
-    <div>
-      <TypographyH5>{t_insights('highlights')}</TypographyH5>
-      <p className="mt-2 mb-4">{t_insights('highlights-description')} </p>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div
+      className={cn(
+        'no-scrollbar mx-auto flex w-full justify-start overflow-x-auto overflow-y-hidden',
+        'sm:justify-center',
+        cards.length <= 5 ? 'sm:justify-center' : 'sm:justify-start'
+      )}
+    >
+      <div className="flex w-max flex-row gap-4 px-4">
         {cards.map((card, i) => (
           <HighlightItem key={i} item={card} index={i} total={cards.length} />
         ))}

@@ -17,8 +17,8 @@ export function HighlightItem({
   total: number
 }) {
   const motions: Variants = {
-    offscreen: { opacity: 0, x: -150 },
-    onscreen: {
+    hidden: { opacity: 0, x: -150 },
+    visible: {
       opacity: 1,
       x: 0,
       transition: { type: 'spring', bounce: 0.2, duration: 0.8, delay: (total - 1 - index) * 0.15 },
@@ -27,11 +27,10 @@ export function HighlightItem({
 
   return (
     <motion.div
-      initial="offscreen"
-      whileInView="onscreen"
+      initial="hidden"
+      animate="visible"
       variants={motions}
-      viewport={{ once: true, amount: 0.01 }}
-      className="text-ocean-400 bg-pale-ocean shadow-center-sm flex flex-col space-y-2 rounded-lg p-4 text-sm"
+      className="text-ocean-400 bg-pale-ocean shadow-center-sm flex max-w-44 flex-col space-y-2 rounded-lg p-4 text-sm"
     >
       <h3 className="font-bold">{item.title}</h3>
       <div className="bg-pale-ocean shadow-center-sm h-0.5 w-3/4 rounded opacity-70" />
@@ -41,7 +40,7 @@ export function HighlightItem({
             fileKey={item.picture}
             classNameContainer="h-12 w-12 shadow-center-sm border-ocean-400 flex-shrink-0"
           />
-          <span className="leading-tight font-medium">{item.value}</span>
+          <span className="leading-tight font-medium text-ellipsis">{item.value}</span>
         </div>
         <div className="flex flex-col text-xs font-medium opacity-70">
           <span>{item.subtitle}</span>

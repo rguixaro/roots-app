@@ -9,7 +9,9 @@
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "compress-images": "npx tsx scripts/compress-images.ts",
+    "download-images": "npx tsx scripts/download-images.ts"
   },
   "dependencies": {
     "@auth/core": "^0.34.3",

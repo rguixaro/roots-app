@@ -55,6 +55,5 @@ export function isInCurrentWeekOfYear(date: Date): boolean {
   currentWeekEnd.setDate(currentWeekStart.getDate() + 6)
   currentWeekEnd.setHours(23, 59, 59, 999)
 
-  console.log({ targetDate, currentWeekStart, currentWeekEnd })
   return targetDate >= currentWeekStart && targetDate <= currentWeekEnd
 }

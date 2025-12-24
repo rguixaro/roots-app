@@ -16,6 +16,8 @@ export function HighlightItem({
   index: number
   total: number
 }) {
+  const isTreeNameOnly = item.treeName === item.value
+
   const motions: Variants = {
     hidden: { opacity: 0, x: -150 },
     visible: {
@@ -36,20 +38,33 @@ export function HighlightItem({
       <div className="bg-pale-ocean shadow-center-sm h-0.5 w-3/4 rounded opacity-70" />
       <div className="flex grow flex-col justify-between gap-2">
         <div className="mb-2 flex items-center space-x-2">
-          <Picture
-            fileKey={item.picture}
-            classNameContainer="h-12 w-12 shadow-center-sm border-ocean-400 flex-shrink-0"
-          />
-          <span className="leading-tight font-medium text-ellipsis">{item.value}</span>
+          {item.picture && (
+            <Picture
+              fileKey={item.picture}
+              classNameContainer="h-12 w-12 shadow-center-sm border-ocean-400 flex-shrink-0"
+            />
+          )}
+          {isTreeNameOnly ? (
+            <Link
+              href={`/trees/${item.treeSlug}`}
+              className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
+            >
+              {item.treeName}
+            </Link>
+          ) : (
+            <span className="leading-tight font-medium text-ellipsis">{item.value}</span>
+          )}
         </div>
         <div className="flex flex-col text-xs font-medium opacity-70">
           <span>{item.subtitle}</span>
-          <Link
-            href={`/trees/${item.treeSlug}`}
-            className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
-          >
-            {item.treeName}
-          </Link>
+          {!isTreeNameOnly && (
+            <Link
+              href={`/trees/${item.treeSlug}`}
+              className="hover:text-ocean-500 decoration-dotted underline-offset-4 hover:underline"
+            >
+              {item.treeName}
+            </Link>
+          )}
         </div>
       </div>
     </motion.div>

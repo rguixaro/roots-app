@@ -4,8 +4,6 @@ import { getHighlights } from '@/server/actions'
 
 import { HighlightCard } from '@/types'
 
-import { TypographyH5 } from '@/ui'
-
 import { cn } from '@/utils'
 
 import { HighlightItem } from './card'
@@ -25,50 +23,60 @@ function formatRelativeTime(dateString: string): string {
 }
 
 export async function Highlights() {
-  const highlights = await getHighlights()
+  const { oldest, newest, largest, mostPhotos, mostMembers } = await getHighlights()
   const t_insights = await getTranslations('insights')
 
   const cards: HighlightCard[] = [
-    highlights.oldest && {
+    oldest && {
       title: t_insights('oldest-ancestor-title'),
-      value: highlights.oldest.name,
+      value: oldest.name,
       subtitle: t_insights('oldest-ancestor-subtitle', {
-        year: highlights.oldest.birthYear ?? 'N/A',
+        year: oldest.birthYear ?? 'N/A',
       }),
-      treeName: highlights.oldest.treeName,
-      treeSlug: highlights.oldest.treeSlug,
-      picture: highlights.oldest.picture,
+      treeName: oldest.treeName,
+      treeSlug: oldest.treeSlug,
+      picture: oldest.picture,
     },
-    highlights.newest &&
-      highlights.newest.addedAt && {
+    newest &&
+      newest.addedAt && {
         title: t_insights('recently-added-title'),
-        value: highlights.newest.name,
+        value: newest.name,
         subtitle: t_insights('recently-added-subtitle', {
-          relativeTime: formatRelativeTime(highlights.newest.addedAt),
+          relativeTime: formatRelativeTime(newest.addedAt),
         }),
-        treeName: highlights.newest.treeName,
-        treeSlug: highlights.newest.treeSlug,
-        picture: highlights.newest.picture,
+        treeName: newest.treeName,
+        treeSlug: newest.treeSlug,
+        picture: newest.picture,
       },
-    highlights.largest && {
+    largest && {
       title: t_insights('most-children-title'),
-      value: highlights.largest.name,
+      value: largest.name,
       subtitle: t_insights('most-children-subtitle', {
-        count: highlights.largest.childrenCount ?? 0,
+        count: largest.childrenCount ?? 0,
       }),
-      treeName: highlights.largest.treeName,
-      treeSlug: highlights.largest.treeSlug,
-      picture: highlights.largest.picture,
+      treeName: largest.treeName,
+      treeSlug: largest.treeSlug,
+      picture: largest.picture,
     },
-    highlights.mostPhotos && {
+    mostPhotos && {
       title: t_insights('most-pictures-title'),
-      value: highlights.mostPhotos.name,
+      value: mostPhotos.name,
       subtitle: t_insights('most-pictures-subtitle', {
-        count: highlights.mostPhotos.photoCount ?? 0,
+        count: mostPhotos.photoCount ?? 0,
       }),
-      treeName: highlights.mostPhotos.treeName,
-      treeSlug: highlights.mostPhotos.treeSlug,
-      picture: highlights.mostPhotos.picture,
+      treeName: mostPhotos.treeName,
+      treeSlug: mostPhotos.treeSlug,
+      picture: mostPhotos.picture,
+    },
+    mostMembers && {
+      title: t_insights('most-members-title'),
+      value: mostMembers.name,
+      subtitle: t_insights('most-members-subtitle', {
+        count: mostMembers.memberCount ?? 0,
+      }),
+      treeName: mostMembers.treeName,
+      treeSlug: mostMembers.treeSlug,
+      picture: mostMembers.picture,
     },
   ].filter(Boolean) as NonNullable<(typeof cards)[number]>[]
 

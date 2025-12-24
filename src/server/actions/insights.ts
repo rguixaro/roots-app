@@ -158,6 +158,7 @@ export async function getHighlights(): Promise<HighlightsResponse> {
   let newestMember: Highlight | null = null
   let mostPhotos: Highlight | null = null
   let mostChildren: Highlight | null = null
+  let mostMembers: Highlight | null = null
 
   trees.forEach((t) => {
     const oldest = t.nodes
@@ -244,10 +245,25 @@ export async function getHighlights(): Promise<HighlightsResponse> {
       }
     }
   })
+
+  const largestTree = trees.sort((a, b) => b.nodes.length - a.nodes.length)?.[0]
+  const randomMember = largestTree.nodes[Math.floor(Math.random() * largestTree.nodes.length)]
+  const picture = randomMember.taggedIn.find((tag) => tag.isProfile)?.picture
+
+  mostMembers = {
+    id: largestTree.id,
+    name: largestTree.name,
+    treeName: largestTree.name,
+    treeSlug: largestTree.slug,
+    memberCount: largestTree.nodes.length,
+    picture: picture?.fileKey,
+  }
+
   return {
     oldest: oldestAncestor,
     newest: newestMember,
     largest: mostChildren,
     mostPhotos,
+    mostMembers,
   }
 }

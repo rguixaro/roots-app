@@ -139,6 +139,8 @@
     "recently-added-subtitle": "Agregado {relativeTime}",
     "most-children-title": "Más hijos",
     "most-children-subtitle": "{count} hijos",
+    "most-members-title": "Más miembros",
+    "most-members-subtitle": "{count} miembros",
     "most-pictures-title": "Más fotos",
     "most-pictures-subtitle": "{count, plural, one {# foto} other {# fotos}}"
   },

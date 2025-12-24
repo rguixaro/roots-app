@@ -51,34 +51,14 @@ export function usePictureOperations({
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [expandedPicture, setExpandedPicture] = useState<Picture | null>(null)
+
   const [pictureMenu, setPictureMenu] = useState({
     visible: false,
     x: 0,
     y: 0,
     picture: null as Picture | null,
   })
-
-  /**
-   * Open picture menu
-   * @param e {React.MouseEvent} - The mouse event
-   * @param picture {Picture} - The picture to open menu for
-   */
-  function openPictureMenu(e: React.MouseEvent, picture: Picture) {
-    e.preventDefault()
-    setPictureMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY,
-      picture,
-    })
-  }
-
-  /**
-   * Close picture menu
-   */
-  function closePictureMenu() {
-    setPictureMenu((prev) => ({ ...prev, visible: false }))
-  }
 
   /**
    * Fetch pictures when node changes and modal opens with gallery
@@ -124,6 +104,32 @@ export function usePictureOperations({
       return () => clearTimeout(timer)
     }
   }, [tappedImageId])
+
+  /**
+   * Expand picture to fullscreen
+   * @param picture {Picture} - The picture to expand
+   */
+  const onPictureExpand = (picture: Picture) => setExpandedPicture(picture)
+
+  /**
+   * Shrink picture from fullscreen
+   */
+  const onPictureShrink = () => setExpandedPicture(null)
+
+  /**
+   * Open picture menu
+   * @param e {React.MouseEvent} - The mouse event
+   * @param picture {Picture} - The picture to open menu for
+   */
+  const onPictureMenuOpen = (e: React.MouseEvent, picture: Picture) => {
+    e.preventDefault()
+    setPictureMenu({ visible: true, x: e.clientX, y: e.clientY, picture })
+  }
+
+  /**
+   * Close picture menu
+   */
+  const onPictureMenuClose = () => setPictureMenu((prev) => ({ ...prev, visible: false }))
 
   /**
    * Download picture
@@ -316,6 +322,10 @@ export function usePictureOperations({
     [node, t_errors, t_toasts]
   )
 
+  /**
+   * Set error state for gallery picture
+   * @param pictureId {string} - The picture id to set error for
+   */
   const setGalleryPictureError = useCallback((pictureId: string) => {
     setErrorGalleryPicture((prev) => ({ ...prev, [pictureId]: true }))
   }, [])
@@ -339,9 +349,12 @@ export function usePictureOperations({
     loading,
     setLoading,
     fileInputRef,
+    expandedPicture,
+    onPictureExpand,
+    onPictureShrink,
     pictureMenu,
-    openPictureMenu,
-    closePictureMenu,
+    onPictureMenuOpen,
+    onPictureMenuClose,
     onPictureDownload,
     onPictureTags,
     onAddTag,

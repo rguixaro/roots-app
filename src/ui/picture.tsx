@@ -13,16 +13,20 @@ interface PictureProps {
   fileKey?: string | null
   classNamePicture?: string
   classNameContainer?: string
+  classNameImage?: string
   disablePlaceholder?: boolean
   iconSize?: number
+  animated?: boolean
 }
 
 export const Picture: React.FC<PictureProps> = ({
   fileKey,
   classNamePicture,
   classNameContainer,
+  classNameImage,
   disablePlaceholder = false,
   iconSize = 24,
+  animated = true,
 }) => {
   const [cachedImages, setCachedImages] = useState<Record<string, string>>({})
 
@@ -58,13 +62,17 @@ export const Picture: React.FC<PictureProps> = ({
       )}
       initial="idle"
       whileHover="hover"
-      variants={{
-        idle: { scale: 1 },
-        hover: {
-          scale: 1.08,
-          transition: { type: 'spring', stiffness: 300, damping: 20 },
-        },
-      }}
+      variants={
+        animated
+          ? {
+              idle: { scale: 1 },
+              hover: {
+                scale: 1.08,
+                transition: { type: 'spring', stiffness: 300, damping: 20 },
+              },
+            }
+          : undefined
+      }
     >
       {showLoader && (
         <div
@@ -97,7 +105,7 @@ export const Picture: React.FC<PictureProps> = ({
             src={src}
             alt="Picture"
             fill={true}
-            className="object-cover"
+            className={cn('object-cover', classNameImage)}
             loader={loader}
             onLoad={handleLoad}
             onError={onError}

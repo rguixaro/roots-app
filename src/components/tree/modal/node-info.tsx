@@ -12,10 +12,12 @@ import { UpdateTreeNodeSchema } from '@/server/schemas'
 import { useMobileDrag, usePictureOperations } from '@/hooks'
 
 import { PictureContextMenu } from '@/components/tree/context'
-import { NodeInfoTabGeneral } from '@/components/tree/modal'
-import { ModalBackdrop } from '@/components/tree/modal'
-
-import { NodeGalleryContent, PictureTagsModal } from '@/components/tree/pictures'
+import { NodeInfoTabGeneral, ModalBackdrop } from '@/components/tree/modal'
+import {
+  NodeGalleryContent,
+  PictureTagsModal,
+  PictureFullscreenModal,
+} from '@/components/tree/pictures'
 
 import { ConfirmDialog, Form, Picture, TypographyH4 } from '@/ui'
 
@@ -255,7 +257,8 @@ export function NodeInfoModal({
                         fileInputRef={pictureOps.fileInputRef}
                         onFileChange={pictureOps.onFileChange}
                         onTappedImageChange={pictureOps.setTappedImageId}
-                        onPictureMenuOpen={pictureOps.openPictureMenu}
+                        onPictureMenuOpen={pictureOps.onPictureMenuOpen}
+                        onPictureFullscreen={pictureOps.onPictureExpand}
                         onGalleryPictureError={pictureOps.setGalleryPictureError}
                         t_trees={t_trees}
                       />
@@ -303,7 +306,8 @@ export function NodeInfoModal({
                 fileInputRef={pictureOps.fileInputRef}
                 onFileChange={pictureOps.onFileChange}
                 onTappedImageChange={pictureOps.setTappedImageId}
-                onPictureMenuOpen={pictureOps.openPictureMenu}
+                onPictureMenuOpen={pictureOps.onPictureMenuOpen}
+                onPictureFullscreen={pictureOps.onPictureExpand}
                 onGalleryPictureError={pictureOps.setGalleryPictureError}
                 onClose={onClose}
                 t_trees={t_trees}
@@ -323,7 +327,7 @@ export function NodeInfoModal({
         onDelete={() => pictureOps.setPictureDeleteDialogOpen(true)}
         onSetProfile={pictureOps.onPictureProfile}
         profilePictureId={pictureOps.profilePicture?.id}
-        onClose={pictureOps.closePictureMenu}
+        onClose={pictureOps.onPictureMenuClose}
       />
       <ConfirmDialog
         open={pictureOps.pictureDeleteDialogOpen}
@@ -345,6 +349,13 @@ export function NodeInfoModal({
           onAddTag={pictureOps.onAddTag}
           onRemoveTag={pictureOps.onRemoveTag}
           t_trees={t_trees}
+        />
+      )}
+      {pictureOps.expandedPicture && (
+        <PictureFullscreenModal
+          picture={pictureOps.expandedPicture}
+          treeType={treeType}
+          onClose={pictureOps.onPictureShrink}
         />
       )}
     </>

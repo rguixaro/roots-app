@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { LoaderIcon, Menu, X } from 'lucide-react'
+import { LoaderIcon, Maximize, Menu, X } from 'lucide-react'
 
 import { Icon } from '@/components/trees/icon'
 
@@ -26,6 +26,7 @@ interface NodeGalleryContentProps {
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
   onTappedImageChange: (pictureId: string | null) => void
   onPictureMenuOpen: (e: React.MouseEvent, picture: Picture) => void
+  onPictureFullscreen: (picture: Picture) => void
   onGalleryPictureError: (pictureId: string) => void
   onClose?: () => void
   t_trees: (key: string) => string
@@ -44,6 +45,7 @@ export function NodeGalleryContent({
   onFileChange,
   onTappedImageChange,
   onPictureMenuOpen,
+  onPictureFullscreen,
   onGalleryPictureError,
   onClose,
   t_trees,
@@ -113,19 +115,30 @@ export function NodeGalleryContent({
                   />
                   <div
                     className={cn(
-                      'absolute top-0 right-0 mt-2 mr-2 flex items-end justify-center gap-2 rounded transition-opacity duration-300',
+                      'pointer-events-none absolute top-0 right-0 mt-2 mr-2 flex flex-col gap-2 transition-opacity duration-300',
                       tappedImageId === picture.id
                         ? 'pointer-events-auto opacity-100'
                         : 'pointer-events-none opacity-0'
                     )}
                   >
-                    <button
-                      type="button"
-                      onClick={(e) => onPictureMenuOpen(e, picture)}
-                      className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
-                    >
-                      <Menu size={18} />
-                    </button>
+                    <div className="flex items-end justify-center gap-2 rounded">
+                      <button
+                        type="button"
+                        onClick={(_) => onPictureFullscreen(picture)}
+                        className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
+                      >
+                        <Maximize size={18} />
+                      </button>
+                    </div>
+                    <div className="flex items-end justify-center gap-2 rounded">
+                      <button
+                        type="button"
+                        onClick={(e) => onPictureMenuOpen(e, picture)}
+                        className="bg-pale-ocean text-ocean-400 shadow-center cursor-pointer rounded-lg p-2 transition-all duration-200"
+                      >
+                        <Menu size={18} />
+                      </button>
+                    </div>
                   </div>
                   <div
                     className={cn(
@@ -210,20 +223,37 @@ export function NodeGalleryContent({
                 onError={() => onGalleryPictureError(picture.id)}
               />
               <div className="bg-ocean-500 pointer-events-none absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-20" />
-              <div
-                className={cn(
-                  'pointer-events-none absolute top-0 right-0 mt-2 mr-2 flex items-end justify-center gap-2 rounded opacity-0',
-                  'transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100'
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={(e) => onPictureMenuOpen(e, picture)}
-                  className="bg-pale-ocean text-ocean-400 shadow-center-sm cursor-pointer rounded-lg p-2 transition-all duration-200"
+              <div className="pointer-events-none absolute top-0 right-0 mt-2 mr-2 flex flex-col gap-2">
+                <div
+                  className={cn(
+                    'flex items-end justify-center gap-2 rounded opacity-0',
+                    'transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100'
+                  )}
                 >
-                  <Menu size={18} />
-                </button>
+                  <button
+                    type="button"
+                    onClick={(_) => onPictureFullscreen(picture)}
+                    className="bg-pale-ocean text-ocean-400 shadow-center-sm cursor-pointer rounded-lg p-2 transition-all duration-200"
+                  >
+                    <Maximize size={18} />
+                  </button>
+                </div>
+                <div
+                  className={cn(
+                    'flex items-end justify-center gap-2 rounded opacity-0',
+                    'transition-opacity duration-300 group-hover:pointer-events-auto group-hover:opacity-100'
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => onPictureMenuOpen(e, picture)}
+                    className="bg-pale-ocean text-ocean-400 shadow-center-sm cursor-pointer rounded-lg p-2 transition-all duration-200"
+                  >
+                    <Menu size={18} />
+                  </button>
+                </div>
               </div>
+
               <div
                 className={cn(
                   'bg-pale-ocean text-ocean-400 pointer-events-none absolute right-0 bottom-0 left-0 mx-2 mb-2 flex justify-between rounded px-3 py-px text-sm opacity-0',

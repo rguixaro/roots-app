@@ -4,7 +4,7 @@ import { getHighlights } from '@/server/actions'
 
 import { HighlightCard } from '@/types'
 
-import { TypographyH5 } from '@/ui'
+import { cn } from '@/utils'
 
 import { HighlightItem } from './card'
 
@@ -23,66 +23,83 @@ function formatRelativeTime(dateString: string): string {
 }
 
 export async function Highlights() {
-  const highlights = await getHighlights()
+  const { oldest, newest, largest, mostPhotos, mostMembers } = await getHighlights()
   const t_insights = await getTranslations('insights')
 
   const cards: HighlightCard[] = [
-    highlights.oldest && {
+    oldest && {
       title: t_insights('oldest-ancestor-title'),
-      value: highlights.oldest.name,
+      value: oldest.name,
       subtitle: t_insights('oldest-ancestor-subtitle', {
-        year: highlights.oldest.birthYear ?? 'N/A',
+        year: oldest.birthYear ?? 'N/A',
       }),
-      treeName: highlights.oldest.treeName,
-      treeSlug: highlights.oldest.treeSlug,
-      picture: highlights.oldest.picture,
+      treeName: oldest.treeName,
+      treeSlug: oldest.treeSlug,
+      picture: oldest.picture,
     },
-    highlights.newest &&
-      highlights.newest.addedAt && {
+    newest &&
+      newest.addedAt && {
         title: t_insights('recently-added-title'),
-        value: highlights.newest.name,
+        value: newest.name,
         subtitle: t_insights('recently-added-subtitle', {
-          relativeTime: formatRelativeTime(highlights.newest.addedAt),
+          relativeTime: formatRelativeTime(newest.addedAt),
         }),
-        treeName: highlights.newest.treeName,
-        treeSlug: highlights.newest.treeSlug,
-        picture: highlights.newest.picture,
+        treeName: newest.treeName,
+        treeSlug: newest.treeSlug,
+        picture: newest.picture,
       },
-    highlights.largest && {
+    largest && {
       title: t_insights('most-children-title'),
-      value: highlights.largest.name,
+      value: largest.name,
       subtitle: t_insights('most-children-subtitle', {
-        count: highlights.largest.childrenCount ?? 0,
+        count: largest.childrenCount ?? 0,
       }),
-      treeName: highlights.largest.treeName,
-      treeSlug: highlights.largest.treeSlug,
-      picture: highlights.largest.picture,
+      treeName: largest.treeName,
+      treeSlug: largest.treeSlug,
+      picture: largest.picture,
     },
-    highlights.mostPhotos && {
+    mostPhotos && {
       title: t_insights('most-pictures-title'),
-      value: highlights.mostPhotos.name,
+      value: mostPhotos.name,
       subtitle: t_insights('most-pictures-subtitle', {
-        count: highlights.mostPhotos.photoCount ?? 0,
+        count: mostPhotos.photoCount ?? 0,
       }),
-      treeName: highlights.mostPhotos.treeName,
-      treeSlug: highlights.mostPhotos.treeSlug,
-      picture: highlights.mostPhotos.picture,
+      treeName: mostPhotos.treeName,
+      treeSlug: mostPhotos.treeSlug,
+      picture: mostPhotos.picture,
+    },
+    mostMembers && {
+      title: t_insights('most-members-title'),
+      value: mostMembers.name,
+      subtitle: t_insights('most-members-subtitle', {
+        count: mostMembers.memberCount ?? 0,
+      }),
+      treeName: mostMembers.treeName,
+      treeSlug: mostMembers.treeSlug,
+      picture: mostMembers.picture,
     },
   ].filter(Boolean) as NonNullable<(typeof cards)[number]>[]
 
   if (!cards.length)
     return (
-      <div>
-        <TypographyH5>{t_insights('highlights')}</TypographyH5>
-        <p className="mt-2 mb-4">{t_insights('highlights-empty')} </p>
+      <div className="w-3/4 self-center sm:w-3/4">
+        <div className="text-ocean-400 flex h-full items-center justify-center">
+          <div className="h-full w-full sm:w-4/5 md:w-3/5">
+            <p>{t_insights('highlights-empty')} </p>
+          </div>
+        </div>
       </div>
     )
 
   return (
-    <div>
-      <TypographyH5>{t_insights('highlights')}</TypographyH5>
-      <p className="mt-2 mb-4">{t_insights('highlights-description')} </p>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div
+      className={cn(
+        'no-scrollbar mx-auto flex w-full justify-start overflow-x-auto overflow-y-hidden',
+        'sm:justify-center',
+        cards.length <= 5 ? 'sm:justify-center' : 'sm:justify-start'
+      )}
+    >
+      <div className="flex w-max flex-row gap-4 px-4">
         {cards.map((card, i) => (
           <HighlightItem key={i} item={card} index={i} total={cards.length} />
         ))}

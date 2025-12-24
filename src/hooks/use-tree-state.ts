@@ -91,7 +91,7 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
     if (displayCreate) setDisplayCreate(false)
     else if (displayInfo) setDisplayInfo(false)
 
-    if (selectedNode) setTimeout(() => selectNode(null), 150)
+    if (selectedNode) setTimeout(() => selectNode(null), 500)
   }
 
   /**

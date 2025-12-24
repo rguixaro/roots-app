@@ -139,6 +139,8 @@
     "recently-added-subtitle": "Added {relativeTime}",
     "most-children-title": "Most children",
     "most-children-subtitle": "{count} children",
+    "most-members-title": "Most members",
+    "most-members-subtitle": "{count} members",
     "most-pictures-title": "Most pictures",
     "most-pictures-subtitle": "{count, plural, one {# photo} other {# photos}}"
   },

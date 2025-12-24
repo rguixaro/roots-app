@@ -139,6 +139,8 @@
     "recently-added-subtitle": "Afegit {relativeTime}",
     "most-children-title": "Més fills",
     "most-children-subtitle": "{count} fills",
+    "most-members-title": "Més membres",
+    "most-members-subtitle": "{count} membres",
     "most-pictures-title": "Més fotos",
     "most-pictures-subtitle": "{count, plural, one {# foto} other {# fotos}}"
   },

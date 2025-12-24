@@ -66,6 +66,7 @@ export const getTreeRoots = cache(async (slug: string) => {
     const nodes = await db.treeNode.findMany({
       where: { treeId: tree.id },
       include: { taggedIn: { where: { isProfile: true }, include: { picture: true } } },
+      orderBy: [{ birthDate: 'asc' }, { createdAt: 'asc' }],
     })
 
     const typedNodes = nodes.map((node) => ({

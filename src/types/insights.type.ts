@@ -27,6 +27,7 @@ export interface Highlight {
   birthDate?: string
   birthYear?: number
   childrenCount?: number
+  memberCount?: number
   photoCount?: number
   picture?: string | null
 }
@@ -36,6 +37,7 @@ export interface HighlightsResponse {
   newest: Highlight | null
   largest: Highlight | null
   mostPhotos: Highlight | null
+  mostMembers: Highlight | null
 }
 
 export type HighlightCard = {

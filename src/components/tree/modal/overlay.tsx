@@ -6,10 +6,10 @@ import {
   Minimize2,
   ChevronLeft,
   Logs,
-  Share2Icon,
   ArrowDownToLine,
   Settings2,
   CalendarDays,
+  ScanSearch,
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
@@ -25,8 +25,10 @@ import { Tree } from '@/types'
 interface TreeOverlayProps {
   readonly: boolean
   tree: Tree
+  viewingOptionsEnabled: boolean
   onCreateNode: () => void
   onResetView: () => void
+  onFocus: () => void
 }
 
 /**
@@ -138,17 +140,20 @@ function IconLink({
   )
 }
 
-export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeOverlayProps) {
+export function TreeOverlay({
+  readonly,
+  tree,
+  viewingOptionsEnabled,
+  onCreateNode,
+  onResetView,
+  onFocus,
+}: TreeOverlayProps) {
   const t_common = useTranslations('common')
 
   const iconClassName = 'text-ocean-50 group-hover:text-pale-ocean transition-colors duration-300'
 
   const downloadRef = useRef<HTMLDivElement>(null)
   const { copy } = useCopyToClipboard()
-
-  const handleShare = useCallback(async () => {
-    toast.info(t_common('unavailable-feature'))
-  }, [copy, tree?.slug, t_common])
 
   const handleDownload = useCallback(() => {
     toast.info(t_common('unavailable-feature'))
@@ -196,6 +201,11 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         <IconButton onClick={onResetView} className="hidden sm:block">
           <Minimize2 size={20} className={iconClassName} />
         </IconButton>
+        {viewingOptionsEnabled && (
+          <IconButton onClick={onFocus} className="hidden sm:block">
+            <ScanSearch size={20} className={iconClassName} />
+          </IconButton>
+        )}
       </motion.div>
       <motion.div
         variants={slideFromRight}
@@ -209,13 +219,9 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         <IconLink href={`/trees/timeline/${tree?.slug}`}>
           <CalendarDays size={20} className={iconClassName} />
         </IconLink>
-        <IconButton onClick={handleShare}>
-          <Share2Icon size={20} className={iconClassName} />
-        </IconButton>
         <IconButton onClick={handleDownload}>
           <ArrowDownToLine size={20} className={iconClassName} />
         </IconButton>
-
         {!readonly && (
           <>
             <div className="bg-ocean-300 h-0.5 w-4" />
@@ -246,12 +252,14 @@ export function TreeOverlay({ readonly, tree, onCreateNode, onResetView }: TreeO
         <IconButton onClick={onResetView}>
           <Minimize2 size={20} className={iconClassName} />
         </IconButton>
+        {viewingOptionsEnabled && (
+          <IconButton onClick={onFocus}>
+            <ScanSearch size={20} className={iconClassName} />
+          </IconButton>
+        )}
         <IconLink href={`/trees/timeline/${tree?.slug}`}>
           <CalendarDays size={20} className={iconClassName} />
         </IconLink>
-        <IconButton onClick={handleShare}>
-          <Share2Icon size={20} className={iconClassName} />
-        </IconButton>
         <IconButton onClick={handleDownload}>
           <ArrowDownToLine size={20} className={iconClassName} />
         </IconButton>

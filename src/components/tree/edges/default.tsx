@@ -15,7 +15,7 @@ export const StyledEdge: React.FC<ConnectionLineComponentProps> = ({
     sourceY: fromY,
     targetX: toX,
     targetY: toY,
-    curvature: 0.5,
+    curvature: 0.25,
   })
 
   return (
@@ -24,7 +24,7 @@ export const StyledEdge: React.FC<ConnectionLineComponentProps> = ({
         fill="none"
         d={path}
         stroke={ocean[200]}
-        strokeWidth={3}
+        strokeWidth={5}
         strokeDasharray="8 4"
         style={connectionLineStyle}
       />

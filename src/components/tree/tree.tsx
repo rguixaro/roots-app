@@ -11,7 +11,12 @@ import {
   useNodeUpdateForm,
 } from '@/hooks'
 
-import { TreeOverlay, NodeInfoModal, NodeCreateModal } from '@/components/tree/modal'
+import {
+  TreeOverlay,
+  NodeInfoModal,
+  NodeCreateModal,
+  ViewingOptions,
+} from '@/components/tree/modal'
 import { EdgeContextMenu } from '@/components/tree/context'
 import { StyledEdge } from '@/components/tree/edges'
 
@@ -40,7 +45,11 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
 
-  const treeState = useTreeState(tree, nodes, edges)
+  const treeState = useTreeState(tree, nodes, edges, {
+    initialGenerationsUp: 2,
+    initialGenerationsDown: 2,
+    enableProgressiveDisclosure: true,
+  })
 
   /**
    * Dismiss any open modal
@@ -61,8 +70,23 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
       <TreeOverlay
         readonly={readonly}
         tree={tree}
+        viewingOptionsEnabled={treeState.viewingOptionsEnabled}
         onCreateNode={treeState.createNode}
         onResetView={treeState.resetView}
+        onFocus={treeState.setViewingOptionsShown}
+      />
+      <ViewingOptions
+        enabled={treeState.viewingOptionsEnabled}
+        visible={treeState.viewingOptionsShown}
+        nodes={nodes}
+        visibleNodes={treeState.treeNodes}
+        showAllNodes={treeState.showAllNodes}
+        adjustGenerations={treeState.adjustGenerations}
+        generationsUp={treeState.generationsUp}
+        generationsDown={treeState.generationsDown}
+        toggleShowAll={treeState.toggleShowAll}
+        focusOnNode={treeState.focusOnNode}
+        totalNodeCount={nodes.length}
       />
       <NodeInfoModal
         readonly={readonly}
@@ -97,17 +121,18 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onEdgeClick={treeState.onEdgeClick}
         onEdgeContextMenu={treeState.onEdgeContextMenu}
         onPaneClick={treeState.collapseAllNodes}
-        connectionLineType={ConnectionLineType.SmoothStep}
+        connectionLineType={ConnectionLineType.SimpleBezier}
         connectionLineComponent={StyledEdge}
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
-        nodesDraggable={true}
-        className="bg-ocean-50 h-full w-full shadow-inner"
+        className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}
         fitView
         fitViewOptions={{ padding: 0.2 }}
+        minZoom={0.5}
+        maxZoom={2}
       >
         <Background gap={24} size={1} color={ocean[300]} />
       </ReactFlow>

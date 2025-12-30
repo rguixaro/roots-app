@@ -1,4 +1,3 @@
-// src/utils/activityFormatter.ts
 import { TreeNodeGender } from '@/types'
 import type { ActivityAction } from '@prisma/client'
 

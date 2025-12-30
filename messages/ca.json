@@ -221,7 +221,12 @@
     "timeline-description": "Explora els esdeveniments i moments importants de la història d'aquesta família.",
     "timeline-gap": "{years} {years, plural, one {any} other {anys}}",
     "timeline-event-birth": "Naixement",
-    "timeline-event-death": "Defunció"
+    "timeline-event-death": "Defunció",
+    "showing": "Mostrant",
+    "ancestors": "Ancestres",
+    "descendants": "Descendents",
+    "focus-on": "Centrar en",
+    "show-all-nodes": "Mostrar tots els membres"
   },
   "profile": {
     "title": "Preferències",

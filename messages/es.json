@@ -221,7 +221,12 @@
     "timeline-description": "Explora los eventos y momentos importantes en la historia de esta familia.",
     "timeline-gap": "{years} {years, plural, one {año} other {años}}",
     "timeline-event-birth": "Nacimiento",
-    "timeline-event-death": "Fallecimiento"
+    "timeline-event-death": "Fallecimiento",
+    "showing": "Mostrando",
+    "ancestors": "Ancestros",
+    "descendants": "Descendientes",
+    "focus-on": "Centrado en",
+    "show-all-nodes": "Mostrar todos los miembros"
   },
   "profile": {
     "title": "Configuración",

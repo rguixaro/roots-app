@@ -46,10 +46,8 @@ export function useEdgeOperations(
     (conn: Connection, edgeType: TreeEdgeType): string | null => {
       if (!conn.source || !conn.target) return 'Invalid connection'
 
-      // Check if nodes are the same (prevent self-connections)
       if (conn.source === conn.target) return 'error-cannot-connect-to-self'
 
-      // Check if relationship already exists (bidirectional check, state data)
       const existingEdge = treeEdges.find(
         (edge) =>
           (edge.source === conn.source && edge.target === conn.target) ||
@@ -58,7 +56,6 @@ export function useEdgeOperations(
 
       if (existingEdge) return 'error-relationship-already-exists'
 
-      // Check if a cycle would be created (for parent-child relationships)
       if (edgeType === 'PARENT' || edgeType === 'CHILD') {
         const checkForCycle = (
           startNode: string,
@@ -70,7 +67,6 @@ export function useEdgeOperations(
 
           visited.add(startNode)
 
-          // Check all parent-child edges
           for (const e of treeEdges) {
             if (e.data?.type === 'SPOUSE') continue
 
@@ -90,7 +86,6 @@ export function useEdgeOperations(
 
         if (wouldCreateCycle) return 'error-would-create-cycle'
 
-        // Check for sibling relationship (database data)
         const getParents = (nodeId: string): string[] => {
           return edges
             .filter((e) => e.toNodeId === nodeId && (e.type === 'PARENT' || e.type === 'CHILD'))
@@ -103,7 +98,6 @@ export function useEdgeOperations(
         const sharedParents = sourceParents.filter((parent) => targetParents.includes(parent))
         if (sharedParents.length > 0) return 'error-cannot-connect-siblings'
 
-        // Check if child would have more than 2 parents (database data)
         if (edgeType === 'PARENT') {
           const childParents = getParents(conn.target)
           if (childParents.length >= 2) return 'error-child-has-max-parents'
@@ -145,13 +139,11 @@ export function useEdgeOperations(
 
       const newEdge = {
         ...conn,
-        animated: true,
-        type: 'smoothstep',
+        type: 'simplebezier',
         style: { stroke: ocean[400], strokeWidth: 2 },
       }
 
       try {
-        // For parent-child relationships, check if we should also create spouse relationship
         if (edgeType === 'PARENT' || edgeType === 'CHILD') {
           const parentNodeId = edgeType === 'PARENT' ? conn.source : conn.target
           const childNodeId = edgeType === 'PARENT' ? conn.target : conn.source
@@ -170,7 +162,6 @@ export function useEdgeOperations(
             return
           }
 
-          // If parent has a spouse, also create the spouse-child relationship
           if (parentSpouse) {
             const existingSpouseChildEdge = edges.find(
               (e) =>

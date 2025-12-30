@@ -17,7 +17,7 @@ interface StyledNodeProps {
  */
 export function VoidNode({}: NodeProps<StyledNodeProps>): JSX.Element {
   return (
-    <div className="bg-ocean-100 h-2 w-0.5 rounded-xs">
+    <div className="bg-ocean-100 h-2 w-1">
       <Handle
         type="target"
         id="top"

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, JSX, useEffect } from 'react'
 import { Position, Handle, NodeProps } from 'reactflow'
-import { Info } from 'lucide-react'
+import { Info, ZoomIn } from 'lucide-react'
 import { motion, Variants } from 'framer-motion'
 
 import { Picture } from '@/ui'
@@ -16,6 +16,7 @@ interface StyledNodeCompactProps {
   withPicture?: boolean
   selectedNodeId: string | null
   onInfo: (node: TreeNode) => void
+  onFocus?: (node: string) => void
   collapseKey?: number
 }
 
@@ -112,10 +113,9 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
   const { withPicture, selectedNodeId } = data
 
   const profilePicture = getProfilePicture(data.node)
+  const isLargeText = fullName.length >= 15
 
-  useEffect(() => {
-    setIsInModal(selectedNodeId === id)
-  }, [selectedNodeId, id])
+  useEffect(() => setIsInModal(selectedNodeId === id), [selectedNodeId, id])
 
   /**
    * Trigger mount animation for connected handles
@@ -149,9 +149,7 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
   /**
    * Handle node click event
    */
-  const onClick = useCallback(() => {
-    setIsExpand((prev) => !prev)
-  }, [])
+  const onClick = useCallback(() => setIsExpand((prev) => !prev), [])
 
   /**
    * Handle node info click event
@@ -160,6 +158,14 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
     data.onInfo?.(data.node)
     setIsHovered(false)
     setIsExpand(false)
+  }, [data])
+
+  /**
+   * Handle node focus click event
+   */
+  const onFocusClick = useCallback(() => {
+    if (data.node.id.startsWith('couple-')) return
+    data.onFocus?.(data.node.id)
   }, [data])
 
   /**
@@ -220,6 +226,43 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
     })
   }
 
+  /**
+   * Render date range if available
+   * @returns JSX.Element | null
+   */
+  function renderDateRange(): JSX.Element | null {
+    return birthYear || deathDate ? (
+      <div
+        className={cn(
+          'relative z-10 mt-1 flex space-x-1 text-xs font-medium',
+          'opacity-70 group-hover:opacity-100'
+        )}
+      >
+        {birthYear && <p>{birthYear}</p>}
+        {deathYear && birthYear && <span>-</span>}
+        {deathYear && <p>{deathYear}</p>}
+      </div>
+    ) : null
+  }
+
+  /**
+   * Render alias if available
+   * @returns JSX.Element | null
+   */
+  function renderAlias(): JSX.Element | null {
+    return alias ? (
+      <span
+        className={cn(
+          'relative z-10 mt-1 mr-1 text-xs font-medium',
+          'opacity-70 group-hover:opacity-100'
+        )}
+      >
+        {alias}
+        {isLargeText && (birthDate || deathDate) ? <span>,&nbsp;</span> : null}
+      </span>
+    ) : null
+  }
+
   return (
     <motion.div
       onClick={onClick}
@@ -230,7 +273,7 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
       whileHover="hover"
       whileTap="tap"
       className={cn(
-        'text-ocean-400 group relative flex h-20 w-auto cursor-pointer items-center justify-start rounded-lg',
+        'text-ocean-400 group relative flex h-20 w-56 max-w-48 cursor-pointer items-center justify-start rounded-lg',
         'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
         isExpanded && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
         isInModal && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`
@@ -243,31 +286,25 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
           classNamePicture={cn('group-hover:bg-ocean-100', isExpanded && 'bg-ocean-100')}
         />
       </motion.div>
-      <div className="justify-star flex w-full flex-col items-start px-2">
-        <strong className="relative z-10 leading-none">{fullName}</strong>
-        {alias && (
+      {isLargeText ? (
+        <div className="justify-star flex w-full flex-col items-start px-2">
           <span
-            className={cn(
-              'relative z-10 mt-1 text-xs leading-none font-medium',
-              'opacity-70 group-hover:opacity-100'
-            )}
+            className={cn('relative z-10 line-clamp-3 text-left text-xs leading-tight font-bold')}
           >
-            {alias}
+            {fullName}
           </span>
-        )}
-        {birthYear || deathDate ? (
-          <div
-            className={cn(
-              'w relative z-10 mt-1 flex space-x-2 text-xs font-medium',
-              'opacity-70 group-hover:opacity-100'
-            )}
-          >
-            {birthYear && <p>{birthYear}</p>}
-            {deathYear && birthYear && <span>-</span>}
-            {deathYear && <p>{deathYear}</p>}
+          <div className="flex w-full">
+            {renderAlias()}
+            {renderDateRange()}
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <div className="justify-star flex w-full flex-col items-start px-2">
+          <span className="relative z-10 text-left leading-tight font-bold">{fullName}</span>
+          {renderAlias()}
+          {renderDateRange()}
+        </div>
+      )}
       <Handle
         type="source"
         id="right"
@@ -386,6 +423,21 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
             className="stroke-pale-ocean group-hover/info:stroke-ocean-50 transition-colors duration-300"
           />
         </motion.div>
+        {data.onFocus != null && (
+          <motion.div
+            variants={infoIconVariants}
+            onClick={onFocusClick}
+            className={cn(
+              'text-ocean-400 bg-ocean-300 flex w-full cursor-pointer items-center justify-center p-2',
+              'group/info hover:bg-ocean-400 transition-colors duration-300 outline-none focus:outline-none'
+            )}
+          >
+            <ZoomIn
+              size={16}
+              className="stroke-pale-ocean group-hover/info:stroke-ocean-50 transition-colors duration-300"
+            />
+          </motion.div>
+        )}
       </motion.div>
     </motion.div>
   )

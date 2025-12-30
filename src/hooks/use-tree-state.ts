@@ -1,14 +1,86 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { useReactFlow, useNodesState, useEdgesState, Edge } from 'reactflow'
+import {
+  useReactFlow,
+  useNodesState,
+  useEdgesState,
+  Node as FlowNode,
+  Edge as FlowEdge,
+} from 'reactflow'
 
 import { TreeNode, TreeEdge, Tree } from '@/types'
 
-import { createTreeLayout, computedLayout, positionCoupleNodes } from '@/components/tree/layout'
+import {
+  createTreeLayout,
+  computedLayout,
+  positionCoupleNodes,
+  getVisibleNodesAndEdges,
+} from '@/components/tree/layout'
 import { StyledNode, StyledNodeCompact, VoidNode } from '@/components/tree/nodes'
 
-export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
+interface UseTreeStateOptions {
+  initialGenerationsUp?: number
+  initialGenerationsDown?: number
+  enableProgressiveDisclosure?: boolean
+}
+
+export function useTreeState(
+  tree: Tree,
+  allNodes: TreeNode[],
+  allEdges: TreeEdge[],
+  options: UseTreeStateOptions = {}
+) {
+  const {
+    initialGenerationsUp = 2,
+    initialGenerationsDown = 2,
+    enableProgressiveDisclosure = true,
+  } = options
+
+  /**
+   * Progressive disclosure state
+   */
+  const [viewingOptionsShown, setViewingOptionsShown] = useState(false)
+  const [focusOnNode, setFocusOnNode] = useState<string | null>(null)
+  const [generationsUp, setGenerationsUp] = useState(initialGenerationsUp)
+  const [generationsDown, setGenerationsDown] = useState(initialGenerationsDown)
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set())
+  const [showAllNodes, setShowAllNodes] = useState(true)
+
+  const viewingOptionsEnabled =
+    enableProgressiveDisclosure && tree.type !== 'ANIMAL' && allNodes.length > 6
+
+  /**
+   * Calculate visible nodes based on progressive disclosure settings
+   */
+  const { nodes, edges, hiddenCounts } = useMemo(() => {
+    if (!viewingOptionsEnabled || showAllNodes || !focusOnNode) {
+      return {
+        nodes: allNodes,
+        edges: allEdges,
+        hiddenCounts: new Map<string, { parents: number; children: number }>(),
+      }
+    }
+
+    return getVisibleNodesAndEdges(
+      allNodes,
+      allEdges,
+      focusOnNode,
+      generationsUp,
+      generationsDown,
+      expandedNodes
+    )
+  }, [
+    allNodes,
+    allEdges,
+    focusOnNode,
+    generationsUp,
+    generationsDown,
+    expandedNodes,
+    showAllNodes,
+    viewingOptionsEnabled,
+  ])
+
   /**
    * Utility states
    */
@@ -69,10 +141,104 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
    * Handle node info click event
    * @param node {TreeNode} Node that was clicked
    */
-  const onInfo = (node: TreeNode) => {
+  const onInfo = useCallback((node: TreeNode) => {
     selectNode(node)
     setDisplayInfo(true)
-  }
+  }, [])
+
+  /**
+   * Handle expand parents for a node
+   */
+  const onExpandParents = useCallback((nodeId: string) => {
+    setExpandedNodes((prev) => new Set(prev).add(nodeId))
+    setGenerationsUp((prev) => Math.min(prev + 1, 10))
+  }, [])
+
+  /**
+   * Handle expand children for a node
+   */
+  const onExpandChildren = useCallback((nodeId: string) => {
+    setExpandedNodes((prev) => new Set(prev).add(nodeId))
+    setGenerationsDown((prev) => Math.min(prev + 1, 10))
+  }, [])
+
+  /**
+   * Toggle expansion state for a node
+   */
+  const toggleExpand = useCallback((nodeId: string) => {
+    setExpandedNodes((prev) => {
+      const next = new Set(prev)
+      if (next.has(nodeId)) next.delete(nodeId)
+      else next.add(nodeId)
+      return next
+    })
+    setShowAllNodes(false)
+  }, [])
+
+  /**
+   * Set focus to a specific node
+   */
+  const setFocus = useCallback(
+    (nodeId: string) => {
+      setFocusOnNode(nodeId)
+      setShowAllNodes(false)
+      setExpandedNodes(new Set())
+
+      setTimeout(() => {
+        const node = reactFlowInstance.getNode(nodeId)
+        if (node) {
+          setViewingOptionsShown(true)
+          reactFlowInstance.setCenter(
+            node.position.x + (node.width ?? 0) / 2,
+            node.position.y + (node.height ?? 0) / 2,
+            { zoom: 1, duration: 300 }
+          )
+        } else {
+          resetView()
+        }
+      }, 100)
+    },
+    [reactFlowInstance, resetView]
+  )
+
+  /**
+   * Adjust generation depth
+   */
+  const adjustGenerations = useCallback((direction: 'up' | 'down', delta: number) => {
+    if (direction === 'up') {
+      setGenerationsUp((prev) => Math.max(1, Math.min(prev + delta, 10)))
+    } else {
+      setGenerationsDown((prev) => Math.max(1, Math.min(prev + delta, 10)))
+    }
+  }, [])
+
+  /**
+   * Toggle show all nodes
+   */
+  const toggleShowAll = useCallback(() => {
+    setShowAllNodes((prev) => {
+      const next = !prev
+      setTimeout(() => {
+        if (next) {
+          resetView()
+          setViewingOptionsShown(false)
+          setFocusOnNode(null)
+        } else if (focusOnNode) {
+          const node = reactFlowInstance.getNode(focusOnNode)
+          if (node) {
+            reactFlowInstance.setCenter(
+              node.position.x + (node.width ?? 0) / 2,
+              node.position.y + (node.height ?? 0) / 2,
+              { zoom: 1, duration: 300 }
+            )
+          } else {
+            resetView()
+          }
+        }
+      }, 100)
+      return next
+    })
+  }, [])
 
   /**
    * Collapse all expanded nodes (triggered on pane click)
@@ -117,27 +283,49 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
       nodes: layoutNodes,
       edges: layoutEdges,
       spousePairs,
-    } = createTreeLayout(tree, nodes, edges, selectedNode?.id ?? null, onInfo, collapseKey)
+    } = createTreeLayout(
+      tree,
+      nodes,
+      edges,
+      selectedNode?.id ?? null,
+      onInfo,
+      setFocus,
+      viewingOptionsEnabled,
+      collapseKey
+    )
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [tree, edges, nodes, selectedNode, collapseKey])
+  }, [
+    tree,
+    edges,
+    nodes,
+    selectedNode,
+    collapseKey,
+    hiddenCounts,
+    onInfo,
+    onExpandParents,
+    onExpandChildren,
+    expandedNodes,
+    toggleExpand,
+  ])
 
-  /**
-   * Compute layout nodes and edges
-   * @return {{nodes: Node[], edges: Edge[]}} Computed nodes and edges
-   */
-  const { nodes: layoutNodes, edges: computedEdges } = useMemo(
-    () => computedLayout(layout.nodes, layout.edges),
-    [layout]
-  )
+  const [layoutResult, setLayoutResult] = useState<{ nodes: FlowNode[]; edges: FlowEdge[] }>({
+    nodes: [],
+    edges: [],
+  })
+
+  useEffect(() => {
+    const compute = async () => {
+      const result = await computedLayout(layout.nodes, layout.edges)
+      setLayoutResult(result)
+    }
+    compute()
+  }, [layout])
 
   /**
    * Position couple nodes in the layout
    * @return {Node[]} Positioned nodes
    */
-  const computedNodes = useMemo(
-    () => positionCoupleNodes(layoutNodes, layout.spousePairs),
-    [layoutNodes, layout.spousePairs]
-  )
+  const computedNodes = useMemo(() => positionCoupleNodes(layoutResult.nodes), [layoutResult.nodes])
 
   /**
    * React Flow nodes state
@@ -146,15 +334,15 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   /**
    * React Flow edges state
    */
-  const [treeEdges, setTreeEdges, onTreeEdgesChange] = useEdgesState(computedEdges)
+  const [treeEdges, setTreeEdges, onTreeEdgesChange] = useEdgesState(layoutResult.edges)
 
   /**
    * Sync computed nodes and edges with React Flow state
    */
   useEffect(() => {
     setTreeNodes(computedNodes)
-    setTreeEdges(computedEdges)
-  }, [computedNodes, computedEdges, setTreeNodes, setTreeEdges])
+    setTreeEdges(layoutResult.edges)
+  }, [computedNodes, layoutResult.edges, setTreeNodes, setTreeEdges])
 
   /**
    * Handle edge click event (left-click)
@@ -162,7 +350,7 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
    * @param edge Edge that was clicked
    * @return void
    */
-  const onEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+  const onEdgeClick = useCallback((event: React.MouseEvent, edge: FlowEdge) => {
     event.preventDefault()
     setEdgeContextMenu({ visible: true, x: event.clientX, y: event.clientY, edgeId: edge.id })
   }, [])
@@ -173,7 +361,7 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
    * @param edge Edge that was right-clicked
    * @return void
    */
-  const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: Edge) => {
+  const onEdgeContextMenu = useCallback((event: React.MouseEvent, edge: FlowEdge) => {
     event.preventDefault()
     setEdgeContextMenu({ visible: true, x: event.clientX, y: event.clientY, edgeId: edge.id })
   }, [])
@@ -204,7 +392,7 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
   const closeDeleteConfirmation = useCallback(() => {
     setConfirmDelete({ open: false, nodeId: null })
     if (displayInfo) dismissModal()
-  }, [])
+  }, [displayInfo])
 
   return {
     setLoading,
@@ -249,5 +437,18 @@ export function useTreeState(tree: Tree, nodes: TreeNode[], edges: TreeEdge[]) {
     resetView,
 
     collapseAllNodes,
+
+    setViewingOptionsShown: () => setViewingOptionsShown(!viewingOptionsShown),
+    viewingOptionsShown,
+    viewingOptionsEnabled,
+    focusOnNode,
+    setFocus,
+    generationsUp,
+    generationsDown,
+    showAllNodes,
+    adjustGenerations,
+    toggleShowAll,
+    totalNodeCount: allNodes.length,
+    hiddenCounts,
   }
 }

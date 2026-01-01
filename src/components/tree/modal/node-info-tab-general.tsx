@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { LoaderIcon } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 import { type z } from 'zod'

@@ -51,16 +51,8 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
     enableProgressiveDisclosure: true,
   })
 
-  /**
-   * Dismiss any open modal
-   */
-  const dismissModal = () => {
-    treeState.setDisplayCreate(false)
-    treeState.setDisplayInfo(false)
-  }
-
-  const nodeCreateForm = useNodeCreateForm(tree, dismissModal)
-  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, dismissModal)
+  const nodeCreateForm = useNodeCreateForm(tree, treeState.dismissModal)
+  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, treeState.dismissModal)
 
   const edgeOperations = useEdgeOperations(tree, edges, treeState.treeEdges, treeState.setTreeEdges)
   const nodeOperations = useNodeOperations(tree, nodes)

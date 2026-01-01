@@ -105,7 +105,6 @@ const handleVariants = {
 export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): JSX.Element {
   const [isExpanded, setIsExpand] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [isInModal, setIsInModal] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -114,8 +113,6 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
 
   const profilePicture = getProfilePicture(data.node)
   const isLargeText = fullName.length >= 15
-
-  useEffect(() => setIsInModal(selectedNodeId === id), [selectedNodeId, id])
 
   /**
    * Trigger mount animation for connected handles
@@ -275,8 +272,7 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
       className={cn(
         'text-ocean-400 group relative flex h-20 w-56 max-w-48 cursor-pointer items-center justify-start rounded-lg',
         'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
-        isExpanded && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
-        isInModal && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`
+        isExpanded && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`
       )}
     >
       <motion.div variants={pictureContentVariants} className="px-2">

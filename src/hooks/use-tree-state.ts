@@ -19,6 +19,8 @@ import {
 } from '@/components/tree/layout'
 import { StyledNode, StyledNodeCompact, VoidNode } from '@/components/tree/nodes'
 
+import { ocean } from '@/styles/colors'
+
 interface UseTreeStateOptions {
   initialGenerationsUp?: number
   initialGenerationsDown?: number
@@ -147,33 +149,19 @@ export function useTreeState(
   }, [])
 
   /**
-   * Handle expand parents for a node
+   * Handle node expand/collapse from node component
    */
-  const onExpandParents = useCallback((nodeId: string) => {
-    setExpandedNodes((prev) => new Set(prev).add(nodeId))
-    setGenerationsUp((prev) => Math.min(prev + 1, 10))
-  }, [])
-
-  /**
-   * Handle expand children for a node
-   */
-  const onExpandChildren = useCallback((nodeId: string) => {
-    setExpandedNodes((prev) => new Set(prev).add(nodeId))
-    setGenerationsDown((prev) => Math.min(prev + 1, 10))
-  }, [])
-
-  /**
-   * Toggle expansion state for a node
-   */
-  const toggleExpand = useCallback((nodeId: string) => {
-    setExpandedNodes((prev) => {
-      const next = new Set(prev)
-      if (next.has(nodeId)) next.delete(nodeId)
-      else next.add(nodeId)
-      return next
-    })
-    setShowAllNodes(false)
-  }, [])
+  const onExpand = useCallback(
+    (nodeId: string, expanded: boolean) =>
+      setTimeout(() => {
+        setExpandedNodes((_) => {
+          const next = new Set<string>()
+          if (expanded) next.add(nodeId)
+          return next
+        })
+      }, 0),
+    []
+  )
 
   /**
    * Set focus to a specific node
@@ -243,7 +231,7 @@ export function useTreeState(
   /**
    * Collapse all expanded nodes (triggered on pane click)
    */
-  const collapseAllNodes = useCallback(() => setCollapseKey((prev) => prev + 1), [])
+  const collapseAllNodes = useCallback(() => setExpandedNodes(new Set()), [])
 
   /**
    * Create a new node by showing the modal
@@ -290,23 +278,14 @@ export function useTreeState(
       selectedNode?.id ?? null,
       onInfo,
       setFocus,
+      onExpand,
       viewingOptionsEnabled,
-      collapseKey
+      collapseKey,
+      expandedNodes,
+      allEdges
     )
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
-  }, [
-    tree,
-    edges,
-    nodes,
-    selectedNode,
-    collapseKey,
-    hiddenCounts,
-    onInfo,
-    onExpandParents,
-    onExpandChildren,
-    expandedNodes,
-    toggleExpand,
-  ])
+  }, [tree, edges, nodes, onInfo, onExpand])
 
   const [layoutResult, setLayoutResult] = useState<{ nodes: FlowNode[]; edges: FlowEdge[] }>({
     nodes: [],
@@ -315,7 +294,7 @@ export function useTreeState(
 
   useEffect(() => {
     const compute = async () => {
-      const result = await computedLayout(layout.nodes, layout.edges)
+      const result = await computedLayout(layout.nodes, layout.edges, 'TB')
       setLayoutResult(result)
     }
     compute()
@@ -343,6 +322,92 @@ export function useTreeState(
     setTreeNodes(computedNodes)
     setTreeEdges(layoutResult.edges)
   }, [computedNodes, layoutResult.edges, setTreeNodes, setTreeEdges])
+
+  /**
+   * Update node and edge data when expandedNodes changes (without recalculating layout)
+   */
+  useEffect(() => {
+    const highlightedNodes = new Set<string>()
+    const highlightedEdges = new Set<string>()
+
+    expandedNodes.forEach((nodeId) => {
+      const visited = new Set<string>()
+      const findAncestors = (nodeId: string, currentEdges?: any[]) => {
+        if (visited.has(nodeId)) return
+        visited.add(nodeId)
+
+        allEdges.forEach((edge) => {
+          if (edge.toNodeId === nodeId && edge.type !== 'SPOUSE') {
+            highlightedEdges.add(`${edge.fromNodeId}->${edge.toNodeId}`)
+            highlightedNodes.add(edge.fromNodeId)
+            findAncestors(edge.fromNodeId, currentEdges)
+          }
+        })
+
+        if (currentEdges) {
+          const coupleNodeEdges = currentEdges.filter(
+            (e) => e.target === nodeId && e.source.startsWith('couple-')
+          )
+          coupleNodeEdges.forEach((coupleEdge) => {
+            highlightedEdges.add(`${coupleEdge.source}->${coupleEdge.target}`)
+            currentEdges.forEach((e) => {
+              if (e.target === coupleEdge.source) {
+                highlightedEdges.add(`${e.source}->${e.target}`)
+                highlightedNodes.add(e.source)
+                findAncestors(e.source, currentEdges)
+              }
+            })
+          })
+        }
+      }
+
+      findAncestors(nodeId)
+    })
+
+    setTreeNodes((currentNodes) =>
+      currentNodes.map((node) => ({
+        ...node,
+        data: {
+          ...node.data,
+          isHighlighted: highlightedNodes.has(node.id),
+          isExpanded: expandedNodes.has(node.id),
+        },
+      }))
+    )
+
+    setTreeEdges((currentEdges) => {
+      const allNodes = new Set([...expandedNodes, ...highlightedNodes])
+
+      allNodes.forEach((nodeId) => {
+        const coupleNodeEdges = currentEdges.filter(
+          (e) => e.target === nodeId && e.source.startsWith('couple-')
+        )
+        coupleNodeEdges.forEach((coupleEdge) => {
+          highlightedEdges.add(`${coupleEdge.source}->${coupleEdge.target}`)
+          currentEdges.forEach((e) => {
+            if (e.target === coupleEdge.source) highlightedEdges.add(`${e.source}->${e.target}`)
+          })
+        })
+      })
+
+      return currentEdges.map((edge) => {
+        const connectionKey = `${edge.source}->${edge.target}`
+        const isHighlighted = highlightedEdges.has(connectionKey)
+        const isSpouse = edge.data?.type === 'SPOUSE'
+
+        return {
+          ...edge,
+          style: {
+            ...edge.style,
+            stroke: isHighlighted ? ocean[200] : ocean[100],
+            strokeWidth: isSpouse ? 6 : isHighlighted ? 5 : 3,
+          },
+          zIndex: isHighlighted ? 1000 : 1,
+          data: { ...edge.data, isHighlighted },
+        }
+      })
+    })
+  }, [expandedNodes, allEdges, setTreeNodes, setTreeEdges])
 
   /**
    * Handle edge click event (left-click)

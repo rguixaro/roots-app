@@ -139,8 +139,8 @@ export function useEdgeOperations(
 
       const newEdge = {
         ...conn,
-        type: 'simplebezier',
-        style: { stroke: ocean[400], strokeWidth: 2 },
+        type: 'smoothstep',
+        style: { stroke: ocean[100], strokeWidth: 3 },
       }
 
       try {

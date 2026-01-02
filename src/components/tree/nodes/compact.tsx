@@ -108,7 +108,7 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  const { id, fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
+  const { fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
   const { withPicture, selectedNodeId } = data
 
   const profilePicture = getProfilePicture(data.node)
@@ -193,7 +193,7 @@ export function StyledNodeCompact({ data }: NodeProps<StyledNodeCompactProps>): 
 
     return cn(HandleVisualStyles, {
       'bg-ocean-100 h-8 w-3': isConnected,
-      'border-ocean-100 bg-ocean-100 w-3': isHoveredOrExpanded,
+      'border-ocean-100 bg-ocean-200 w-3': isHoveredOrExpanded,
       'border-ocean-100 bg-ocean-50 h-8': isHoveredAndNotConnected,
       'border-ocean-100 bg-ocean-200 h-8': isExpanded,
       'bg-ocean-300 h-12': isExpandedAndIsConnected,

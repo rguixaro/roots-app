@@ -118,6 +118,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
+        draggable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}

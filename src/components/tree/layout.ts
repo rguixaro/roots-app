@@ -323,7 +323,10 @@ export async function computedLayout(
  * @param selectedNodeId {string}
  * @param onInfo {(node: TreeNode) => void}
  * @param onFocus {(node: string) => void}
+ * @param onExpand {(nodeId: string, expanded: boolean) => void}
  * @param collapseKey {number} - Key to trigger collapse of all expanded nodes
+ * @param expandedNodes {Set<string>} - Set of node ids that are expanded
+ * @param allEdges {TreeEdge[]} - All edges in the tree for ancestor calculation
  */
 export function createTreeLayout(
   tree: Tree,
@@ -332,17 +335,28 @@ export function createTreeLayout(
   selectedNodeId: string | null,
   onInfo: (node: TreeNode) => void,
   onFocus: (node: string) => void,
+  onExpand: (nodeId: string, expanded: boolean) => void,
   focusEnabled: boolean = false,
-  collapseKey: number = 0
+  collapseKey: number = 0,
+  expandedNodes: Set<string> = new Set(),
+  allEdges: TreeEdge[] = []
 ) {
   const treeEdges: Edge[] = edges.map((edge) => ({
     id: edge.id,
     source: edge.fromNodeId,
     target: edge.toNodeId,
-    type: 'simplebezier',
+    type: 'smoothstep',
     animated: true,
     data: { type: edge.type },
   }))
+
+  const highlightedNodes = new Set<string>()
+  expandedNodes.forEach((nodeId) => {
+    const parents = allEdges
+      .filter((e) => e.toNodeId === nodeId && e.type !== 'SPOUSE')
+      .map((e) => e.fromNodeId)
+    parents.forEach((parentId) => highlightedNodes.add(parentId))
+  })
 
   const treeNodes: Node[] = nodes.map((node) => {
     const edgesFrom = edges.filter((e) => e.fromNodeId === node.id)
@@ -357,7 +371,10 @@ export function createTreeLayout(
         selectedNodeId: selectedNodeId,
         onInfo: onInfo,
         onFocus: focusEnabled ? onFocus : null,
+        onExpand: onExpand,
         collapseKey: collapseKey,
+        isHighlighted: highlightedNodes.has(node.id),
+        isExpanded: expandedNodes.has(node.id),
       },
       position: { x: 0, y: 0 },
     }
@@ -380,14 +397,12 @@ export function createTreeLayout(
       const childParents: string[] = []
 
       for (const pEdge of edges) {
-        if ((pEdge.type === 'PARENT' || pEdge.type === 'CHILD') && pEdge.toNodeId === childId) {
+        if ((pEdge.type === 'PARENT' || pEdge.type === 'CHILD') && pEdge.toNodeId === childId)
           childParents.push(pEdge.fromNodeId)
-        }
       }
 
-      if (childParents.includes(edge.source) && childParents.includes(edge.target)) {
+      if (childParents.includes(edge.source) && childParents.includes(edge.target))
         sharedChildren.push(childId)
-      }
     }
 
     if (sharedChildren.length > 0) {

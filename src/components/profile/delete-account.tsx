@@ -69,7 +69,7 @@ export const DeleteAccount = (props: DeleteAccountProps) => {
         </DialogHeader>
         <form onSubmit={handleDeleteAccount}>
           <div className="flex flex-col space-y-3">
-            <p className="text-sm">
+            <p className="text-ocean-400 text-sm">
               {t_profile('account-delete-prompt')}{' '}
               <span className="font-semibold">{props.email}</span>
             </p>

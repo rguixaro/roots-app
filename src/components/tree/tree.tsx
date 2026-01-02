@@ -113,11 +113,12 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onEdgeClick={treeState.onEdgeClick}
         onEdgeContextMenu={treeState.onEdgeContextMenu}
         onPaneClick={treeState.collapseAllNodes}
-        connectionLineType={ConnectionLineType.SimpleBezier}
+        connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
+        draggable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}

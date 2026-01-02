@@ -17,7 +17,7 @@ import {
   positionCoupleNodes,
   getVisibleNodesAndEdges,
 } from '@/components/tree/layout'
-import { StyledNode, StyledNodeCompact, VoidNode } from '@/components/tree/nodes'
+import { StyledNode, VoidNode } from '@/components/tree/nodes'
 
 import { ocean } from '@/styles/colors'
 
@@ -127,11 +127,10 @@ export function useTreeState(
    */
   const nodeTypes = useMemo(
     () => ({
-      COMPACT: tree.compact ? StyledNodeCompact : StyledNode,
-      LOOSE: tree.compact ? StyledNodeCompact : StyledNode,
+      DEFAULT: StyledNode,
       COUPLE: VoidNode,
     }),
-    [tree.compact]
+    []
   )
 
   /**

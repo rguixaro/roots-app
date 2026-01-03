@@ -37,6 +37,7 @@ export const CreateTreeSchema = z.object({
     .min(3, { message: 'tree-name-too-short' })
     .max(24, { message: 'tree-name-too-long' }),
   type: z.enum(TreeType, { required_error: 'tree-type-required' }),
+  newsletter: z.boolean().optional(),
   members: z
     .array(
       z.object({
@@ -83,6 +84,7 @@ export const UpdateProfileSchema = z.object({
     .min(1, { message: 'username-required' })
     .max(40, { message: 'username-too-long' }),
   email: z.string().email({ message: 'email-invalid' }),
+  newsletter: z.boolean().optional(),
 })
 
 export type UpdateProfileInput = z.TypeOf<typeof UpdateProfileSchema>

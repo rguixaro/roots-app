@@ -18,9 +18,6 @@ const formatValue = (value: any, field: string, t: (key: string) => string): str
   const dateFields = ['birthDate', 'deathDate']
   if (dateFields.includes(field)) return new Date(value).toISOString().split('T')[0]
 
-  const booleanFields = ['nodeGallery', 'nodeImage']
-  if (booleanFields.includes(field)) return value ? t('true') : t('false')
-
   if (field === 'gender' && TreeNodeGender.includes(value)) return t(value.toLowerCase())
 
   return String(value)

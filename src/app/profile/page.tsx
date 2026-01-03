@@ -22,7 +22,7 @@ export default async function ProfilePage() {
         id={session.user.id!}
         name={session.user.name!}
         email={session.user.email!}
-        isPrivate={session.user.isPrivate!}
+        newsletter={session.user.newsletter!}
       />
     </div>
   )

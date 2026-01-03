@@ -82,7 +82,7 @@ export const updateTree = async (
       include: { accesses: { include: { user: true } } },
     })
 
-    const changes = getChanges(prevTree, values, ['name', 'type'])
+    const changes = getChanges(prevTree, values, ['name', 'type', 'newsletter'])
 
     if (changes) {
       await db.activityLog.create({

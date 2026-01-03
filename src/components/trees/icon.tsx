@@ -35,12 +35,10 @@ const defaultIconsByUserRole: Record<string, keyof typeof icons> = {
 const otherDefaultIcons: Record<string, keyof typeof icons> = {
   filled: 'CircleUser',
   empty: 'CircleDashed',
-  enabled: 'Images',
+  enabled: 'Mails',
   disabled: 'X',
   public: 'LockKeyholeOpen',
   private: 'UserLock',
-  compact: 'StretchHorizontal',
-  loose: 'StretchVertical',
 }
 
 export const Icon: React.FC<IconProps> = ({

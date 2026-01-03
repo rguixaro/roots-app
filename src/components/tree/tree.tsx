@@ -85,8 +85,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         showModal={treeState.displayInfo}
         treeType={tree.type}
         node={treeState.selectedNode}
-        withPicture={tree.nodeImage}
-        withGallery={tree.nodeGallery}
         form={nodeUpdateForm.form}
         onUpdate={nodeUpdateForm.onSubmit}
         onClose={treeState.dismissModal}
@@ -118,7 +116,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
-        draggable={false}
+        nodesDraggable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}

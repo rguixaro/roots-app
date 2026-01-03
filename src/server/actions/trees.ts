@@ -37,9 +37,6 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
         slug: slugify(values.name),
         name: values.name,
         type: values.type,
-        compact: values.compact ?? false,
-        nodeImage: values.nodeImage ?? false,
-        nodeGallery: values.nodeGallery ?? false,
         accesses: { create: { userId, role: 'ADMIN' } },
       },
       include: { accesses: { include: { user: true } } },
@@ -80,21 +77,12 @@ export const updateTree = async (
       data: {
         name: values.name,
         type: values.type,
-        compact: values.compact,
-        nodeImage: values.nodeImage,
-        nodeGallery: values.nodeGallery,
         slug: slugify(values.name),
       },
       include: { accesses: { include: { user: true } } },
     })
 
-    const changes = getChanges(prevTree, values, [
-      'name',
-      'type',
-      'compact',
-      'nodeImage',
-      'nodeGallery',
-    ])
+    const changes = getChanges(prevTree, values, ['name', 'type'])
 
     if (changes) {
       await db.activityLog.create({
@@ -133,7 +121,7 @@ export const inviteMember = async (
   role: TreeAccessRole
 ): Promise<TreeResult> => {
   try {
-    await assertAuthenticated()
+    const inviterId = await assertAuthenticated()
 
     const user = await db.user.findUnique({ where: { email } })
     if (!user) return { error: true, message: 'error-user-not-found' }

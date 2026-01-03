@@ -52,14 +52,11 @@ enum ActivityAction {
 model Tree {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  slug        String
-  name        String
-  type        TreeType
-  compact     Boolean  @default(false)
-  nodeImage   Boolean  @default(false)
-  nodeGallery Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug      String
+  name      String
+  type      TreeType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   nodes       TreeNode[]
   accesses    TreeAccess[]
@@ -167,7 +164,6 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   password      String?
-  isPrivate     Boolean   @default(true)
 
   accounts Account[]
   sessions Session[]

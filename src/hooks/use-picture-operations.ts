@@ -19,7 +19,6 @@ import { Picture, TreeNode } from '@/types'
 
 interface UsePictureOperationsOptions {
   showModal: boolean
-  withGallery?: boolean
   node: TreeNode | null
   t_errors: (key: string) => string
   t_toasts: (key: string) => string
@@ -27,7 +26,6 @@ interface UsePictureOperationsOptions {
 
 export function usePictureOperations({
   showModal,
-  withGallery,
   node,
   t_errors,
   t_toasts,
@@ -64,7 +62,7 @@ export function usePictureOperations({
    * Fetch pictures when node changes and modal opens with gallery
    */
   useEffect(() => {
-    if (showModal && withGallery && node?.id) {
+    if (showModal && node?.id) {
       setErrorProfilePicture(false)
       setErrorGalleryPicture({})
 
@@ -82,7 +80,7 @@ export function usePictureOperations({
 
       fetchPictures()
     }
-  }, [showModal, withGallery, node?.id])
+  }, [showModal, node?.id])
 
   /**
    * Effect to update profile picture when node or pictures change

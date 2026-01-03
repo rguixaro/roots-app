@@ -13,7 +13,6 @@ import { TreeNode } from '@/types'
 
 interface StyledNodeProps {
   node: TreeNode
-  withPicture?: boolean
   selectedNodeId: string | null
   onInfo: (node: TreeNode) => void
   onFocus?: (node: string) => void
@@ -111,7 +110,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isMobile, setIsMobile] = useState(false)
 
   const { fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
-  const { withPicture, isHighlighted, isExpanded = false } = data
+  const { isHighlighted, isExpanded = false } = data
 
   const profilePicture = getProfilePicture(data.node)
   const isLargeText = fullName.length >= 15
@@ -271,7 +270,7 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       className={cn(
         'text-ocean-400 group relative flex h-20 w-56 max-w-48 cursor-pointer items-center justify-start rounded-lg',
         'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
-        isExpanded && `bg-ocean-100 text-pale-ocean ${withPicture && 'rounded-b-none'}`,
+        isExpanded && 'bg-ocean-100 text-pale-ocean rounded-b-none',
         isHighlighted && !isExpanded && 'bg-ocean-100 text-pale-ocean'
       )}
     >

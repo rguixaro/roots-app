@@ -58,6 +58,8 @@ model Tree {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  newsletter Boolean @default(true)
+
   nodes       TreeNode[]
   accesses    TreeAccess[]
   TreeEdge    TreeEdge[]
@@ -164,6 +166,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   password      String?
+  newsletter    Boolean   @default(true)
 
   accounts Account[]
   sessions Session[]

@@ -245,6 +245,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     defaultValues: {
       name: currentTree.name,
       type: currentTree.type as TreeType,
+      newsletter: currentTree.newsletter,
       members: currentTree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
@@ -257,6 +258,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
 
   const treeName = form.watch('name')
+  const newsletter = form.watch('newsletter')
 
   /**
    * Handle async operations with loading state
@@ -429,7 +431,10 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={loading || treeName === currentTree.name}
+                  disabled={
+                    loading ||
+                    (treeName === currentTree.name && newsletter === currentTree.newsletter)
+                  }
                   className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
@@ -443,6 +448,28 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             </Tabs.Content>
             <Tabs.Content value="settings" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('settings-tab')}</TypographyH5>
+              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded-lg border-2 bg-white p-3">
+                <FormField
+                  control={form.control}
+                  name="newsletter"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>{t_trees('tree-newsletter-weekly')}</FormLabel>
+                      <FormDescription className="mb-2 text-sm opacity-70">
+                        {t_trees('tree-newsletter-weekly-info')}
+                      </FormDescription>
+                      <FormControl>
+                        <StyledSelector
+                          types={['Enabled', 'Disabled'] as const}
+                          value={form.getValues('newsletter') ? 'Enabled' : 'Disabled'}
+                          setValue={(value) => form.setValue('newsletter', value === 'Enabled')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <div className="my-5">
                 <Button
                   type="submit"

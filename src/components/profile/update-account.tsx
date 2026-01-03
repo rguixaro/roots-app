@@ -33,7 +33,7 @@ interface UpdateAccountProps {
   id: string
   name: string
   email: string
-  isPrivate: boolean
+  newsletter: boolean
 }
 
 export const UpdateAccount = (props: UpdateAccountProps) => {
@@ -47,15 +47,11 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
 
   const hookForm = useForm<z.infer<typeof UpdateProfileSchema>>({
     resolver: zodResolver(UpdateProfileSchema),
-    defaultValues: {
-      name: props.name,
-      email: props.email,
-      isPrivate: props.isPrivate,
-    },
+    defaultValues: { name: props.name, newsletter: props.newsletter, email: props.email },
   })
 
   const name = hookForm.watch('name')
-  const isPrivate = hookForm.watch('isPrivate')
+  const newsletter = hookForm.watch('newsletter')
 
   /**
    * Handle form submission to update profile.
@@ -122,21 +118,24 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                 <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
                 <FormField
                   control={hookForm.control}
-                  name="isPrivate"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t_profile('private')}</FormLabel>
-                      <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_profile('private-description')}
+                  name="newsletter"
+                  render={(_) => (
+                    <FormItem className="w-fit">
+                      <FormLabel className="font-bold">{t_profile('newsletter')}</FormLabel>
+                      <FormDescription className="text-sm opacity-70">
+                        {t_profile('newsletter-description')}
                       </FormDescription>
-                      <FormControl>
+                      <FormControl className="mb-5 flex w-max">
                         <StyledSelector
-                          types={['Public', 'Private'] as const}
-                          value={hookForm.getValues('isPrivate') ? 'Private' : 'Public'}
-                          setValue={(value) => hookForm.setValue('isPrivate', value === 'Private')}
+                          types={['Enabled', 'Disabled'] as const}
+                          value={hookForm.getValues('newsletter') ? 'Enabled' : 'Disabled'}
+                          setValue={(value) => hookForm.setValue('newsletter', value === 'Enabled')}
                         />
                       </FormControl>
                       <FormMessage />
+                      <FormDescription className="opacity-70">
+                        {t_profile('newsletter-description-alert')}
+                      </FormDescription>
                     </FormItem>
                   )}
                 />
@@ -144,7 +143,7 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
               <div className="my-5 flex w-full justify-between gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || (name === props.name && isPrivate === props.isPrivate)}
+                  disabled={loading || (name === props.name && newsletter === props.newsletter)}
                 >
                   {loading ? (
                     <LoaderIcon size={16} className="animate-spin" />

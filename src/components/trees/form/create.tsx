@@ -197,7 +197,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
 
   const form = useForm<z.infer<typeof CreateTreeSchema>>({
     resolver: zodResolver(CreateTreeSchema),
-    defaultValues: { name: '', members: [] },
+    defaultValues: { name: '', newsletter: true, members: [] },
   })
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
@@ -359,6 +359,31 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
                 />
               </div>
               <TypographyH5 className="mt-5">{t_trees('settings-tab')}</TypographyH5>
+              <div className="border-ocean-200/50 shadow-center flex-col items-start rounded-lg border-2 bg-white px-3 py-2">
+                <FormField
+                  control={form.control}
+                  name="newsletter"
+                  render={() => {
+                    const value = form.getValues('newsletter')
+                    return (
+                      <FormItem>
+                        <FormLabel>{t_trees('tree-newsletter-weekly')}</FormLabel>
+                        <FormDescription className="mb-2 text-sm opacity-70">
+                          {t_trees('tree-newsletter-weekly-info')}
+                        </FormDescription>
+                        <FormControl>
+                          <StyledSelector
+                            types={['Enabled', 'Disabled'] as const}
+                            value={value == undefined ? '' : value ? 'Enabled' : 'Disabled'}
+                            setValue={(value) => form.setValue('newsletter', value === 'Enabled')}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )
+                  }}
+                />
+              </div>
               <div className="my-5">
                 <Button
                   type="submit"

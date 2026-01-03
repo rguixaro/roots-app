@@ -15,6 +15,8 @@ export interface Tree {
   createdAt: Date
   updatedAt: Date
 
+  newsletter: boolean
+
   nodes?: TreeNode[]
   edges?: TreeEdge[]
   accesses?: TreeAccess[]

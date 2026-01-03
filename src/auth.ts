@@ -37,7 +37,7 @@ export const {
         session.user.name = token.name
         session.user.email = token.email!
         session.user.isOAuth = token.isOAuth as boolean
-        session.user.isPrivate = token.isPrivate as boolean
+        session.user.newsletter = token.newsletter as boolean
       }
 
       return session
@@ -52,7 +52,7 @@ export const {
       token.isOAuth = !!existingAccount
       token.name = existingUser.name
       token.email = existingUser.email
-      token.isPrivate = existingUser.isPrivate
+      token.newsletter = existingUser.newsletter
 
       return token
     },

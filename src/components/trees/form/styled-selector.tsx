@@ -53,7 +53,7 @@ export const StyledSelector = <T extends string>({
             )}
             <div
               className={cn(
-                'border-ocean-200 bg-pale-ocean absolute -top-1 -right-1 rounded border-2',
+                'border-ocean-200 bg-pale-ocean absolute -top-1 -right-1 rounded-md border-2',
                 'transition-opacity duration-300',
                 isActive ? 'opacity-100' : 'opacity-0'
               )}

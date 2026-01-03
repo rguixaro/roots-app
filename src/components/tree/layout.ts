@@ -14,9 +14,6 @@ const nodeHeight = 80
  * @returns {number} - Calculated width
  */
 function getNodeWidth(node: Node): number {
-  const isCompact = node.type === 'COMPACT'
-  if (!isCompact) return nodeWidth
-
   const name = node.data?.node?.fullName || node.data?.node?.name || ''
   if (name.length <= 15) {
     const charWidth = 9
@@ -364,10 +361,9 @@ export function createTreeLayout(
 
     return {
       id: node.id,
-      type: tree.compact ? 'COMPACT' : 'LOOSE',
+      type: 'DEFAULT',
       data: {
         node: { ...node, edgesFrom, edgesTo },
-        withPicture: tree.nodeImage,
         selectedNodeId: selectedNodeId,
         onInfo: onInfo,
         onFocus: focusEnabled ? onFocus : null,

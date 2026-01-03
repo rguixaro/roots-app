@@ -12,8 +12,6 @@ export interface Tree {
   slug: string
   name: string
   type: TreeType
-  nodeImage: boolean
-  nodeGallery: boolean
   createdAt: Date
   updatedAt: Date
 

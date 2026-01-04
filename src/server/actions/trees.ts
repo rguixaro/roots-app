@@ -16,6 +16,8 @@ import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/u
 
 import { sendTreeInvitationEmail } from '@/lib/email'
 
+import { languageToLocale } from '@/utils/language'
+
 import { Tree, TreeNode, TimelineEvent } from '@/types'
 
 interface TreeResult {
@@ -148,7 +150,8 @@ export const inviteMember = async (
         inviterName: inviter.name || inviter.email!,
         treeName: tree.name,
         treeSlug: tree.slug,
-        role: role,
+        role,
+        locale: user.language ? languageToLocale(user.language) : 'en',
       }).catch((_) => {})
     }
 

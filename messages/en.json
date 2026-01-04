@@ -97,15 +97,14 @@
   "enums": {
     "human": "Human",
     "animal": "Animal",
-    "filled": "Enabled",
-    "empty": "Disabled",
     "enabled": "Enabled",
     "disabled": "Disabled",
     "admin": "Admin",
     "editor": "Editor",
     "viewer": "Viewer",
-    "public": "Public",
-    "private": "Private"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Sign in to ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "If enabled, you will receive weekly emails with updates and highlights from your families.",
     "newsletter-description-alert": "Make sure the newsletter is enabled for each of your families.",
+    "language": "Language",
+    "language-description": "Select the preferred language for both application and communications.",
     "account-delete": "Delete account",
     "account-delete-attention": "This action cannot be undone.",
     "account-delete-text": "This will permanently delete your account. Your family trees will be handled as follows:",
@@ -284,5 +285,62 @@
     "edge-type": "Relationship type",
     "parent": "Parent/Child",
     "spouse": "Spouse"
+  },
+  "emails": {
+    "welcome": {
+      "subject": "Welcome to Roots, {name}!",
+      "title": "Welcome to Roots!",
+      "subtitle": "Start preserving your family's story",
+      "greeting": "Hi {name},",
+      "intro": "Thank you for joining Roots! We're thrilled to help you preserve and share your family's story.",
+      "getting-started-title": "Getting started",
+      "step-1": "Create your first family tree",
+      "step-2": "Add family members and their stories",
+      "step-3": "Upload and organize photos",
+      "step-4": "Invite relatives to collaborate",
+      "cta": "Start building your tree",
+      "help": "If you have any questions or need assistance, feel free to reach out. We're here to help you every step of the way.",
+      "footer": "You're receiving this email because you created an account on Roots."
+    },
+    "invitation": {
+      "subject": "{inviter} invited you to {tree}",
+      "title": "You've been invited!",
+      "subtitle": "Join a family tree collaboration",
+      "greeting": "Hi {name},",
+      "intro": " has invited you to collaborate on the family tree",
+      "as": " as a",
+      "role-admin": "administrator",
+      "role-editor": "editor",
+      "role-viewer": "viewer",
+      "permission-viewer": "explore ",
+      "permission-editor": "contribute to ",
+      "permission-base-1": "You can now view and ",
+      "permission-base-2": "this family tree. Click the button below to get started.",
+      "cta": "View family tree",
+      "link": "Or copy and paste this URL into your browser:",
+      "help": "If you have any questions about how to use Roots, we're here to help.",
+      "footer": "This invitation was sent by {inviter}. If you weren't expecting this email, you can safely ignore it."
+    },
+    "newsletter": {
+      "subject": "Weekly Update: {tree}",
+      "title": "Weekly family tree update",
+      "greeting": "Hi {name},",
+      "intro-1": "Here's what's new with your ",
+      "intro-2": " family tree this week.",
+      "members-new": "New this week",
+      "members-total": "Total members",
+      "new-members-title": "Recently added",
+      "new-members-empty": "No new members were added this week.",
+      "upcoming-events-title": "This week's dates",
+      "upcoming-events-empty": "No upcoming birthdays or anniversaries in the next week.",
+      "total-members": "Total family members: {count}",
+      "event-birthday": "Birthday ({years} years old)",
+      "event-anniversary": "Anniversary ({years} years)",
+      "cta": "View your family tree",
+      "help": "Want to change your email preferences? You can do so in your profile settings.",
+      "footer": "You're receiving this email because you're subscribed to weekly updates for this family tree.",
+      "link": "Manage your preferences"
+    },
+    "copyright": "© {year} Roots. All rights reserved."
   }
 }

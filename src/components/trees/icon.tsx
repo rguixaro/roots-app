@@ -2,16 +2,7 @@ import { icons, LucideIcon } from 'lucide-react'
 
 import { TreeType, TreeAccessRole } from '@/types'
 
-type BuiltInType =
-  | TreeType
-  | TreeAccessRole
-  | 'Filled'
-  | 'Empty'
-  | 'Enabled'
-  | 'Disabled'
-  | 'Public'
-  | 'Private'
-  | string
+type BuiltInType = TreeType | TreeAccessRole | 'Enabled' | 'Disabled' | string
 
 type IconProps = {
   type: BuiltInType
@@ -33,12 +24,11 @@ const defaultIconsByUserRole: Record<string, keyof typeof icons> = {
 }
 
 const otherDefaultIcons: Record<string, keyof typeof icons> = {
-  filled: 'CircleUser',
-  empty: 'CircleDashed',
   enabled: 'Mails',
   disabled: 'X',
-  public: 'LockKeyholeOpen',
-  private: 'UserLock',
+  ca: 'Languages',
+  es: 'Languages',
+  en: 'Languages',
 }
 
 export const Icon: React.FC<IconProps> = ({

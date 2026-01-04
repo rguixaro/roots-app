@@ -1,3 +1,5 @@
+import { Language } from '@prisma/client'
+
 export interface User {
   id: string
   email: string | null
@@ -7,4 +9,5 @@ export interface User {
   image: string | null
   password: string | null
   newsletter: boolean
+  language: Language
 }

@@ -97,15 +97,14 @@
   "enums": {
     "human": "Humana",
     "animal": "Animal",
-    "filled": "Activado",
-    "empty": "Desactivado",
     "enabled": "Activado",
     "disabled": "Desactivado",
     "admin": "Administrador",
     "editor": "Editor",
     "viewer": "Espectador",
-    "public": "Público",
-    "private": "Privado"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Acceder a ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "Si está activado, recibirás correos electrónicos semanales con actualizaciones y efemérides de tus familias.",
     "newsletter-description-alert": "Asegúrate de que el newsletter esté activado para cada una de tus familias.",
+    "language": "Idioma",
+    "language-description": "Selecciona el idioma preferido tanto para la interfaz de la aplicación como para las comunicaciones.",
     "account-delete": "Eliminar la cuenta",
     "account-delete-attention": "Esta acción no se puede deshacer.",
     "account-delete-text": "Esto eliminará permanentemente tu cuenta. Tus familias se manejarán de la siguiente manera:",
@@ -284,5 +285,62 @@
     "edge-type": "Tipo de relación",
     "parent": "Padre/Madre",
     "spouse": "Cónyuge"
+  },
+  "emails": {
+    "welcome": {
+      "subject": "¡Bienvenido a Roots, {name}!",
+      "title": "¡Bienvenido a Roots!",
+      "subtitle": "Empieza a preservar la historia de tu familia",
+      "greeting": "Hola {name},",
+      "intro": "¡Gracias por unirte a Roots! Estamos encantados de ayudarte a preservar y compartir la historia de tu familia.",
+      "getting-started-title": "Primeros pasos",
+      "step-1": "Crea tu primer árbol genealógico",
+      "step-2": "Añade miembros de la familia y sus historias",
+      "step-3": "Sube y organiza fotos",
+      "step-4": "Invita a familiares a colaborar",
+      "cta": "Comienza a construir tu árbol",
+      "help": "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos. Estamos aquí para ayudarte en cada paso del camino.",
+      "footer": "Recibes este correo porque creaste una cuenta en Roots."
+    },
+    "invitation": {
+      "subject": "{inviter} te ha invitado a {tree}",
+      "title": "¡Has sido invitado!",
+      "subtitle": "Únete a una colaboración de árbol genealógico",
+      "greeting": "Hola {name},",
+      "intro": " te ha invitado a colaborar en el árbol genealógico",
+      "as": " como",
+      "role-admin": "administrador",
+      "role-editor": "editor",
+      "role-viewer": "espectador",
+      "permission-viewer": "explorar ",
+      "permission-editor": "contribuir a ",
+      "permission-base-1": "Ahora puedes ver y ",
+      "permission-base-2": "este árbol genealógico. Haz clic en el botón de abajo para comenzar.",
+      "cta": "Ver árbol genealógico",
+      "link": "O copia y pega esta URL en tu navegador:",
+      "help": "Si tienes alguna pregunta sobre cómo usar Roots, estamos aquí para ayudarte.",
+      "footer": "Esta invitación fue enviada por {inviter}. Si no esperabas este correo, puedes ignorarlo."
+    },
+    "newsletter": {
+      "subject": "Actualización semanal: {tree}",
+      "title": "Actualización semanal del árbol genealógico",
+      "greeting": "Hola {name},",
+      "intro-1": "Aquí tienes las novedades de tu ",
+      "intro-2": " árbol genealógico esta semana.",
+      "members-new": "Nuevos esta semana",
+      "members-total": "Miembros totales",
+      "new-members-title": "Recientemente añadidos",
+      "new-members-empty": "No se han añadido nuevos miembros esta semana.",
+      "upcoming-events-title": "Eventos de esta semana",
+      "upcoming-events-empty": "No hay cumpleaños o aniversarios en la próxima semana.",
+      "total-members": "Miembros totales de la familia: {count}",
+      "event-birthday": "Cumpleaños ({years} años)",
+      "event-anniversary": "Aniversario ({years} años)",
+      "cta": "Visita tu árbol",
+      "help": "¿Quieres cambiar tus preferencias de correo? Puedes hacerlo en la configuración de tu perfil.",
+      "footer": "Recibes este correo porque estás suscrito a las actualizaciones semanales de este árbol genealógico.",
+      "link": "Gestiona tus preferencias"
+    },
+    "copyright": "© {year} Roots. Todos los derechos reservados."
   }
 }

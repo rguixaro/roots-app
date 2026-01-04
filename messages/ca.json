@@ -97,15 +97,14 @@
   "enums": {
     "human": "Humana",
     "animal": "Animal",
-    "filled": "Activat",
-    "empty": "Desactivat",
     "enabled": "Activat",
     "disabled": "Desactivat",
     "admin": "Administrador",
     "editor": "Editor",
     "viewer": "Espectador",
-    "public": "Públic",
-    "private": "Privat"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Accedeix a ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "Si està activat, rebràs correus electrònics setmanals amb actualitzacions i efemèrides de les teves famílies.",
     "newsletter-description-alert": "Assegura't que el newsletter estigui activat per a cadascuna de les teves famílies.",
+    "language": "Idioma",
+    "language-description": "Selecciona l'idioma preferit tant per a la interfície de l'aplicació com per a les comunicacions.",
     "account-delete": "Esborra el compte",
     "account-delete-attention": "Aquesta acció no es pot desfer.",
     "account-delete-text": "Això eliminarà permanentment el teu compte. Les teves famílies es gestionaran de la manera següent:",
@@ -284,5 +285,62 @@
     "edge-type": "Tipus de relació",
     "parent": "Pare/Mare",
     "spouse": "Cònjuge"
+  },
+  "emails": {
+    "welcome": {
+      "subject": "Benvingut a Roots, {name}!",
+      "title": "Benvingut a Roots!",
+      "subtitle": "Comença a preservar la història de la teva família",
+      "greeting": "Hola {name},",
+      "intro": "Gràcies per unir-te a Roots! Estem encantats d'ajudar-te a preservar i compartir la història de la teva família.",
+      "getting-started-title": "Primers passos",
+      "step-1": "Crea el teu primer arbre genealògic",
+      "step-2": "Afegeix membres de la família i les seves històries",
+      "step-3": "Puja i organitza fotos",
+      "step-4": "Convida familiars a col·laborar",
+      "cta": "Comença a construir el teu arbre",
+      "help": "Si tens alguna pregunta o necessites ajuda, no dubtis a contactar-nos. Som aquí per ajudar-te en cada pas del camí.",
+      "footer": "Reps aquest correu perquè has creat un compte a Roots."
+    },
+    "invitation": {
+      "subject": "{inviter} t'ha convidat a {tree}",
+      "title": "Has estat convidat!",
+      "subtitle": "Uneix-te a una col·laboració d'arbre genealògic",
+      "greeting": "Hola {name},",
+      "intro": " t'ha convidat a col·laborar en l'arbre genealògic",
+      "as": " com a",
+      "role-admin": "administrador",
+      "role-editor": "editor",
+      "role-viewer": "espectador",
+      "permission-viewer": "explorar ",
+      "permission-editor": "contribuir a ",
+      "permission-base-1": "Ara pots veure i ",
+      "permission-base-2": "aquest arbre genealògic. Fes clic al botó següent per començar.",
+      "cta": "Veure arbre genealògic",
+      "link": "O copia i enganxa aquesta URL al teu navegador:",
+      "help": "Si tens alguna pregunta sobre com utilitzar Roots, som aquí per ajudar-te.",
+      "footer": "Aquesta invitació ha estat enviada per {inviter}. Si no esperaves aquest correu, pots ignorar-lo."
+    },
+    "newsletter": {
+      "subject": "Actualització setmanal: {tree}",
+      "title": "Actualització setmanal de l'arbre genealògic",
+      "greeting": "Hola {name},",
+      "intro-1": "Aquí tens les novetats del teu ",
+      "intro-2": " arbre genealògic aquesta setmana.",
+      "members-new": "Nous aquesta setmana",
+      "members-total": "Membres totals",
+      "new-members-title": "Recentment afegits",
+      "new-members-empty": "No s'han afegit nous membres aquesta setmana.",
+      "upcoming-events-title": "Esdeveniments d'aquesta setmana",
+      "upcoming-events-empty": "No hi ha aniversaris ni celebracions la propera setmana.",
+      "total-members": "Membres totals de la família: {count}",
+      "event-birthday": "Aniversari ({years} anys)",
+      "event-anniversary": "Celebració ({years} anys)",
+      "cta": "Visita el teu arbre",
+      "help": "Vols canviar les teves preferències de correu? Pots fer-ho a la configuració del teu perfil.",
+      "footer": "Reps aquest correu perquè estàs subscrit a les actualitzacions setmanals d'aquest arbre genealògic.",
+      "link": "Gestiona les teves preferències"
+    },
+    "copyright": "© {year} Roots. Tots els drets reservats."
   }
 }

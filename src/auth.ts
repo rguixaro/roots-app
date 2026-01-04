@@ -2,12 +2,16 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import type { Adapter } from 'next-auth/adapters'
 import NextAuth from 'next-auth'
 
+import { Language } from '@prisma/client'
+
 import AuthConfig from '@/auth.config'
 
 import { db } from '@/server/db'
 import { getUserById, getAccountByUserId } from '@/server/utils'
 
 import { sendWelcomeEmail } from '@/lib/email'
+
+import { languageToLocale } from '@/utils/language'
 
 import { env } from './env.mjs'
 
@@ -40,6 +44,7 @@ export const {
           sendWelcomeEmail({
             recipientEmail: user.email,
             recipientName: user.name || user.email,
+            locale: existingUser.language ? languageToLocale(existingUser.language) : 'en',
           }).catch((_) => {})
         }
       }
@@ -54,6 +59,7 @@ export const {
         session.user.email = token.email!
         session.user.isOAuth = token.isOAuth as boolean
         session.user.newsletter = token.newsletter as boolean
+        session.user.language = token.language as Language
       }
 
       return session
@@ -69,6 +75,7 @@ export const {
       token.name = existingUser.name
       token.email = existingUser.email
       token.newsletter = existingUser.newsletter
+      token.language = existingUser.language
 
       return token
     },

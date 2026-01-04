@@ -7,7 +7,7 @@ import 'reactflow/dist/style.css'
 
 import { auth } from '@/auth'
 
-import { ToasterProvider } from '@/providers'
+import { ToasterProvider, CookiesProvider } from '@/providers'
 
 import { Header, Footer } from '@/components/layout'
 
@@ -52,6 +52,7 @@ export default async function RootLayout({
         <div className="flex min-h-screen w-full flex-col">
           <SessionProvider>
             <NextIntlClientProvider messages={messages}>
+              <CookiesProvider />
               <Header username={userName || ''} />
               <main className="flex-1">{children}</main>
               <Footer />

@@ -97,15 +97,14 @@
   "enums": {
     "human": "Humana",
     "animal": "Animal",
-    "filled": "Activado",
-    "empty": "Desactivado",
     "enabled": "Activado",
     "disabled": "Desactivado",
     "admin": "Administrador",
     "editor": "Editor",
     "viewer": "Espectador",
-    "public": "Público",
-    "private": "Privado"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Acceder a ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "Si está activado, recibirás correos electrónicos semanales con actualizaciones y efemérides de tus familias.",
     "newsletter-description-alert": "Asegúrate de que el newsletter esté activado para cada una de tus familias.",
+    "language": "Idioma",
+    "language-description": "Selecciona el idioma preferido tanto para la interfaz de la aplicación como para las comunicaciones.",
     "account-delete": "Eliminar la cuenta",
     "account-delete-attention": "Esta acción no se puede deshacer.",
     "account-delete-text": "Esto eliminará permanentemente tu cuenta. Tus familias se manejarán de la siguiente manera:",

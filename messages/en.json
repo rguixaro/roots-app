@@ -97,15 +97,14 @@
   "enums": {
     "human": "Human",
     "animal": "Animal",
-    "filled": "Enabled",
-    "empty": "Disabled",
     "enabled": "Enabled",
     "disabled": "Disabled",
     "admin": "Admin",
     "editor": "Editor",
     "viewer": "Viewer",
-    "public": "Public",
-    "private": "Private"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Sign in to ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "If enabled, you will receive weekly emails with updates and highlights from your families.",
     "newsletter-description-alert": "Make sure the newsletter is enabled for each of your families.",
+    "language": "Language",
+    "language-description": "Select the preferred language for both application and communications.",
     "account-delete": "Delete account",
     "account-delete-attention": "This action cannot be undone.",
     "account-delete-text": "This will permanently delete your account. Your family trees will be handled as follows:",

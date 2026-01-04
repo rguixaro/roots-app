@@ -97,15 +97,14 @@
   "enums": {
     "human": "Humana",
     "animal": "Animal",
-    "filled": "Activat",
-    "empty": "Desactivat",
     "enabled": "Activat",
     "disabled": "Desactivat",
     "admin": "Administrador",
     "editor": "Editor",
     "viewer": "Espectador",
-    "public": "Públic",
-    "private": "Privat"
+    "ca": "Català",
+    "en": "English",
+    "es": "Español"
   },
   "login": {
     "login-to": "Accedeix a ",
@@ -239,6 +238,8 @@
     "newsletter": "Newsletter",
     "newsletter-description": "Si està activat, rebràs correus electrònics setmanals amb actualitzacions i efemèrides de les teves famílies.",
     "newsletter-description-alert": "Assegura't que el newsletter estigui activat per a cadascuna de les teves famílies.",
+    "language": "Idioma",
+    "language-description": "Selecciona l'idioma preferit tant per a la interfície de l'aplicació com per a les comunicacions.",
     "account-delete": "Esborra el compte",
     "account-delete-attention": "Aquesta acció no es pot desfer.",
     "account-delete-text": "Això eliminarà permanentment el teu compte. Les teves famílies es gestionaran de la manera següent:",

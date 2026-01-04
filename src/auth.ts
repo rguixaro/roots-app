@@ -7,6 +7,8 @@ import AuthConfig from '@/auth.config'
 import { db } from '@/server/db'
 import { getUserById, getAccountByUserId } from '@/server/utils'
 
+import { sendWelcomeEmail } from '@/lib/email'
+
 import { env } from './env.mjs'
 
 const { AUTH_SECRET } = env
@@ -27,7 +29,21 @@ export const {
   secret: AUTH_SECRET,
   pages: { signIn: '/auth', error: '/auth/error' },
   callbacks: {
-    async signIn() {
+    async signIn({ user, account }) {
+      if (account && user.email) {
+        const existingUser = await db.user.findUnique({
+          where: { email: user.email },
+          include: { accounts: true },
+        })
+
+        if (existingUser && existingUser.accounts.length === 0) {
+          sendWelcomeEmail({
+            recipientEmail: user.email,
+            recipientName: user.name || user.email,
+          }).catch((_) => {})
+        }
+      }
+
       return true
     },
     async session({ token, session }) {

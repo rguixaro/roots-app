@@ -37,6 +37,7 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
         slug: slugify(values.name),
         name: values.name,
         type: values.type,
+        newsletter: values.newsletter,
         accesses: { create: { userId, role: 'ADMIN' } },
       },
       include: { accesses: { include: { user: true } } },
@@ -77,6 +78,7 @@ export const updateTree = async (
       data: {
         name: values.name,
         type: values.type,
+        newsletter: values.newsletter,
         slug: slugify(values.name),
       },
       include: { accesses: { include: { user: true } } },

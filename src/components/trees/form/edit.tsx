@@ -341,6 +341,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     form.reset({
       name: tree.name,
       type: tree.type,
+      newsletter: tree.newsletter,
       members: tree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
@@ -431,10 +432,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={
-                    loading ||
-                    (treeName === currentTree.name && newsletter === currentTree.newsletter)
-                  }
+                  disabled={loading || treeName === currentTree.name}
                   className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
@@ -473,7 +471,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || newsletter === currentTree.newsletter}
                   className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">

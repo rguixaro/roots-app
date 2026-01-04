@@ -310,7 +310,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
             </Tabs.List>
             <Tabs.Content value="general" className="space-y-4">
               <TypographyH5 className="mt-5">{t_trees('general-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 px-3 py-2 text-left">
                 <FormField
                   control={form.control}
                   name="name"
@@ -359,7 +359,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
                 />
               </div>
               <TypographyH5 className="mt-5">{t_trees('settings-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center flex-col items-start rounded-lg border-2 bg-white px-3 py-2">
+              <div className="border-ocean-200/50 shadow-center bg-pale-ocean flex-col items-start rounded-xl border-2 px-3 py-2">
                 <FormField
                   control={form.control}
                   name="newsletter"
@@ -401,7 +401,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
             </Tabs.Content>
             <Tabs.Content value="members" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded-lg border-2 bg-white p-3">
+              <div className="border-ocean-200/50 shadow-center-sm bg-ocean-200 flex-col items-start rounded-xl border-2 p-3">
                 <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
                   {t_trees('tree-members-info')}

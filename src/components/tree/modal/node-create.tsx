@@ -211,7 +211,7 @@ export function NodeCreateModal({
             onKeyDown={(e) => checkKeyDown(e)}
             className="flex h-full w-full flex-col sm:w-2/5 md:w-2/5 lg:w-2/5 xl:w-1/3 2xl:w-1/5"
           >
-            <div className="bg-pale-ocean shadow-2l flex h-full flex-col overflow-hidden sm:flex sm:flex-row">
+            <div className="bg-ocean-50 shadow-center-sm flex h-full flex-col overflow-hidden sm:flex sm:flex-row">
               <div
                 className="flex shrink-0 cursor-row-resize justify-center pt-3 pb-2 select-none sm:hidden"
                 onMouseDown={handleDragStart}
@@ -244,7 +244,7 @@ export function NodeCreateModal({
                   </button>
                 </div>
                 <TypographyH5 className="mt-5">{t_trees('node-general-info')}</TypographyH5>
-                <div className="border-ocean-200/50 shadow-center mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
+                <div className="border-ocean-200/50 shadow-center bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 px-3 py-2 text-left">
                   <FormField
                     control={form.control}
                     name="fullName"

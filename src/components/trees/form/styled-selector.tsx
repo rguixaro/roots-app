@@ -36,8 +36,9 @@ export const StyledSelector = <T extends string>({
             key={name}
             className={cn(
               'bg-ocean-200/15 shadow-center-sm relative mx-1 flex min-w-18 snap-center flex-col items-center justify-center rounded-lg px-2 py-3',
-              'border-ocean-200/15 border-2 transition-all duration-400 hover:scale-[1.05]',
-              isActive && 'border-ocean-200'
+              'border-ocean-200/15 cursor-pointer border-2 transition-all duration-400 hover:scale-[1.05]',
+              isActive && 'border-ocean-200',
+              disabled && 'cursor-not-allowed opacity-50 hover:scale-100'
             )}
           >
             <Icon type={name} size={24} />

@@ -2,6 +2,12 @@ import { headers } from 'next/headers'
 import { getRequestConfig } from 'next-intl/server'
 import Negotiator from 'negotiator'
 
+import { auth } from '@/auth'
+
+import { getUserById } from '@/server/utils'
+
+import { languageToLocale } from '@/utils/language'
+
 export default getRequestConfig(async () => {
   const defaultHeaders = await headers()
   const headersObj = Object.fromEntries(defaultHeaders.entries())
@@ -14,7 +20,18 @@ export default getRequestConfig(async () => {
 
   let locale: string
 
-  if (host === FORCE_CA_DOMAIN) {
+  const session = await auth()
+  if (session?.user?.id) {
+    const user = await getUserById(session.user.id)
+    if (user?.language) {
+      locale = languageToLocale(user.language)
+    } else if (host === FORCE_CA_DOMAIN) {
+      locale = 'ca'
+    } else {
+      const negotiator = new Negotiator({ headers: headersObj })
+      locale = negotiator.language(locales) || defaultLocale
+    }
+  } else if (host === FORCE_CA_DOMAIN) {
     locale = 'ca'
   } else {
     const negotiator = new Negotiator({ headers: headersObj })

@@ -30,10 +30,36 @@ export const updateProfile = async (
 /**
  * Delete Profile.
  * Auth required.
+ * Handles tree cleanup:
+ * - Deletes trees where user is the only member
+ * - Transfers ownership to another admin (or editor if no admin exists) for shared trees
  * @returns Promise<null | true>
  */
 export const deleteProfile = async (): Promise<null | true> => {
   const userId = await assertAuthenticated()
+
+  const userTreeAccesses = await db.treeAccess.findMany({
+    where: { userId },
+    include: { tree: { include: { accesses: { include: { user: true } } } } },
+  })
+
+  for (const access of userTreeAccesses) {
+    const tree = access.tree
+    const otherMembers = tree.accesses.filter((a) => a.userId !== userId)
+
+    if (otherMembers.length === 0) {
+      await db.tree.delete({ where: { id: tree.id } })
+    } else {
+      if (access.role === 'ADMIN') {
+        let newAdmin = otherMembers.find((a) => a.role === 'ADMIN')
+        if (!newAdmin) newAdmin = otherMembers.find((a) => a.role === 'EDITOR')
+        if (!newAdmin) newAdmin = otherMembers[0]
+
+        if (newAdmin)
+          await db.treeAccess.update({ where: { id: newAdmin.id }, data: { role: 'ADMIN' } })
+      }
+    }
+  }
 
   await db.user.delete({ where: { id: userId } })
   await signOut()

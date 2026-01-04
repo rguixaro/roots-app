@@ -48,6 +48,9 @@ interface MemberItemProps {
   setCurrMember: (value: { index: number; memberId?: string } | null) => void
   setDialogOpen: (open: boolean) => void
   remove: (index: number) => void
+  t_trees: any
+  t_common: any
+  t_errors: any
 }
 
 /**
@@ -68,13 +71,12 @@ const MemberItem = ({
   setCurrMember,
   setDialogOpen,
   remove,
+  t_trees,
+  t_common,
+  t_errors,
 }: Omit<MemberItemProps, 'field'>) => {
-  const t_trees = useTranslations('trees')
-  const t_common = useTranslations('common')
-  const t_errors = useTranslations('errors')
-
-  const memberRole = form.getValues(`members.${index}.role`)
-  const memberEmail = form.getValues(`members.${index}.email`) || ''
+  const memberRole = form.watch(`members.${index}.role`)
+  const memberEmail = form.watch(`members.${index}.email`) || ''
   const memberName = form.watch(`members.${index}.name`) || ''
   const memberId = form.watch(`members.${index}.userId`) || ''
 
@@ -87,26 +89,16 @@ const MemberItem = ({
       control={form.control}
       name={`members.${index}.role`}
       render={() => (
-        <FormItem className="bg-ocean-100/15 border-ocean-100/50 my-2 w-full flex-col items-center justify-start space-x-3 rounded border-2 p-4">
+        <FormItem className="bg-ocean-100/15 border-ocean-100/50 my-2 w-full flex-col items-center justify-start space-x-3 rounded-lg border-2 p-4">
           <div className="w-full sm:flex sm:justify-between">
             <div className="flex-col space-y-2">
               {isNew ? (
-                <div className="flex w-full sm:space-x-5">
-                  <Input
-                    {...form.register(`members.${index}.email`)}
-                    placeholder={t_trees('tree-member-email')}
-                    className="w-full"
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    disabled={!canInvite}
-                    onClick={() => inviteUser(memberEmail!, memberRole!)}
-                    className="bg-ocean-200 hover:bg-ocean-300 disabled:bg-ocean-100 hidden h-9 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
-                  >
-                    {t_trees('tree-member-invite')}
-                  </button>
-                </div>
+                <Input
+                  {...form.register(`members.${index}.email`)}
+                  placeholder={t_trees('tree-member-email')}
+                  className="w-full"
+                  disabled={loading}
+                />
               ) : (
                 <FormLabel>
                   {memberName} <span className="font-normal">{`(${memberEmail})`}</span>
@@ -114,12 +106,24 @@ const MemberItem = ({
               )}
             </div>
             <div className="flex space-x-2">
-              {!isNew && currentUserRole === 'ADMIN' && currentUserId !== memberId && (
-                <button
+              {isNew && (
+                <Button
                   type="button"
+                  variant={'outline'}
+                  disabled={!canInvite}
+                  onClick={() => inviteUser(memberEmail!, memberRole!)}
+                  className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 hidden text-xs font-bold sm:block"
+                >
+                  {t_trees('tree-member-invite')}
+                </Button>
+              )}
+              {!isNew && currentUserRole === 'ADMIN' && currentUserId !== memberId && (
+                <Button
+                  type="button"
+                  variant={'outline'}
                   disabled={!canUpdate || loadingUpdate}
                   onClick={() => updateUser(memberId!, memberRole!)}
-                  className="bg-ocean-300 disabled:bg-ocean-100 hover:bg-ocean-400 hidden h-8 rounded px-2 py-1 text-white transition-colors duration-300 sm:block"
+                  className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 hidden text-xs font-bold sm:block"
                 >
                   <div className="flex items-center justify-center space-x-3">
                     {loadingUpdate && <LoaderIcon size={16} className="animate-spin" />}
@@ -127,19 +131,19 @@ const MemberItem = ({
                       {loadingUpdate ? t_common('updating') : t_common('update')}
                     </span>
                   </div>
-                </button>
+                </Button>
               )}
               {currentUserRole === 'ADMIN' && currentUserId !== memberId && (
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     if (memberId) (setCurrMember({ index, memberId }), setDialogOpen(true))
                     else remove(index)
                   }}
-                  className="bg-ocean-400 hover:bg-ocean-500 hidden h-8 rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:block"
+                  className="bg-ocean-300 hover:bg-ocean-400 text-pale-ocean hidden text-xs font-bold sm:block"
                 >
                   {t_trees('tree-member-remove')}
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -167,21 +171,23 @@ const MemberItem = ({
           </div>
           <div className="flex-col">
             {isNew && (
-              <button
+              <Button
                 type="button"
-                disabled={memberEmail === ''}
+                variant={'outline'}
+                disabled={!canInvite}
                 onClick={() => inviteUser(memberEmail!, memberRole!)}
-                className="bg-ocean-200 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-xs font-bold text-white transition-colors duration-300 sm:hidden sm:w-auto"
+                className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 visible w-full text-xs font-bold sm:hidden sm:w-auto"
               >
                 {t_trees('tree-member-invite')}
-              </button>
+              </Button>
             )}
             {!isNew && currentUserRole === 'ADMIN' && currentUserId != memberId && (
-              <button
+              <Button
                 type="button"
+                variant={'outline'}
                 disabled={!canUpdate || loadingUpdate}
                 onClick={() => updateUser(memberId!, memberRole!)}
-                className="bg-ocean-200 disabled:bg-ocean-100 hover:bg-ocean-300 visible h-9 w-full rounded px-2 py-1 text-white transition-colors duration-300 sm:hidden sm:w-auto"
+                className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 visible w-full text-xs font-bold sm:hidden sm:w-auto"
               >
                 <div className="flex items-center justify-center space-x-3">
                   {loadingUpdate && <LoaderIcon size={16} className="animate-spin" />}
@@ -189,10 +195,10 @@ const MemberItem = ({
                     {loadingUpdate ? t_common('updating') : t_common('update')}
                   </span>
                 </div>
-              </button>
+              </Button>
             )}
             {currentUserRole === 'ADMIN' && currentUserId != memberId && (
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   if (memberId) {
@@ -202,10 +208,10 @@ const MemberItem = ({
                     remove(index)
                   }
                 }}
-                className="text-ocean-400 visible h-9 rounded px-2 py-1 text-xs font-bold underline decoration-dotted underline-offset-4 sm:hidden"
+                className="text-ocean-400 visible bg-transparent text-xs font-bold underline decoration-dotted underline-offset-4 shadow-none! sm:hidden"
               >
                 {t_trees('tree-member-remove')}
-              </button>
+              </Button>
             )}
           </div>
         </FormItem>
@@ -239,9 +245,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     defaultValues: {
       name: currentTree.name,
       type: currentTree.type as TreeType,
-      compact: currentTree.compact,
-      nodeImage: currentTree.nodeImage,
-      nodeGallery: currentTree.nodeGallery,
+      newsletter: currentTree.newsletter,
       members: currentTree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
@@ -254,9 +258,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'members' })
 
   const treeName = form.watch('name')
-  const compact = form.watch('compact')
-  const nodeImage = form.watch('nodeImage')
-  const nodeGallery = form.watch('nodeGallery')
+  const newsletter = form.watch('newsletter')
 
   /**
    * Handle async operations with loading state
@@ -339,9 +341,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
     form.reset({
       name: tree.name,
       type: tree.type,
-      compact: tree.compact,
-      nodeImage: tree.nodeImage,
-      nodeGallery: tree.nodeGallery,
+      newsletter: tree.newsletter,
       members: tree.accesses?.map((a) => ({
         userId: a.userId,
         name: a.user.name,
@@ -381,7 +381,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             </Tabs.List>
             <Tabs.Content value="general" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('general-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 p-3 text-left">
                 <FormField
                   control={form.control}
                   name="name"
@@ -433,7 +433,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                 <Button
                   type="submit"
                   disabled={loading || treeName === currentTree.name}
-                  className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
+                  className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
@@ -446,63 +446,21 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             </Tabs.Content>
             <Tabs.Content value="settings" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('settings-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded-lg border-2 bg-white p-3">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean flex-col items-start rounded-xl border-2 p-3">
                 <FormField
                   control={form.control}
-                  name="compact"
+                  name="newsletter"
                   render={() => (
                     <FormItem>
-                      <FormLabel>{t_trees('tree-node-compact')}</FormLabel>
+                      <FormLabel>{t_trees('tree-newsletter-weekly')}</FormLabel>
                       <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_trees('tree-node-compact-info')}
-                      </FormDescription>
-                      <FormControl>
-                        <StyledSelector
-                          types={['Compact', 'Loose'] as const}
-                          value={form.getValues('compact') ? 'Compact' : 'Loose'}
-                          setValue={(value) => form.setValue('compact', value === 'Compact')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
-                <FormField
-                  control={form.control}
-                  name="nodeImage"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t_trees('tree-node-image')}</FormLabel>
-                      <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_trees('tree-node-image-info')}
-                      </FormDescription>
-                      <FormControl>
-                        <StyledSelector
-                          types={['Filled', 'Empty'] as const}
-                          value={form.getValues('nodeImage') ? 'Filled' : 'Empty'}
-                          setValue={(value) => form.setValue('nodeImage', value === 'Filled')}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
-                <FormField
-                  control={form.control}
-                  name="nodeGallery"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t_trees('tree-node-gallery')}</FormLabel>
-                      <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_trees('tree-node-gallery-info')}
+                        {t_trees('tree-newsletter-weekly-info')}
                       </FormDescription>
                       <FormControl>
                         <StyledSelector
                           types={['Enabled', 'Disabled'] as const}
-                          value={form.getValues('nodeGallery') ? 'Enabled' : 'Disabled'}
-                          setValue={(value) => form.setValue('nodeGallery', value === 'Enabled')}
+                          value={form.getValues('newsletter') ? 'Enabled' : 'Disabled'}
+                          setValue={(value) => form.setValue('newsletter', value === 'Enabled')}
                         />
                       </FormControl>
                       <FormMessage />
@@ -513,13 +471,8 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={
-                    loading ||
-                    (compact == currentTree.compact &&
-                      nodeImage === currentTree.nodeImage &&
-                      nodeGallery === currentTree.nodeGallery)
-                  }
-                  className="bg-ocean-200 hover:bg-ocean-300 rounded-lg p-2 px-5 text-white shadow transition-colors duration-300"
+                  disabled={loading || newsletter === currentTree.newsletter}
+                  className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
                     {loading && <LoaderIcon size={16} className="animate-spin" />}
@@ -532,7 +485,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             </Tabs.Content>
             <Tabs.Content value="members" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm flex-col items-start rounded border-2 bg-white p-3">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean flex-col items-start rounded-xl border-2 p-3">
                 <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
                   {t_trees('tree-members-info')}
@@ -555,22 +508,32 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                     setCurrMember={setCurrMember}
                     setDialogOpen={setDialogOpen}
                     remove={remove}
+                    t_trees={t_trees}
+                    t_common={t_common}
+                    t_errors={t_errors}
                   />
                 ))}
               </div>
               {currentUserRole === 'ADMIN' && (
                 <div className="my-5">
-                  <button
+                  <Button
                     type="button"
                     disabled={loading}
-                    onClick={() => append({ userId: '', name: '', email: '', role: 'VIEWER' })}
-                    className="bg-ocean-200 hover:bg-ocean-300 rounded p-2 px-5 text-white shadow transition-colors duration-300"
+                    className="hover:bg-ocean-300 text-pale-ocean"
+                    onClick={() =>
+                      append({
+                        userId: '',
+                        name: '',
+                        email: '',
+                        role: 'VIEWER',
+                      })
+                    }
                   >
                     <div className="flex items-center space-x-3">
                       {loading && <LoaderIcon size={16} className="animate-spin" />}
                       <span className="text-sm font-bold">{t_trees('tree-member-add')}</span>
                     </div>
-                  </button>
+                  </Button>
                 </div>
               )}
             </Tabs.Content>

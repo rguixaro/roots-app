@@ -69,7 +69,19 @@ export const DeleteAccount = (props: DeleteAccountProps) => {
         </DialogHeader>
         <form onSubmit={handleDeleteAccount}>
           <div className="flex flex-col space-y-3">
-            <p className="text-sm">
+            <div className="bg-ocean-50 border-ocean-200 rounded-lg border p-3">
+              <ul className="text-ocean-400 space-y-2 text-sm">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>{t_profile('account-delete-trees-solo')}</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>{t_profile('account-delete-trees-shared')}</span>
+                </li>
+              </ul>
+            </div>
+            <p className="text-ocean-400 text-sm">
               {t_profile('account-delete-prompt')}{' '}
               <span className="font-semibold">{props.email}</span>
             </p>

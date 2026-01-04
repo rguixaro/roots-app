@@ -45,7 +45,7 @@ export default auth(async (req) => {
     return NextResponse.redirect(new URL(`/auth?callbackUrl=${callbackUrl}`, origin))
   }
 
-  /// CloudFront cookies for authenticated users
+  /// CloudFront Cookies for authenticated users
   if (isLoggedIn && !isSettingsRoute) {
     const hasCloudFrontCookies =
       req.cookies.has('CloudFront-Key-Pair-Id') &&
@@ -53,8 +53,12 @@ export default auth(async (req) => {
       req.cookies.has('CloudFront-Signature')
 
     if (!hasCloudFrontCookies) {
-      const cookiesUrl = `${origin}/api/cookies?return=${encodeURIComponent(href)}`
-      return NextResponse.redirect(cookiesUrl)
+      const response = NextResponse.next()
+
+      const { setCloudFrontCookies } = await import('@/lib/cloudfront')
+      await setCloudFrontCookies(response)
+
+      return response
     }
   }
 

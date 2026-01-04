@@ -1,5 +1,6 @@
 export const ocean = {
   0: '#f7fdfe',
+  50: '#e1ecee',
   100: '#a8c7cb',
   200: '#78a9af',
   300: '#4c8690',

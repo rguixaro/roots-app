@@ -18,15 +18,15 @@ interface IconRefProps {
 export type ButtonIconProps = IconProps | IconRefProps
 
 const buttonVariants = cva(
-  'inline-flex items-center space-x-3 justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-neutral-500',
+  'inline-flex items-center space-x-3 justify-center whitespace-nowrap cursor-pointer rounded-lg text-sm font-medium focus-visible:outline-none focus-visible:ring-1 disabled:cursor-none disabled:pointer-events-none disabled:opacity-50 focus-visible:ring-neutral-500 transition-colors duration-300',
   {
     variants: {
       variant: {
-        default: 'bg-ocean-200 text-neutral-50 shadow hover:bg-ocean-200/90',
-        destructive: 'bg-red-500 text-neutral-50 shadow-sm hover:bg-red-500/90',
+        default: 'bg-ocean-200 text-neutral-50 hover:bg-ocean-200/90 shadow-center-sm',
+        destructive: 'bg-red-500 text-neutral-50 shadow-center-sm hover:bg-red-500/90',
         outline:
-          'bg-ocean-200/15 border-2 border-ocean-200/15 shadow-sm hover:bg-ocean-200/60 text-ocean-400 shadow',
-        ghost: 'hover:bg-ocean-200/15 hover:text-ocean-400',
+          'bg-ocean-200/15 border-2 border-ocean-200/15 shadow-center-sm hover:bg-ocean-200/60 text-ocean-400 shadow-center-sm',
+        ghost: 'bg-transparent hover:bg-ocean-200/15 hover:text-ocean-400 shadow-none',
       },
       size: {
         default: 'h-9 px-4 py-2',
@@ -43,8 +43,7 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
@@ -54,13 +53,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps & ButtonIconProps
     return (
       <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
         {Icon && iconPlacement === 'left' && (
-          <div className="w-0 translate-x-[0%] pr-0 opacity-0 transition-all duration-200 group-hover:w-4 group-hover:translate-x-100 group-hover:pr-1 group-hover:opacity-100">
+          <div className="w-0 translate-x-[0%] pr-0 opacity-0 transition-all duration-300 group-hover:w-4 group-hover:translate-x-100 group-hover:pr-1 group-hover:opacity-100">
             <Icon size={18} />
           </div>
         )}
         <Slottable>{props.children}</Slottable>
         {Icon && iconPlacement === 'right' && (
-          <div className="w-0 translate-x-full pl-0 opacity-0 transition-all duration-200 group-hover:w-4 group-hover:translate-x-0 group-hover:pl-1 group-hover:opacity-100">
+          <div className="w-0 translate-x-full pl-0 opacity-0 transition-all duration-300 group-hover:w-4 group-hover:translate-x-0 group-hover:pl-1 group-hover:opacity-100">
             <Icon size={18} />
           </div>
         )}

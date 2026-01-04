@@ -32,6 +32,12 @@ enum TreeNodeGender {
   UNSPECIFIED
 }
 
+enum Language {
+  CA
+  ES
+  EN
+}
+
 enum ActivityAction {
   NODE_CREATED
   NODE_UPDATED
@@ -52,14 +58,13 @@ enum ActivityAction {
 model Tree {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  slug        String
-  name        String
-  type        TreeType
-  compact     Boolean  @default(false)
-  nodeImage   Boolean  @default(false)
-  nodeGallery Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slug      String
+  name      String
+  type      TreeType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  newsletter Boolean @default(true)
 
   nodes       TreeNode[]
   accesses    TreeAccess[]
@@ -160,14 +165,15 @@ model Session {
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   image         String
   name          String
-  email         String    @unique
+  email         String       @unique
   emailVerified DateTime?
   password      String?
-  isPrivate     Boolean   @default(true)
+  newsletter    Boolean      @default(true)
+  language      Language @default(EN)
 
   accounts Account[]
   sessions Session[]

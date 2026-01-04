@@ -33,6 +33,10 @@ export const env = createEnv({
     AMAZON_S3_BUCKET_NAME: z.string(),
     AMAZON_CLOUDFRONT_KEY_PAIR_ID: z.string(),
     AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME: z.string(),
+    AMAZON_SES_FROM_EMAIL: z.string().email(),
+
+    /// Cron
+    CRON_SECRET: z.string().optional(),
 
     /// Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: z.string().url(),
@@ -66,6 +70,10 @@ export const env = createEnv({
     AMAZON_CLOUDFRONT_KEY_PAIR_ID: process.env.AMAZON_CLOUDFRONT_KEY_PAIR_ID,
     AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME:
       process.env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
+    AMAZON_SES_FROM_EMAIL: process.env.AMAZON_SES_FROM_EMAIL,
+
+    /// Cron
+    CRON_SECRET: process.env.CRON_SECRET,
 
     /// Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN,

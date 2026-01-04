@@ -37,9 +37,7 @@ export const CreateTreeSchema = z.object({
     .min(3, { message: 'tree-name-too-short' })
     .max(24, { message: 'tree-name-too-long' }),
   type: z.enum(TreeType, { required_error: 'tree-type-required' }),
-  compact: z.boolean({ required_error: 'tree-option-required' }),
-  nodeImage: z.boolean({ required_error: 'tree-option-required' }),
-  nodeGallery: z.boolean({ required_error: 'tree-option-required' }),
+  newsletter: z.boolean().optional(),
   members: z
     .array(
       z.object({
@@ -59,9 +57,6 @@ export const TreeSchema = z.object({
   slug: z.string(),
   name: z.string(),
   type: z.enum(TreeType),
-  compact: z.boolean().default(false),
-  nodeImage: z.boolean().default(false),
-  nodeGallery: z.boolean().default(false),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -89,7 +84,8 @@ export const UpdateProfileSchema = z.object({
     .min(1, { message: 'username-required' })
     .max(40, { message: 'username-too-long' }),
   email: z.string().email({ message: 'email-invalid' }),
-  isPrivate: z.boolean().optional(),
+  newsletter: z.boolean().optional(),
+  language: z.enum(['CA', 'ES', 'EN']),
 })
 
 export type UpdateProfileInput = z.TypeOf<typeof UpdateProfileSchema>

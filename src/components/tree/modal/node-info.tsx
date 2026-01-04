@@ -30,8 +30,6 @@ interface NodeInfoModalProps {
   showModal: boolean
   treeType: TreeType
   node: TreeNode | null
-  withPicture?: boolean
-  withGallery?: boolean
   form: UseFormReturn<z.infer<typeof UpdateTreeNodeSchema>>
   onUpdate: (values: z.infer<typeof UpdateTreeNodeSchema>) => Promise<void>
   onClose: () => void
@@ -43,8 +41,6 @@ export function NodeInfoModal({
   showModal,
   treeType,
   node,
-  withPicture,
-  withGallery,
   form,
   onUpdate,
   onClose,
@@ -64,7 +60,6 @@ export function NodeInfoModal({
 
   const pictureOps = usePictureOperations({
     showModal,
-    withGallery,
     node,
     t_errors,
     t_toasts,
@@ -139,7 +134,7 @@ export function NodeInfoModal({
             showModal
               ? 'translate-y-0 sm:translate-x-0 sm:translate-y-0'
               : 'translate-y-full sm:-translate-x-full sm:translate-y-0',
-            !showModal && withGallery && 'sm:delay-400'
+            !showModal && 'sm:delay-400'
           )}
           style={{
             height: isMobile ? `${modalHeight}vh` : '100vh',
@@ -161,8 +156,8 @@ export function NodeInfoModal({
             >
               <div
                 className={cn(
-                  'bg-pale-ocean border-ocean-200 flex h-full flex-col',
-                  'shadow-2l overflow-hidden sm:flex sm:flex-row',
+                  'bg-ocean-50 border-ocean-200 flex h-full flex-col',
+                  'shadow-center-sm overflow-hidden sm:flex sm:flex-row',
                   isMobile && 'border-t-8'
                 )}
               >
@@ -190,25 +185,14 @@ export function NodeInfoModal({
                 >
                   <div className="my-4 flex flex-col items-start gap-x-3 gap-y-2">
                     <div className="flex w-full items-center space-x-3">
-                      {withPicture && (
-                        <Picture
-                          fileKey={pictureOps.profilePicture?.fileKey}
-                          classNameContainer="h-24 w-24 border-4 border-ocean-300"
-                          iconSize={48}
-                        />
-                      )}
+                      <Picture
+                        fileKey={pictureOps.profilePicture?.fileKey}
+                        classNameContainer="h-24 w-24 border-4 border-ocean-300"
+                        iconSize={48}
+                      />
                       <div className="flex flex-1 items-center">
                         <TypographyH4>{displayNode?.fullName}</TypographyH4>
                       </div>
-                      {!withGallery && (
-                        <button
-                          onClick={onClose}
-                          type="button"
-                          className="hover:bg-ocean-200/15 self-start rounded p-1 transition-colors duration-300"
-                        >
-                          <X size={24} className="text-ocean-200" />
-                        </button>
-                      )}
                     </div>
                     <p>{t_trees('node-info-description')} </p>
                   </div>
@@ -221,7 +205,6 @@ export function NodeInfoModal({
                     </Tabs.Trigger>
                     <Tabs.Trigger
                       value="gallery"
-                      disabled={!withGallery}
                       className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
                     >
                       {t_trees('node-gallery')}
@@ -265,16 +248,12 @@ export function NodeInfoModal({
                     </Tabs.Content>
                   )}
                 </div>
-                {!isMobile && (
-                  <div
-                    className={cn('bg-ocean-200 w-2 self-center', withGallery ? 'h-3/5' : 'h-full')}
-                  />
-                )}
+                {!isMobile && <div className={cn('bg-ocean-200 h-3/5 w-2 self-center')} />}
               </div>
             </form>
           </Form>
         </div>
-        {!isMobile && withGallery && (
+        {!isMobile && (
           <div
             className={cn(
               'text-pale-ocean fixed inset-x-0 bottom-0 z-40 transition-transform duration-400 ease-linear',

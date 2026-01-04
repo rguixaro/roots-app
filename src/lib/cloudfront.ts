@@ -1,26 +1,17 @@
 import { NextResponse } from 'next/server'
 
 import { getSignedCookies } from '@aws-sdk/cloudfront-signer'
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager'
 
 import { env } from '@/env.mjs'
 
-const secrets = new SecretsManagerClient({ region: env.AMAZON_REGION })
+import { getPrivateKey } from './secret-manager'
 
-async function getPrivateKey() {
-  const response = await secrets.send(
-    new GetSecretValueCommand({
-      SecretId: env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
-    })
-  )
-  return response.SecretString!
-}
-
-export async function GET(req: Request) {
-  const url = new URL(req.url)
-  const returnTo = url.searchParams.get('return') ?? '/'
-  const redirectUrl = new URL(returnTo)
-
+/**
+ * Generate CloudFront signed cookies and apply them to a response
+ * @param response - NextResponse object to apply cookies to
+ * @returns {Promise<{ expires: number }>} Expiration timestamp
+ */
+export async function setCloudFrontCookies(response: NextResponse): Promise<{ expires: number }> {
   const privateKey = await getPrivateKey()
   const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 6
 
@@ -39,8 +30,6 @@ export async function GET(req: Request) {
     policy: JSON.stringify(policy),
   })
 
-  const response = NextResponse.redirect(redirectUrl)
-
   Object.entries(cookies).forEach(([name, value]) => {
     response.cookies.set({
       name,
@@ -54,5 +43,5 @@ export async function GET(req: Request) {
     })
   })
 
-  return response
+  return { expires }
 }

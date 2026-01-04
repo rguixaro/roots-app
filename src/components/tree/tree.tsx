@@ -51,16 +51,8 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
     enableProgressiveDisclosure: true,
   })
 
-  /**
-   * Dismiss any open modal
-   */
-  const dismissModal = () => {
-    treeState.setDisplayCreate(false)
-    treeState.setDisplayInfo(false)
-  }
-
-  const nodeCreateForm = useNodeCreateForm(tree, dismissModal)
-  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, dismissModal)
+  const nodeCreateForm = useNodeCreateForm(tree, treeState.dismissModal)
+  const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, treeState.dismissModal)
 
   const edgeOperations = useEdgeOperations(tree, edges, treeState.treeEdges, treeState.setTreeEdges)
   const nodeOperations = useNodeOperations(tree, nodes)
@@ -93,8 +85,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         showModal={treeState.displayInfo}
         treeType={tree.type}
         node={treeState.selectedNode}
-        withPicture={tree.nodeImage}
-        withGallery={tree.nodeGallery}
         form={nodeUpdateForm.form}
         onUpdate={nodeUpdateForm.onSubmit}
         onClose={treeState.dismissModal}
@@ -121,11 +111,12 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         onEdgeClick={treeState.onEdgeClick}
         onEdgeContextMenu={treeState.onEdgeContextMenu}
         onPaneClick={treeState.collapseAllNodes}
-        connectionLineType={ConnectionLineType.SimpleBezier}
+        connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
         panOnDrag
         zoomOnScroll
         deleteKeyCode={null}
+        nodesDraggable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}

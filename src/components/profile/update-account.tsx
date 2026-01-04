@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
+import { Language } from '@prisma/client'
+
 import { updateProfile } from '@/server/actions'
 import { UpdateProfileSchema } from '@/server/schemas'
 
@@ -33,7 +35,8 @@ interface UpdateAccountProps {
   id: string
   name: string
   email: string
-  isPrivate: boolean
+  newsletter: boolean
+  language: Language
 }
 
 export const UpdateAccount = (props: UpdateAccountProps) => {
@@ -49,13 +52,15 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
     resolver: zodResolver(UpdateProfileSchema),
     defaultValues: {
       name: props.name,
+      newsletter: props.newsletter,
+      language: props.language,
       email: props.email,
-      isPrivate: props.isPrivate,
     },
   })
 
   const name = hookForm.watch('name')
-  const isPrivate = hookForm.watch('isPrivate')
+  const newsletter = hookForm.watch('newsletter')
+  const language = hookForm.watch('language')
 
   /**
    * Handle form submission to update profile.
@@ -97,7 +102,7 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
             </Tabs.List>
             <Tabs.Content value="profile">
               <TypographyH5 className="mt-2">{t_profile('profile-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 p-3 text-left">
                 <FormField
                   control={hookForm.control}
                   name="name"
@@ -122,18 +127,42 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                 <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
                 <FormField
                   control={hookForm.control}
-                  name="isPrivate"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>{t_profile('private')}</FormLabel>
-                      <FormDescription className="mb-2 text-sm opacity-70">
-                        {t_profile('private-description')}
+                  name="newsletter"
+                  render={(_) => (
+                    <FormItem className="w-fit">
+                      <FormLabel className="font-bold">{t_profile('newsletter')}</FormLabel>
+                      <FormDescription className="text-sm opacity-70">
+                        {t_profile('newsletter-description')}
                       </FormDescription>
-                      <FormControl>
+                      <FormControl className="mb-5 flex w-max">
                         <StyledSelector
-                          types={['Public', 'Private'] as const}
-                          value={hookForm.getValues('isPrivate') ? 'Private' : 'Public'}
-                          setValue={(value) => hookForm.setValue('isPrivate', value === 'Private')}
+                          types={['Enabled', 'Disabled'] as const}
+                          value={hookForm.getValues('newsletter') ? 'Enabled' : 'Disabled'}
+                          setValue={(value) => hookForm.setValue('newsletter', value === 'Enabled')}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <FormDescription className="opacity-70">
+                        {t_profile('newsletter-description-alert')}
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
+                <FormField
+                  control={hookForm.control}
+                  name="language"
+                  render={(_) => (
+                    <FormItem className="w-fit">
+                      <FormLabel className="font-bold">{t_profile('language')}</FormLabel>
+                      <FormDescription className="text-sm opacity-70">
+                        {t_profile('language-description')}
+                      </FormDescription>
+                      <FormControl className="mb-5 flex w-max">
+                        <StyledSelector
+                          types={['CA', 'ES', 'EN'] as const}
+                          value={hookForm.getValues('language')}
+                          setValue={(value) => hookForm.setValue('language', value as Language)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -144,7 +173,12 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
               <div className="my-5 flex w-full justify-between gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || (name === props.name && isPrivate === props.isPrivate)}
+                  disabled={
+                    loading ||
+                    (name === props.name &&
+                      newsletter === props.newsletter &&
+                      language === props.language)
+                  }
                 >
                   {loading ? (
                     <LoaderIcon size={16} className="animate-spin" />
@@ -167,7 +201,7 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
             </Tabs.Content>
             <Tabs.Content value="account">
               <TypographyH5 className="mt-2">{t_profile('account-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm mb-2 flex flex-col items-start rounded-lg border-2 bg-white p-3 text-left">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex flex-col items-start rounded-xl border-2 p-3 text-left">
                 <FormField
                   name="email"
                   render={({ field }) => (

@@ -88,10 +88,11 @@ export const Picture: React.FC<PictureProps> = ({
         <div
           className={cn(
             'bg-ocean-50 absolute inset-0 flex items-center justify-center',
+            'stroke-ocean-400 group-hover:stroke-ocean-50',
             classNamePicture
           )}
         >
-          <ImageIcon className="stroke-ocean-400 group-hover:stroke-ocean-50" size={iconSize} />
+          <ImageIcon size={iconSize} />
         </div>
       )}
       {src && !hasError && (

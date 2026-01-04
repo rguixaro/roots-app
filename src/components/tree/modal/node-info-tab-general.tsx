@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { LoaderIcon } from 'lucide-react'
 import { UseFormReturn } from 'react-hook-form'
 import { type z } from 'zod'
@@ -69,7 +68,7 @@ export function NodeInfoTabGeneral({
   return (
     <>
       {!isMobile && <TypographyH5>{t_trees('node-general-info')}</TypographyH5>}
-      <div className="border-ocean-200/50 shadow-center-sm mb-2 flex-col items-start rounded-lg border-2 bg-white px-3 py-2 text-left">
+      <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 px-3 py-2 text-left">
         <FormField
           control={form.control}
           name="fullName"

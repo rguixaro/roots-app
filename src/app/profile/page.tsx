@@ -23,6 +23,7 @@ export default async function ProfilePage() {
         name={session.user.name!}
         email={session.user.email!}
         newsletter={session.user.newsletter!}
+        language={session.user.language!}
       />
     </div>
   )

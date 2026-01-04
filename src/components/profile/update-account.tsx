@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 import type { z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
+import { Language } from '@prisma/client'
+
 import { updateProfile } from '@/server/actions'
 import { UpdateProfileSchema } from '@/server/schemas'
 
@@ -34,6 +36,7 @@ interface UpdateAccountProps {
   name: string
   email: string
   newsletter: boolean
+  language: Language
 }
 
 export const UpdateAccount = (props: UpdateAccountProps) => {
@@ -47,11 +50,17 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
 
   const hookForm = useForm<z.infer<typeof UpdateProfileSchema>>({
     resolver: zodResolver(UpdateProfileSchema),
-    defaultValues: { name: props.name, newsletter: props.newsletter, email: props.email },
+    defaultValues: {
+      name: props.name,
+      newsletter: props.newsletter,
+      language: props.language,
+      email: props.email,
+    },
   })
 
   const name = hookForm.watch('name')
   const newsletter = hookForm.watch('newsletter')
+  const language = hookForm.watch('language')
 
   /**
    * Handle form submission to update profile.
@@ -139,11 +148,37 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
                     </FormItem>
                   )}
                 />
+                <div className="bg-ocean-200/15 mx-auto my-3 h-1 w-full rounded" />
+                <FormField
+                  control={hookForm.control}
+                  name="language"
+                  render={(_) => (
+                    <FormItem className="w-fit">
+                      <FormLabel className="font-bold">{t_profile('language')}</FormLabel>
+                      <FormDescription className="text-sm opacity-70">
+                        {t_profile('language-description')}
+                      </FormDescription>
+                      <FormControl className="mb-5 flex w-max">
+                        <StyledSelector
+                          types={['CA', 'ES', 'EN'] as const}
+                          value={hookForm.getValues('language')}
+                          setValue={(value) => hookForm.setValue('language', value as Language)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="my-5 flex w-full justify-between gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || (name === props.name && newsletter === props.newsletter)}
+                  disabled={
+                    loading ||
+                    (name === props.name &&
+                      newsletter === props.newsletter &&
+                      language === props.language)
+                  }
                 >
                   {loading ? (
                     <LoaderIcon size={16} className="animate-spin" />

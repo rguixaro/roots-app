@@ -4,6 +4,8 @@ import { db } from '@/server/db'
 
 import { sendWeeklyNewsletter } from '@/lib/email'
 
+import { languageToLocale } from '@/utils/language'
+
 interface NewsletterResult {
   success: boolean
   emailsSent: number
@@ -115,6 +117,7 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             })),
             events,
             totalMembers: allNodes.length,
+            locale: access.user.language ? languageToLocale(access.user.language) : 'en',
           })
 
           if (result) {

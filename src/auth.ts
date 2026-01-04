@@ -11,6 +11,8 @@ import { getUserById, getAccountByUserId } from '@/server/utils'
 
 import { sendWelcomeEmail } from '@/lib/email'
 
+import { languageToLocale } from '@/utils/language'
+
 import { env } from './env.mjs'
 
 const { AUTH_SECRET } = env
@@ -42,6 +44,7 @@ export const {
           sendWelcomeEmail({
             recipientEmail: user.email,
             recipientName: user.name || user.email,
+            locale: existingUser.language ? languageToLocale(existingUser.language) : 'en',
           }).catch((_) => {})
         }
       }

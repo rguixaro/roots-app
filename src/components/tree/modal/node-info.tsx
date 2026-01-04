@@ -156,8 +156,8 @@ export function NodeInfoModal({
             >
               <div
                 className={cn(
-                  'bg-pale-ocean border-ocean-200 flex h-full flex-col',
-                  'shadow-2l overflow-hidden sm:flex sm:flex-row',
+                  'bg-ocean-50 border-ocean-200 flex h-full flex-col',
+                  'shadow-center-sm overflow-hidden sm:flex sm:flex-row',
                   isMobile && 'border-t-8'
                 )}
               >

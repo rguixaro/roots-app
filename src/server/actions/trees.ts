@@ -14,6 +14,8 @@ import type {
 } from '@/server/schemas'
 import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
 
+import { sendTreeInvitationEmail } from '@/lib/email'
+
 import { Tree, TreeNode, TimelineEvent } from '@/types'
 
 interface TreeResult {
@@ -137,6 +139,18 @@ export const inviteMember = async (
       where: { id: treeId },
       include: { accesses: { include: { user: true } } },
     })
+
+    const inviter = await db.user.findUnique({ where: { id: inviterId } })
+    if (tree && inviter) {
+      await sendTreeInvitationEmail({
+        recipientEmail: user.email!,
+        recipientName: user.name || user.email!,
+        inviterName: inviter.name || inviter.email!,
+        treeName: tree.name,
+        treeSlug: tree.slug,
+        role: role,
+      }).catch((_) => {})
+    }
 
     revalidatePath('/')
     revalidatePath('/trees')

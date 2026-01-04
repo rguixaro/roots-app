@@ -2,6 +2,8 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import type { Adapter } from 'next-auth/adapters'
 import NextAuth from 'next-auth'
 
+import { Language } from '@prisma/client'
+
 import AuthConfig from '@/auth.config'
 
 import { db } from '@/server/db'
@@ -54,6 +56,7 @@ export const {
         session.user.email = token.email!
         session.user.isOAuth = token.isOAuth as boolean
         session.user.newsletter = token.newsletter as boolean
+        session.user.language = token.language as Language
       }
 
       return session
@@ -69,6 +72,7 @@ export const {
       token.name = existingUser.name
       token.email = existingUser.email
       token.newsletter = existingUser.newsletter
+      token.language = existingUser.language
 
       return token
     },

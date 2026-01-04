@@ -85,6 +85,7 @@ export const UpdateProfileSchema = z.object({
     .max(40, { message: 'username-too-long' }),
   email: z.string().email({ message: 'email-invalid' }),
   newsletter: z.boolean().optional(),
+  language: z.enum(['CA', 'ES', 'EN']),
 })
 
 export type UpdateProfileInput = z.TypeOf<typeof UpdateProfileSchema>

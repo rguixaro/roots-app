@@ -133,8 +133,8 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const birthYear = birthDate ? birthDate.getFullYear() : null
-  const deathYear = deathDate ? deathDate.getFullYear() : null
+  const birthYear = birthDate ? birthDate.getUTCFullYear() : null
+  const deathYear = deathDate ? deathDate.getUTCFullYear() : null
 
   /**
    * Utility booleans to determine which handles have connections
@@ -308,9 +308,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         id="right"
         position={Position.Right}
         className={cn(
-          'pointer-events-auto border-0! transition-all',
-          'right-0! translate-x-1/2! opacity-0!',
-          isExpanded || isHighlighted || isHovered ? 'h-12! w-12!' : 'h-0! w-0!'
+          'relative h-px! w-px! border-0! opacity-0!',
+          'right-0! translate-x-1/2!',
+          isExpanded || isHighlighted || isHovered
+            ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
+            : 'pointer-events-none'
         )}
       />
       <Handle
@@ -318,9 +320,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         id="left"
         position={Position.Left}
         className={cn(
-          'pointer-events-auto border-0! transition-all',
-          'left-0! -translate-x-1/2! opacity-0!',
-          isExpanded || isHighlighted || isHovered ? 'h-12! w-12!' : 'h-0! w-0!'
+          'relative h-px! w-px! border-0! opacity-0!',
+          'left-0! -translate-x-1/2!',
+          isExpanded || isHighlighted || isHovered
+            ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
+            : 'pointer-events-none'
         )}
       />
       <Handle
@@ -328,9 +332,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         id="top"
         position={Position.Top}
         className={cn(
-          'pointer-events-auto border-0! transition-all',
-          'top-0! -translate-y-1/2! opacity-0!',
-          isExpanded || isHighlighted || isHovered ? 'h-12! w-12!' : 'h-0! w-0!'
+          'relative h-px! w-px! border-0! opacity-0!',
+          'top-0! -translate-y-1/2!',
+          isExpanded || isHighlighted || isHovered
+            ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
+            : 'pointer-events-none'
         )}
       />
       <Handle
@@ -338,11 +344,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         id="bottom"
         position={Position.Bottom}
         className={cn(
-          'pointer-events-auto border-0! transition-all',
-          'bottom-0! translate-y-1/2! opacity-0!',
+          'relative h-px! w-px! border-0! opacity-0!',
+          'bottom-0! translate-y-1/2!',
           isHovered && !isExpanded
-            ? 'pointer-events-auto h-12! w-12!'
-            : 'pointer-events-none! h-0! w-0!'
+            ? "pointer-events-auto! before:absolute before:-inset-6 before:bg-transparent before:content-['']"
+            : 'pointer-events-none!'
         )}
       />
       <div className="pointer-events-none absolute inset-0">

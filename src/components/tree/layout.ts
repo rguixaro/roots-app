@@ -138,11 +138,11 @@ export function getVisibleNodesAndEdges(
  * @param direction {'TB' | 'LR'} - Layout direction (Top-Bottom or Left-Right)
  * @returns { nodes: Node[]; edges: Edge[] } - Computed nodes and edges with positions
  */
-export async function computedLayout(
+export function computedLayout(
   nodes: Node[],
   edges: Edge[],
   direction: 'TB' | 'LR' = 'TB'
-): Promise<{ nodes: Node[]; edges: Edge[] }> {
+): { nodes: Node[]; edges: Edge[] } {
   const dagreGraph = new dagre.graphlib.Graph()
 
   dagreGraph.setDefaultEdgeLabel(() => ({}))

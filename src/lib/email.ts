@@ -210,7 +210,8 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
 
     await ses.send(command)
     return true
-  } catch (_) {
+  } catch (error) {
+    console.error('Failed to send welcome email:', error)
     return false
   }
 }
@@ -360,7 +361,8 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
 
     await ses.send(command)
     return true
-  } catch (_) {
+  } catch (error) {
+    console.error('Failed to send invitation email:', error)
     return false
   }
 }
@@ -602,7 +604,8 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
 
     await ses.send(command)
     return true
-  } catch (_) {
+  } catch (error) {
+    console.error('Failed to send newsletter email:', error)
     return false
   }
 }

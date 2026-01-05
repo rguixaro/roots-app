@@ -6,7 +6,11 @@ import { ocean } from '@/styles/colors'
 
 import type { Locale } from '@/utils/language'
 
-const { AMAZON_REGION, AMAZON_SES_FROM_EMAIL } = env
+import enMessages from '../../messages/en.json'
+import esMessages from '../../messages/es.json'
+import caMessages from '../../messages/ca.json'
+
+const { AMAZON_REGION, AMAZON_SES_FROM_EMAIL, AUTH_URL } = env
 
 const ses = new SESClient({ region: AMAZON_REGION })
 
@@ -48,9 +52,13 @@ interface NewsletterEmailParams {
 /**
  * Get translations for email
  */
-async function getEmailTranslations(locale: Locale = 'en') {
-  const messages = (await import(`../../messages/${locale}.json`)).default
-  return messages
+function getEmailTranslations(locale: Locale = 'en') {
+  const messagesMap = {
+    en: enMessages,
+    es: esMessages,
+    ca: caMessages,
+  } as const
+  return messagesMap[locale] || messagesMap.en
 }
 
 /**
@@ -71,9 +79,9 @@ function replacePlaceholders(str: string, values: Record<string, string | number
 export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<boolean> {
   const { recipientEmail, recipientName, locale = 'en' } = params
 
-  const t = await getEmailTranslations(locale)
+  const t = getEmailTranslations(locale)
 
-  const appUrl = env.AUTH_URL
+  const appUrl = AUTH_URL
 
   const htmlBody = `
 <!DOCTYPE html>
@@ -223,13 +231,13 @@ export async function sendTreeInvitationEmail(params: TreeInvitationEmailParams)
     locale = 'en',
   } = params
 
-  const t = await getEmailTranslations(locale)
+  const t = getEmailTranslations(locale)
 
-  const appUrl = env.AUTH_URL
+  const appUrl = AUTH_URL
   const treeUrl = `${appUrl}/trees/${treeSlug}`
 
   const roleTranslations: Record<string, string> = {
-    OWNER: t.emails.invitation['role-owner'],
+    ADMIN: t.emails.invitation['role-admin'],
     EDITOR: t.emails.invitation['role-editor'],
     VIEWER: t.emails.invitation['role-viewer'],
   }
@@ -374,9 +382,9 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
     locale = 'en',
   } = params
 
-  const t = await getEmailTranslations(locale)
+  const t = getEmailTranslations(locale)
 
-  const appUrl = env.AUTH_URL
+  const appUrl = AUTH_URL
   const treeUrl = `${appUrl}/trees/${treeSlug}`
   const profileUrl = `${appUrl}/profile`
 

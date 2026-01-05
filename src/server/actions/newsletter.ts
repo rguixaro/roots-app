@@ -126,6 +126,7 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             errors++
           }
         } catch (error) {
+          console.log('Error sending newsletter to', error)
           errors++
         }
       }

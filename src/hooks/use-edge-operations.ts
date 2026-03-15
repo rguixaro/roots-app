@@ -44,7 +44,7 @@ export function useEdgeOperations(
    */
   const validateConnection = useCallback(
     (conn: Connection, edgeType: TreeEdgeType): string | null => {
-      if (!conn.source || !conn.target) return 'Invalid connection'
+      if (!conn.source || !conn.target) return 'error'
 
       if (conn.source === conn.target) return 'error-cannot-connect-to-self'
 

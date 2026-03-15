@@ -157,11 +157,12 @@ export function usePictureOperations({
    */
   const onPictureTags = useCallback(
     async (picture: Picture) => {
+      if (!node) return
       setSelectedPicture(picture)
       setShowTagsModal(true)
 
       try {
-        const nodes = await getTreeNodes(node?.treeId!)
+        const nodes = await getTreeNodes(node.treeId)
         const taggedNodeIds = picture.tags?.map((tag) => tag.nodeId) || []
         const available = nodes
           .filter((node) => !taggedNodeIds.includes(node.id))
@@ -221,7 +222,11 @@ export function usePictureOperations({
         const tagToRemove = selectedPicture.tags?.find((t) => t.id === tagId)
         if (!tagToRemove) return
 
-        const { error, message } = await deletePictureTag(pictureId, tagToRemove.nodeId, node!.id)
+        const { error, message } = await deletePictureTag(
+          pictureId,
+          tagToRemove.nodeId,
+          node?.id ?? ''
+        )
         if (error) return toast.error(t_errors(message || 'error-tag-remove'))
 
         const updatedTags = selectedPicture.tags?.filter((t) => t.id !== tagId) || []
@@ -277,7 +282,8 @@ export function usePictureOperations({
   const onPictureProfile = useCallback(
     async (pictureId: string) => {
       try {
-        const { error, message } = await setProfilePictureTag(pictureId, node!.id)
+        if (!node) return
+        const { error, message } = await setProfilePictureTag(pictureId, node.id)
         if (error) return toast.error(t_errors(message || 'error'))
 
         const newProfilePicture = pictures.find((pic) => pic.id === pictureId) || null
@@ -302,7 +308,8 @@ export function usePictureOperations({
 
       setLoading(true)
       try {
-        const result = await createPicture(node!.id, file)
+        if (!node) return
+        const result = await createPicture(node.id, file)
 
         if (!result.error && result.picture) {
           setPictures((prev) => [result.picture!, ...prev])

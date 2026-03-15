@@ -444,7 +444,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
                   onClick={() => {}}
                   className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean"
                 >
-                  <Link href={currentTree?.slug!} className="text-sm font-bold">
+                  <Link href={`/trees/${currentTree?.slug ?? ''}`} className="text-sm font-bold">
                     {t_common('finish')}
                   </Link>
                 </Button>

@@ -14,5 +14,8 @@ export async function getPrivateKey(): Promise<string> {
       SecretId: env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,
     })
   )
-  return response.SecretString!
+  if (!response.SecretString) {
+    throw new Error('CloudFront private key secret not found or stored as binary')
+  }
+  return response.SecretString
 }

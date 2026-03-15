@@ -36,7 +36,7 @@ export const env = createEnv({
     AMAZON_SES_FROM_EMAIL: z.string().email(),
 
     /// Cron
-    CRON_SECRET: z.string().optional(),
+    CRON_SECRET: z.string().min(1),
 
     /// Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: z.string().url(),

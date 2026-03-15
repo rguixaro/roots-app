@@ -31,8 +31,8 @@ export interface ActivityLog {
 
   metadata?: JsonValue | null
 
-  createdBy: string
-  user: User
+  createdBy: string | null
+  user: User | null
 
   createdAt: Date
 }

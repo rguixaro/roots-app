@@ -24,7 +24,7 @@ export async function uploadFileToS3(
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
-  const exif = await exifr.parse(buffer)
+  const exif = await exifr.parse(buffer).catch(() => null)
 
   const compressedBuffer = await sharp(buffer)
     .resize(2048, 2048, { fit: 'inside', withoutEnlargement: true })

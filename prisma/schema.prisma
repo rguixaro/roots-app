@@ -223,8 +223,8 @@ model ActivityLog {
 
   metadata Json?
 
-  user      User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  createdBy String @db.ObjectId
+  user      User?   @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  createdBy String? @db.ObjectId
 
   createdAt DateTime @default(now())
 }

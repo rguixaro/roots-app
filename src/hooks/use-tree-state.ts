@@ -170,22 +170,22 @@ export function useTreeState(
       setFocusOnNode(nodeId)
       setShowAllNodes(false)
       setExpandedNodes(new Set())
+      setViewingOptionsShown(true)
 
       setTimeout(() => {
         const node = reactFlowInstance.getNode(nodeId)
         if (node) {
-          setViewingOptionsShown(true)
           reactFlowInstance.setCenter(
             node.position.x + (node.width ?? 0) / 2,
             node.position.y + (node.height ?? 0) / 2,
             { zoom: 1, duration: 300 }
           )
         } else {
-          resetView()
+          setTimeout(() => reactFlowInstance.fitView({ padding: 0.2, duration: 300 }), 100)
         }
-      }, 100)
+      }, 150)
     },
-    [reactFlowInstance, resetView]
+    [reactFlowInstance]
   )
 
   /**
@@ -205,13 +205,28 @@ export function useTreeState(
   const toggleShowAll = useCallback(() => {
     setShowAllNodes((prev) => {
       const next = !prev
+      const previousFocus = focusOnNode
+
       setTimeout(() => {
         if (next) {
-          resetView()
+          if (previousFocus) {
+            const node = reactFlowInstance.getNode(previousFocus)
+            if (node) {
+              reactFlowInstance.setCenter(
+                node.position.x + (node.width ?? 0) / 2,
+                node.position.y + (node.height ?? 0) / 2,
+                { zoom: 1, duration: 300 }
+              )
+            } else {
+              resetView()
+            }
+          } else {
+            resetView()
+          }
           setViewingOptionsShown(false)
           setFocusOnNode(null)
-        } else if (focusOnNode) {
-          const node = reactFlowInstance.getNode(focusOnNode)
+        } else if (previousFocus) {
+          const node = reactFlowInstance.getNode(previousFocus)
           if (node) {
             reactFlowInstance.setCenter(
               node.position.x + (node.width ?? 0) / 2,
@@ -222,10 +237,10 @@ export function useTreeState(
             resetView()
           }
         }
-      }, 100)
+      }, 150)
       return next
     })
-  }, [])
+  }, [focusOnNode, reactFlowInstance, resetView])
 
   /**
    * Collapse all expanded nodes (triggered on pane click)
@@ -286,17 +301,11 @@ export function useTreeState(
     return { nodes: layoutNodes, edges: layoutEdges, spousePairs }
   }, [tree, edges, nodes, onInfo, onExpand])
 
-  const [layoutResult, setLayoutResult] = useState<{ nodes: FlowNode[]; edges: FlowEdge[] }>({
-    nodes: [],
-    edges: [],
-  })
-
-  useEffect(() => {
-    const compute = async () => {
-      const result = await computedLayout(layout.nodes, layout.edges, 'TB')
-      setLayoutResult(result)
-    }
-    compute()
+  /**
+   * Compute layout synchronously to avoid race conditions during updates
+   */
+  const layoutResult = useMemo(() => {
+    return computedLayout(layout.nodes, layout.edges, 'TB')
   }, [layout])
 
   /**

@@ -76,7 +76,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
             <span>{log.createdAt.toISOString().split('T')[0]}</span>
             <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
-              {log.user.name}
+              {log.user?.name ?? t_logs('deleted-user')}
             </span>
           </div>
         </div>
@@ -105,7 +105,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
             <span>{log.createdAt.toISOString().split('T')[0]}</span>
             <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
-              {log.user.name}
+              {log.user?.name ?? t_logs('deleted-user')}
             </span>
           </div>
         </div>

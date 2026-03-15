@@ -85,11 +85,11 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<bool
 
   const htmlBody = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Roots</title>
+  <title>${t.emails.welcome.title}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
@@ -246,11 +246,11 @@ export async function sendTreeInvitationEmail(params: TreeInvitationEmailParams)
 
   const htmlBody = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tree invitation</title>
+  <title>${t.emails.invitation.title}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
     <tr>
@@ -278,7 +278,7 @@ export async function sendTreeInvitationEmail(params: TreeInvitationEmailParams)
               </p>
               
               <p style="margin: 0 0 32px; color: ${ocean[300]}; font-size: 14px; line-height: 1.6;">
-                ${t.emails.invitation['permission-base-1']}${role === 'VIEWER' ? t.emails.invitation['permission-viewer'] : t.emails.invitation['permission-editor']}${t.emails.invitation['permission-base-2']}
+${t.emails.invitation['permission-base-1']}${role === 'VIEWER' ? t.emails.invitation['permission-viewer'] : role === 'ADMIN' ? t.emails.invitation['permission-admin'] : t.emails.invitation['permission-editor']}${t.emails.invitation['permission-base-2']}
               </p>
               
               <!-- CTA Button -->
@@ -392,11 +392,11 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
 
   const htmlBody = `
 <!DOCTYPE html>
-<html lang="en">
+<html lang="${locale}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weekly update - ${treeName}</title>
+  <title>${t.emails.newsletter.title} - ${treeName}</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">

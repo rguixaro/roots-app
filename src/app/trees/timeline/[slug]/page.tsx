@@ -29,7 +29,7 @@ export default async function TreeTimelinePage({ params }: { params: Promise<{ s
     )
   }
 
-  const events = (await getTimelineEvents(slug)) ?? {}
+  const events = (await getTimelineEvents(slug)) ?? []
 
   return <Timeline events={events} slug={slug} />
 }

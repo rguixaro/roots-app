@@ -37,7 +37,7 @@ export function useNodeUpdateForm(tree: Tree, node: TreeNode | null, onSuccess?:
       gender: node.gender ?? '',
       biography: node.biography ?? '',
     })
-  }, [node])
+  }, [node, tree.id, form])
 
   /**
    * Handle form update submission

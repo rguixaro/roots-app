@@ -69,8 +69,12 @@ export const UpdateAccount = (props: UpdateAccountProps) => {
   const onSubmit = async (values: z.infer<typeof UpdateProfileSchema>) => {
     try {
       setLoading(true)
-      await updateProfile(values)
-      toast.success(t_toasts('profile-updated'))
+      const result = await updateProfile(values)
+      if (result.error) {
+        toast.error(t_errors(result.message || 'error'))
+      } else {
+        toast.success(t_toasts('profile-updated'))
+      }
     } catch (error) {
       toast.error(t_errors('error'))
     } finally {

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { ChevronsLeftRightEllipsis } from 'lucide-react'
 
 import { GoBack } from '@/components/layout'
@@ -25,6 +25,7 @@ const GAP_LABEL_WIDTH = 80
 
 export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: string }) {
   const t_trees = useTranslations('trees')
+  const locale = useLocale()
 
   /**
    * Compute timeline items with positions based on event dates
@@ -181,7 +182,7 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                     isAbove ? 'top-8' : 'bottom-4'
                   )}
                 >
-                  {new Date(event.item.date).toLocaleDateString('en-GB')}
+                  {new Date(event.item.date).toLocaleDateString(locale)}
                 </div>
               </AnimatedEvent>
             )

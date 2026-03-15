@@ -8,18 +8,21 @@ import { cn } from '@/utils'
 
 import { HighlightItem } from './card'
 
-function formatRelativeTime(dateString: string): string {
+function formatRelativeTime(
+  dateString: string,
+  t: (key: string, values?: Record<string, number>) => string
+): string {
   const date = new Date(dateString)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'today'
-  if (diffDays === 1) return 'yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
-  return `${Math.floor(diffDays / 365)} years ago`
+  if (diffDays === 0) return t('relative-today')
+  if (diffDays === 1) return t('relative-yesterday')
+  if (diffDays < 7) return t('relative-days-ago', { count: diffDays })
+  if (diffDays < 30) return t('relative-weeks-ago', { count: Math.floor(diffDays / 7) })
+  if (diffDays < 365) return t('relative-months-ago', { count: Math.floor(diffDays / 30) })
+  return t('relative-years-ago', { count: Math.floor(diffDays / 365) })
 }
 
 export async function Highlights() {
@@ -42,7 +45,7 @@ export async function Highlights() {
         title: t_insights('recently-added-title'),
         value: newest.name,
         subtitle: t_insights('recently-added-subtitle', {
-          relativeTime: formatRelativeTime(newest.addedAt),
+          relativeTime: formatRelativeTime(newest.addedAt, t_insights),
         }),
         treeName: newest.treeName,
         treeSlug: newest.treeSlug,

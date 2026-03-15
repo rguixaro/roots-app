@@ -17,7 +17,13 @@ import { Picture, PictureMetadata, PictureTag } from '@/types'
  */
 export const getPictures = async (nodeId: string) => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
+
+    const node = await db.treeNode.findUnique({ where: { id: nodeId } })
+    if (!node) return []
+
+    const hasAccess = await db.treeAccess.findFirst({ where: { treeId: node.treeId, userId } })
+    if (!hasAccess) return []
 
     const pictures = await db.pictureTag.findMany({
       where: { nodeId },
@@ -52,6 +58,7 @@ export const createPicture = async (
 ): Promise<{ error: boolean; picture?: Picture; message?: string }> => {
   let fileKey: string | null = null
 
+  if (!file.type.startsWith('image/')) return { error: true, message: 'error-picture-upload' }
   if (file.size > 50 * 1024 * 1024) return { error: true, message: 'error-picture-too-large' }
 
   try {
@@ -66,32 +73,37 @@ export const createPicture = async (
     let metadata: PictureMetadata
     ;[fileKey, date, metadata] = await uploadFileToS3(file, node.treeId)
 
-    const picture = await db.picture.create({
-      data: { treeId: node.treeId, fileKey, uploadedBy: userId, date, metadata },
-    })
+    const { picture, newTag } = await db.$transaction(async (tx) => {
+      const picture = await tx.picture.create({
+        data: { treeId: node.treeId, fileKey: fileKey!, uploadedBy: userId, date, metadata },
+      })
 
-    const newTag = await db.pictureTag.create({
-      data: { pictureId: picture.id, nodeId: nodeId, isProfile: false },
-    })
+      const newTag = await tx.pictureTag.create({
+        data: { pictureId: picture.id, nodeId: nodeId, isProfile: false },
+        include: { node: { select: { id: true, fullName: true, alias: true } } },
+      })
 
-    await db.activityLog.create({
-      data: {
-        treeId: node.treeId,
-        createdBy: userId,
-        action: 'PICTURE_ADDED',
-        entityId: picture.id,
-        metadata: { fileKey },
-      },
-    })
+      await tx.activityLog.create({
+        data: {
+          treeId: node.treeId,
+          createdBy: userId,
+          action: 'PICTURE_ADDED',
+          entityId: picture.id,
+          metadata: { fileKey },
+        },
+      })
 
-    await db.activityLog.create({
-      data: {
-        treeId: node.treeId,
-        createdBy: userId,
-        action: 'PICTURE_TAG_CREATED',
-        entityId: newTag.id,
-        metadata: { pictureId: picture.id, nodeId: nodeId, nodeName: node.fullName },
-      },
+      await tx.activityLog.create({
+        data: {
+          treeId: node.treeId,
+          createdBy: userId,
+          action: 'PICTURE_TAG_CREATED',
+          entityId: newTag.id,
+          metadata: { pictureId: picture.id, nodeId: nodeId, nodeName: node.fullName },
+        },
+      })
+
+      return { picture, newTag }
     })
 
     revalidatePath(`/trees/${node.treeId}`)
@@ -197,7 +209,7 @@ export const createPictureTag = async (
 
     await assertRole(picture.treeId, userId)
 
-    const node = await db.treeNode.findUnique({ where: { id: nodeId } })
+    const node = await db.treeNode.findFirst({ where: { id: nodeId, treeId: picture.treeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
 
     const existingTag = await db.pictureTag.findUnique({
@@ -316,7 +328,7 @@ export const setProfilePictureTag = async (
 
     await assertRole(picture.treeId, userId)
 
-    const node = await db.treeNode.findUnique({ where: { id: nodeId } })
+    const node = await db.treeNode.findFirst({ where: { id: nodeId, treeId: picture.treeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
 
     const tag = await db.pictureTag.findUnique({
@@ -324,14 +336,16 @@ export const setProfilePictureTag = async (
     })
     if (!tag) return { error: true, message: 'error-tag-not-found' }
 
-    await db.pictureTag.updateMany({
-      where: { nodeId: nodeId, isProfile: true, id: { not: tag.id } },
-      data: { isProfile: false },
-    })
+    await db.$transaction(async (tx) => {
+      await tx.pictureTag.updateMany({
+        where: { nodeId: nodeId, isProfile: true, id: { not: tag.id } },
+        data: { isProfile: false },
+      })
 
-    await db.pictureTag.update({
-      where: { id: tag.id },
-      data: { isProfile: true },
+      await tx.pictureTag.update({
+        where: { id: tag.id },
+        data: { isProfile: true },
+      })
     })
 
     revalidatePath(`/trees/${picture.treeId}`)

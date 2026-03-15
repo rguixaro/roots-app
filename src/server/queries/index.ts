@@ -82,7 +82,9 @@ export const getTreeRoots = cache(async (slug: string) => {
     const edges = await db.treeEdge.findMany({ where: { treeId: tree.id } })
 
     return { tree, nodes: typedNodes, edges }
-  } catch (error) {}
+  } catch (error) {
+    throw error
+  }
 })
 
 /**
@@ -93,10 +95,10 @@ export const getTreeRoots = cache(async (slug: string) => {
  */
 export const getTreeActivityLogs = cache(async (slug: string) => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
 
     const logs = await db.activityLog.findMany({
-      where: { tree: { slug: slug } },
+      where: { tree: { slug, accesses: { some: { userId } } } },
       include: { tree: true, user: true },
       orderBy: { createdAt: 'desc' },
     })

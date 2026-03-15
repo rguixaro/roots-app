@@ -5,13 +5,13 @@ import { revalidatePath } from 'next/cache'
 import type { z } from 'zod'
 
 import { db } from '@/server/db'
-import type {
+import {
   CreateTreeSchema,
   CreateTreeNodeSchema,
   CreateTreeEdgeSchema,
   UpdateTreeNodeSchema,
-  TreeAccessRole,
 } from '@/server/schemas'
+import type { TreeAccessRole } from '@/server/schemas'
 import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
 
 import { sendTreeInvitationEmail } from '@/lib/email'
@@ -34,6 +34,7 @@ interface TreeResult {
  */
 export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Promise<TreeResult> => {
   try {
+    CreateTreeSchema.parse(values)
     const userId = await assertAuthenticated()
 
     const tree = await db.tree.create({
@@ -71,6 +72,7 @@ export const updateTree = async (
   values: z.infer<typeof CreateTreeSchema>
 ): Promise<TreeResult> => {
   try {
+    CreateTreeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(id, userId)
 
@@ -128,6 +130,12 @@ export const inviteMember = async (
 ): Promise<TreeResult> => {
   try {
     const inviterId = await assertAuthenticated()
+    await assertRole(treeId, inviterId)
+
+    if (role === 'ADMIN') {
+      const inviterAccess = await db.treeAccess.findFirst({ where: { treeId, userId: inviterId } })
+      if (inviterAccess?.role !== 'ADMIN') return { error: true, message: 'error-no-permission' }
+    }
 
     const user = await db.user.findUnique({ where: { email } })
     if (!user) return { error: true, message: 'error-user-not-found' }
@@ -159,7 +167,8 @@ export const inviteMember = async (
     revalidatePath('/trees')
 
     return { error: false, tree: tree || undefined }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     return { error: true, message: 'error' }
   }
 }
@@ -177,7 +186,8 @@ export const updateMember = async (
   role: TreeAccessRole
 ): Promise<TreeResult> => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId, ['ADMIN'])
 
     await db.treeAccess.update({
       where: { treeId_userId: { treeId, userId: memberId } },
@@ -193,7 +203,8 @@ export const updateMember = async (
     revalidatePath('/trees')
 
     return { error: false, tree: tree ?? undefined }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     return { error: true, message: 'error' }
   }
 }
@@ -208,7 +219,8 @@ export const updateMember = async (
  */
 export const removeMember = async (treeId: string, memberId: string): Promise<TreeResult> => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId, ['ADMIN'])
 
     await db.treeAccess.delete({ where: { treeId_userId: { treeId, userId: memberId } } })
 
@@ -221,7 +233,8 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
     revalidatePath('/trees')
 
     return { error: false, tree: tree ?? undefined }
-  } catch (e) {
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     return { error: true, message: 'error' }
   }
 }
@@ -236,6 +249,7 @@ export const createTreeNode = async (
   values: z.infer<typeof CreateTreeNodeSchema>
 ): Promise<TreeResult> => {
   try {
+    CreateTreeNodeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
 
@@ -287,14 +301,17 @@ export const updateTreeNode = async (
   values: z.infer<typeof UpdateTreeNodeSchema>
 ): Promise<TreeResult> => {
   try {
+    UpdateTreeNodeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
 
-    const prevNode = await db.treeNode.findUnique({ where: { id: values.id } })
+    const prevNode = await db.treeNode.findFirst({
+      where: { id: values.id, treeId: values.treeId },
+    })
     if (!prevNode) return { error: true, message: 'error-node-not-found' }
 
     await db.treeNode.update({
-      where: { id: values.id },
+      where: { id: prevNode.id },
       data: {
         fullName: values.fullName,
         alias: values.alias,
@@ -345,6 +362,7 @@ export const createTreeEdge = async (
   values: z.infer<typeof CreateTreeEdgeSchema>
 ): Promise<TreeResult> => {
   try {
+    CreateTreeEdgeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
 
@@ -423,22 +441,42 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
       where: { treeId: treeId, OR: [{ fromNodeId: nodeId }, { toNodeId: nodeId }] },
     })
 
-    if (connectedEdges.length > 0)
-      await db.treeEdge.deleteMany({ where: { id: { in: connectedEdges.map((edge) => edge.id) } } })
+    await db.$transaction(async (tx) => {
+      if (connectedEdges.length > 0)
+        await tx.treeEdge.deleteMany({
+          where: { id: { in: connectedEdges.map((edge) => edge.id) } },
+        })
 
-    await db.treeNode.delete({ where: { id: nodeId } })
-
-    await db.activityLog.create({
-      data: {
-        treeId: treeId,
-        createdBy: userId,
-        action: 'NODE_DELETED',
-        entityId: nodeId,
-        metadata: {
-          nodeName: nodeToDelete.fullName,
-          edgeIds: connectedEdges.map((edge) => edge.id),
+      // Delete pictures where this node is the only tagged member
+      const orphanedPictures = await tx.picture.findMany({
+        where: {
+          treeId,
+          tags: { every: { nodeId }, some: {} },
         },
-      },
+      })
+      if (orphanedPictures.length > 0) {
+        await tx.pictureTag.deleteMany({
+          where: { pictureId: { in: orphanedPictures.map((p) => p.id) } },
+        })
+        await tx.picture.deleteMany({
+          where: { id: { in: orphanedPictures.map((p) => p.id) } },
+        })
+      }
+
+      await tx.treeNode.delete({ where: { id: nodeId } })
+
+      await tx.activityLog.create({
+        data: {
+          treeId: treeId,
+          createdBy: userId,
+          action: 'NODE_DELETED',
+          entityId: nodeId,
+          metadata: {
+            nodeName: nodeToDelete.fullName,
+            edgeIds: connectedEdges.map((edge) => edge.id),
+          },
+        },
+      })
     })
 
     revalidatePath('/')
@@ -476,27 +514,29 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
     ])
     if (!fromNode || !toNode) return { error: true, message: 'error-nodes-not-found' }
 
-    await db.treeEdge.delete({ where: { id: edgeId } })
+    await db.$transaction(async (tx) => {
+      await tx.treeEdge.delete({ where: { id: edgeId } })
+
+      await tx.activityLog.create({
+        data: {
+          treeId: treeId,
+          createdBy: userId,
+          action: 'EDGE_DELETED',
+          entityId: edgeId,
+          metadata: {
+            fromNodeId: fromNode.id,
+            fromNodeName: fromNode.fullName,
+            toNodeId: toNode.id,
+            toNodeName: toNode.fullName,
+            type: edgeToDelete.type,
+          },
+        },
+      })
+    })
 
     revalidatePath('/')
     revalidatePath('/trees')
     revalidatePath(`/trees/${treeId}`)
-
-    await db.activityLog.create({
-      data: {
-        treeId: treeId,
-        createdBy: userId,
-        action: 'EDGE_DELETED',
-        entityId: edgeId,
-        metadata: {
-          fromNodeId: fromNode.id,
-          fromNodeName: fromNode.fullName,
-          toNodeId: toNode.id,
-          toNodeName: toNode.fullName,
-          type: edgeToDelete.type,
-        },
-      },
-    })
 
     return { error: false }
   } catch (e: any) {
@@ -515,7 +555,10 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
  */
 export const getTreeNodes = async (treeId: string): Promise<TreeNode[]> => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
+
+    const hasAccess = await db.treeAccess.findFirst({ where: { treeId, userId } })
+    if (!hasAccess) return []
 
     return await db.treeNode.findMany({ where: { treeId } })
   } catch (error) {
@@ -530,10 +573,10 @@ export const getTreeNodes = async (treeId: string): Promise<TreeNode[]> => {
  */
 export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> => {
   try {
-    await assertAuthenticated()
+    const userId = await assertAuthenticated()
 
-    const tree = await db.tree.findUnique({
-      where: { slug },
+    const tree = await db.tree.findFirst({
+      where: { slug, accesses: { some: { userId } } },
       include: {
         nodes: {
           select: {

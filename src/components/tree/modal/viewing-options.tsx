@@ -52,9 +52,9 @@ export function ViewingOptions({
   focusOnNode,
   totalNodeCount,
 }: ViewingOptionsProps) {
-  if (!enabled) return null
-
   const t_trees = useTranslations('trees')
+
+  if (!enabled) return null
 
   const visibleNodesCount = visibleNodes.filter(
     (n) => n.type !== 'COUPLE' && n.data.type !== 'SPOUSE'
@@ -80,7 +80,7 @@ export function ViewingOptions({
                 <span className="font-bold">{`${visibleNodesCount} / ${totalNodeCount}`}</span>
               </div>
               <div className="flex items-center justify-between gap-3 text-xs">
-                <span className="flex-1 text-left font-medium">Ancestors</span>
+                <span className="flex-1 text-left font-medium">{t_trees('ancestors')}</span>
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"
@@ -112,7 +112,7 @@ export function ViewingOptions({
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3 text-xs">
-                <span className="flex-1 text-left font-medium">Descendants</span>
+                <span className="flex-1 text-left font-medium">{t_trees('descendants')}</span>
                 <div className="flex items-center gap-1">
                   <Button
                     size="sm"

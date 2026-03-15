@@ -38,10 +38,8 @@ export const ConfirmDialog = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title || 'Are you sure?'}</DialogTitle>
-          <DialogDescription className="my-2">
-            {description || 'This action cannot be undone.'}
-          </DialogDescription>
+          <DialogTitle>{title || t_common('confirm')}</DialogTitle>
+          <DialogDescription className="my-2">{description || ''}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="ghost" onClick={onCancel}>

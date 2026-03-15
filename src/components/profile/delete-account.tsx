@@ -43,15 +43,18 @@ export const DeleteAccount = (props: DeleteAccountProps) => {
       return
     }
     setLoading(true)
-    toast.promise(deleteProfile, {
-      loading: t_common('deleting'),
-      description: t_profile('account-deleting'),
-      success: () => {
+    try {
+      const result = await deleteProfile()
+      if (result.error) {
+        toast.error(t_profile('account-delete-error'))
         setLoading(false)
-        return t_profile('account-deleted')
-      },
-      error: t_profile('account-delete-error'),
-    })
+      } else {
+        toast.success(t_profile('account-deleted'))
+      }
+    } catch (_) {
+      toast.error(t_profile('account-delete-error'))
+      setLoading(false)
+    }
   }
 
   return (
@@ -103,7 +106,7 @@ export const DeleteAccount = (props: DeleteAccountProps) => {
                 type="submit"
                 variant="destructive"
               >
-                {loading ?? <LoaderIcon size={16} className="animate-spin" />}
+                {loading && <LoaderIcon size={16} className="animate-spin" />}
                 <span>{loading ? t_common('deleting') : t_common('delete')}</span>
               </Button>
             </DialogFooter>

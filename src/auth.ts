@@ -32,23 +32,19 @@ export const {
   basePath: '/api/auth',
   secret: AUTH_SECRET,
   pages: { signIn: '/auth', error: '/auth/error' },
-  callbacks: {
-    async signIn({ user, account }) {
-      if (account && user.email) {
-        const existingUser = await db.user.findUnique({
-          where: { email: user.email },
-          include: { accounts: true },
-        })
-
-        if (existingUser && existingUser.accounts.length === 0) {
-          sendWelcomeEmail({
-            recipientEmail: user.email,
-            recipientName: user.name || user.email,
-            locale: existingUser.language ? languageToLocale(existingUser.language) : 'en',
-          }).catch((_) => {})
-        }
+  events: {
+    async createUser({ user }) {
+      if (user.email) {
+        sendWelcomeEmail({
+          recipientEmail: user.email,
+          recipientName: user.name || user.email,
+          locale: 'en',
+        }).catch((_) => {})
       }
-
+    },
+  },
+  callbacks: {
+    async signIn() {
       return true
     },
     async session({ token, session }) {

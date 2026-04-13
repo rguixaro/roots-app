@@ -26,7 +26,11 @@ export function calculateDaysUntil(date: Date, options?: { ignoreYear?: boolean 
   const today = new Date()
 
   if (options?.ignoreYear) {
-    const targetDate = new Date(today.getFullYear(), date.getMonth(), date.getDate())
+    let targetDate = new Date(today.getFullYear(), date.getMonth(), date.getDate())
+    // Handle Feb 29 in non-leap years — clamp to Feb 28
+    if (date.getMonth() === 1 && date.getDate() === 29 && targetDate.getMonth() !== 1) {
+      targetDate = new Date(today.getFullYear(), 1, 28)
+    }
 
     if (targetDate < today) {
       targetDate.setFullYear(today.getFullYear() + 1)
@@ -45,10 +49,16 @@ export function calculateDaysUntil(date: Date, options?: { ignoreYear?: boolean 
  */
 export function isInCurrentWeekOfYear(date: Date): boolean {
   const today = new Date()
-  const targetDate = new Date(today.getFullYear(), date.getMonth(), date.getDate())
+  let targetDate = new Date(today.getFullYear(), date.getMonth(), date.getDate())
+  if (date.getMonth() === 1 && date.getDate() === 29 && targetDate.getMonth() !== 1) {
+    targetDate = new Date(today.getFullYear(), 1, 28)
+  }
 
   const currentWeekStart = new Date(today)
-  currentWeekStart.setDate(today.getDate() - today.getDay())
+  const dayOfWeek = today.getDay()
+  // Monday-start week: Monday=0 offset, Sunday=6 offset
+  const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  currentWeekStart.setDate(today.getDate() - mondayOffset)
   currentWeekStart.setHours(0, 0, 0, 0)
 
   const currentWeekEnd = new Date(currentWeekStart)

@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useLocale } from 'next-intl'
 import { LoaderIcon, Maximize, Menu, X } from 'lucide-react'
 
 import { Icon } from '@/components/trees/icon'
@@ -50,6 +51,8 @@ export function NodeGalleryContent({
   onClose,
   t_trees,
 }: NodeGalleryContentProps) {
+  const locale = useLocale()
+
   if (isMobile) {
     return (
       <div
@@ -147,7 +150,7 @@ export function NodeGalleryContent({
                       tappedImageId === picture.id ? 'opacity-100' : 'opacity-0'
                     )}
                   >
-                    <span>{picture.date?.toLocaleDateString()}</span>
+                    <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
                     <div className="flex items-center space-x-1">
                       <Icon size={12} type={treeType} className="stroke-ocean-400" />
                       <span>{picture.tags?.length}</span>
@@ -260,7 +263,7 @@ export function NodeGalleryContent({
                   'shadow-center-sm transition-opacity duration-300 group-hover:opacity-100'
                 )}
               >
-                <span>{picture.date?.toLocaleDateString()}</span>
+                <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
                 <div className="flex items-center space-x-1">
                   <Icon size={12} type={treeType} className="stroke-ocean-400" />
                   <span>{picture.tags?.length}</span>

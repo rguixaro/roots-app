@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { motion, Variants } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
@@ -11,6 +11,7 @@ import { formatActivityLog } from '@/utils'
 import { cn } from '@/utils'
 
 export function ActivityItem({ log, index }: { log: ActivityLog; index: number }) {
+  const locale = useLocale()
   const t_logs = useTranslations('log_activities')
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -73,7 +74,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
             )}
           </div>
           <div className="text-ocean-200 mt-2 flex flex-col text-xs">
-            <span>{log.createdAt.toISOString().split('T')[0]}</span>
+            <span>{new Date(log.createdAt).toLocaleDateString(locale)}</span>
             <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
               {log.user?.name ?? t_logs('deleted-user')}
@@ -102,7 +103,7 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
             <span className="text-ocean-200 text-sm font-semibold">{display.subtitle}</span>
           </div>
           <div className="border-ocean-200/50 flex flex-col border-l-2 pl-3 text-xs">
-            <span>{log.createdAt.toISOString().split('T')[0]}</span>
+            <span>{new Date(log.createdAt).toLocaleDateString(locale)}</span>
             <span className="font-semibold">
               <span className="font-normal">{`${t_logs('edited-by')} `}</span>
               {log.user?.name ?? t_logs('deleted-user')}

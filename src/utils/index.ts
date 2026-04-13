@@ -1,5 +1,6 @@
 export * from './constants'
 export * from './cn'
+export * from './compress-image'
 export * from './helpers'
 export * from './formatter'
 export * from './language'

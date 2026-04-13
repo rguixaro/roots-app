@@ -13,7 +13,7 @@ import {
   setProfilePictureTag,
 } from '@/server/actions'
 
-import { getProfilePicture } from '@/utils'
+import { compressImage, getProfilePicture } from '@/utils'
 
 import { Picture, TreeNode } from '@/types'
 
@@ -309,7 +309,8 @@ export function usePictureOperations({
       setLoading(true)
       try {
         if (!node) return
-        const result = await createPicture(node.id, file)
+        const compressed = await compressImage(file)
+        const result = await createPicture(node.id, compressed)
 
         if (!result.error && result.picture) {
           setPictures((prev) => [result.picture!, ...prev])

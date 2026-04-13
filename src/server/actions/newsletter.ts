@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs'
+
 import { db } from '@/server/db'
 
 import { sendWeeklyNewsletter } from '@/lib/email'
@@ -124,7 +126,10 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             errors++
           }
         } catch (error) {
-          console.error('Error sending newsletter email:', error)
+          Sentry.captureException(error, {
+            level: 'warning',
+            tags: { action: 'sendWeeklyNewsletters', step: 'send-email' },
+          })
           errors++
         }
       }
@@ -132,6 +137,7 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
 
     return { success: true, emailsSent, errors }
   } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'sendWeeklyNewsletters' } })
     return { success: false, emailsSent: 0, errors: 1 }
   }
 }

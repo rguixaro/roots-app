@@ -102,8 +102,14 @@ export const CreateTreeNodeSchema = z.object({
   biography: z.string().nullable().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
-  edgesFrom: z.array(z.any()).optional().nullable(),
-  edgesTo: z.array(z.any()).optional().nullable(),
+  edgesFrom: z
+    .array(z.object({ id: z.string(), fromNodeId: z.string(), toNodeId: z.string(), type: z.enum(TreeEdgeType) }))
+    .optional()
+    .nullable(),
+  edgesTo: z
+    .array(z.object({ id: z.string(), fromNodeId: z.string(), toNodeId: z.string(), type: z.enum(TreeEdgeType) }))
+    .optional()
+    .nullable(),
 })
 
 export type CreateTreeMemberInput = z.TypeOf<typeof CreateTreeNodeSchema>

@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react'
 import { useTranslations } from 'next-intl'
+import * as Sentry from '@sentry/nextjs'
 import { toast } from 'sonner'
 import { Connection, Edge, addEdge } from 'reactflow'
 
@@ -178,7 +179,12 @@ export function useEdgeOperations(
                 type: edgeType,
               })
 
-              if (spouseError) console.warn('Failed to create spouse-child relationship')
+              if (spouseError) {
+                Sentry.captureMessage('Failed to create spouse-child relationship', {
+                  level: 'warning',
+                  tags: { action: 'createTreeEdge', step: 'spouse-child' },
+                })
+              }
             }
           }
 

@@ -10,6 +10,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
     "compress-images": "npx tsx scripts/compress-images.ts",
     "download-images": "npx tsx scripts/download-images.ts"
   },
@@ -68,6 +71,9 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bcrypt": "^5.0.2",
     "@types/dagre": "^0.7.53",
     "@types/eslint": "^9.6.1",
@@ -78,9 +84,11 @@
     "@types/react-dom": "19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
     "@typescript-eslint/parser": "^8.46.3",
+    "@vitest/coverage-v8": "^4.1.4",
     "autoprefixer": "10.4.20",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.1",
+    "jsdom": "^29.0.2",
     "postcss": "8.5.1",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
@@ -89,7 +97,8 @@
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.16",
     "tailwindcss-animate": "^1.0.7",
-    "tsx": "^4.20.6"
+    "tsx": "^4.20.6",
+    "vitest": "^4.1.4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

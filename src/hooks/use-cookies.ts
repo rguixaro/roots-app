@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 /**
  * Hook to manage CloudFront cookies
@@ -18,8 +19,16 @@ export function useCookies(enabled: boolean = true) {
           credentials: 'include',
         })
 
-        if (!response.ok) console.error('Failed to refresh cookies:', response.statusText)
-      } catch (_) {}
+        if (!response.ok) {
+          Sentry.captureMessage('Failed to refresh CloudFront cookies', {
+            level: 'warning',
+            tags: { action: 'refreshCookies' },
+            extra: { status: response.status },
+          })
+        }
+      } catch (error) {
+        Sentry.captureException(error, { tags: { action: 'refreshCookies' } })
+      }
     }
 
     const REFRESH_INTERVAL = 5 * 60 * 60 * 1000

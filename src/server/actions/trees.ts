@@ -2,9 +2,11 @@
 
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import * as Sentry from '@sentry/nextjs'
 import type { z } from 'zod'
 
 import { db } from '@/server/db'
+import { deleteFileFromS3 } from '@/lib/s3'
 import {
   CreateTreeSchema,
   CreateTreeNodeSchema,
@@ -45,7 +47,7 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
         newsletter: values.newsletter,
         accesses: { create: { userId, role: 'ADMIN' } },
       },
-      include: { accesses: { include: { user: true } } },
+      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
     })
 
     revalidatePath('/')
@@ -56,6 +58,7 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tree-exists' }
     }
+    Sentry.captureException(e, { tags: { action: 'createTree' } })
     return { error: true, message: 'error' }
   }
 }
@@ -87,7 +90,7 @@ export const updateTree = async (
         newsletter: values.newsletter,
         slug: slugify(values.name),
       },
-      include: { accesses: { include: { user: true } } },
+      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
     })
 
     const changes = getChanges(prevTree, values, ['name', 'type', 'newsletter'])
@@ -110,6 +113,7 @@ export const updateTree = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tree-exists' }
     }
+    Sentry.captureException(e, { tags: { action: 'updateTree' } })
     return { error: true, message: 'error' }
   }
 }
@@ -147,7 +151,7 @@ export const inviteMember = async (
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: true } } },
+      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
     })
 
     const inviter = await db.user.findUnique({ where: { id: inviterId } })
@@ -160,7 +164,12 @@ export const inviteMember = async (
         treeSlug: tree.slug,
         role,
         locale: user.language ? languageToLocale(user.language) : 'en',
-      }).catch((_) => {})
+      }).catch((err) =>
+        Sentry.captureException(err, {
+          level: 'warning',
+          tags: { action: 'inviteMember', step: 'send-email' },
+        })
+      )
     }
 
     revalidatePath('/')
@@ -169,6 +178,7 @@ export const inviteMember = async (
     return { error: false, tree: tree || undefined }
   } catch (e: any) {
     if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'inviteMember' } })
     return { error: true, message: 'error' }
   }
 }
@@ -196,7 +206,7 @@ export const updateMember = async (
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: true } } },
+      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
     })
 
     revalidatePath('/')
@@ -205,6 +215,7 @@ export const updateMember = async (
     return { error: false, tree: tree ?? undefined }
   } catch (e: any) {
     if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'updateMember' } })
     return { error: true, message: 'error' }
   }
 }
@@ -226,7 +237,7 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: true } } },
+      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
     })
 
     revalidatePath('/')
@@ -235,6 +246,7 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
     return { error: false, tree: tree ?? undefined }
   } catch (e: any) {
     if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'removeMember' } })
     return { error: true, message: 'error' }
   }
 }
@@ -287,6 +299,7 @@ export const createTreeNode = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'createTreeNode' } })
     return { error: true, message: 'error' }
   }
 }
@@ -348,6 +361,7 @@ export const updateTreeNode = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-node-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'updateTreeNode' } })
     return { error: true, message: 'error' }
   }
 }
@@ -365,6 +379,8 @@ export const createTreeEdge = async (
     CreateTreeEdgeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+
+    if (values.fromNodeId === values.toNodeId) return { error: true, message: 'error-cannot-connect-to-self' }
 
     const [fromNode, toNode] = await Promise.all([
       db.treeNode.findFirst({ where: { id: values.fromNodeId, treeId: values.treeId } }),
@@ -418,6 +434,7 @@ export const createTreeEdge = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'createTreeEdge' } })
     return { error: true, message: 'error' }
   }
 }
@@ -461,6 +478,16 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
         await tx.picture.deleteMany({
           where: { id: { in: orphanedPictures.map((p) => p.id) } },
         })
+
+        // Clean up S3 files (best-effort, outside transaction)
+        for (const pic of orphanedPictures) {
+          await deleteFileFromS3(pic.fileKey).catch((err) =>
+            Sentry.captureException(err, {
+              level: 'warning',
+              tags: { action: 'deleteTreeNode', step: 's3-cleanup' },
+            })
+          )
+        }
       }
 
       await tx.treeNode.delete({ where: { id: nodeId } })
@@ -489,6 +516,7 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-nodes-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'deleteTreeNode' } })
     return { error: true, message: 'error' }
   }
 }
@@ -544,6 +572,7 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-edge-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'deleteTreeEdge' } })
     return { error: true, message: 'error' }
   }
 }
@@ -562,6 +591,7 @@ export const getTreeNodes = async (treeId: string): Promise<TreeNode[]> => {
 
     return await db.treeNode.findMany({ where: { treeId } })
   } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'getTreeNodes' } })
     return []
   }
 }
@@ -625,6 +655,7 @@ export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> 
 
     return events.sort((a, b) => a.date.getTime() - b.date.getTime())
   } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'getTimelineEvents' } })
     return []
   }
 }

@@ -73,6 +73,8 @@
     "error-no-permission": "You do not have permission to perform this action.",
     "error-user-not-found": "User not found.",
     "error-user-already-in-tree": "User is already a member of the family.",
+    "error-email-in-use": "This email is already in use.",
+    "error-cannot-connect-to-self": "Cannot connect a person to themselves.",
     "full-name-required": "Full name is required",
     "alias-too-long": "Alias cannot be longer than 16 characters.",
     "gender-required": "Gender is required.",

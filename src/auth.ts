@@ -1,6 +1,7 @@
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import type { Adapter } from 'next-auth/adapters'
 import NextAuth from 'next-auth'
+import * as Sentry from '@sentry/nextjs'
 
 import { Language } from '@prisma/client'
 
@@ -39,7 +40,12 @@ export const {
           recipientEmail: user.email,
           recipientName: user.name || user.email,
           locale: 'en',
-        }).catch((_) => {})
+        }).catch((err) =>
+          Sentry.captureException(err, {
+            level: 'warning',
+            tags: { action: 'createUser', step: 'welcome-email' },
+          })
+        )
       }
     },
   },
@@ -64,7 +70,7 @@ export const {
       if (!token.sub) return token
       const existingUser = await getUserById(token.sub)
 
-      if (!existingUser) return token
+      if (!existingUser) return {}
       const existingAccount = await getAccountByUserId(existingUser.id)
 
       token.isOAuth = !!existingAccount

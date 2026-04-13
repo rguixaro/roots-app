@@ -1,6 +1,7 @@
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+import packageJson from './package.json'
 
 const withNextIntl = createNextIntlPlugin()
 
@@ -8,6 +9,8 @@ const assetsUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN
 const assetsHostname = assetsUrl ? new URL(assetsUrl).hostname : undefined
 
 const nextConfig: NextConfig = {
+  env: { NEXT_PUBLIC_APP_VERSION: packageJson.version },
+  poweredByHeader: false,
   pageExtensions: ['ts', 'tsx'],
   experimental: {
     optimizePackageImports: ['lucide-react'],
@@ -16,6 +19,32 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: assetsHostname ? [{ protocol: 'https', hostname: assetsHostname }] : [],
     localPatterns: [assetsHostname ? { pathname: `/assets/**` } : {}, { pathname: `/api/proxy` }],
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              `img-src 'self' data: blob: https://lh3.googleusercontent.com${assetsUrl ? ` ${assetsUrl}` : ''}`,
+              "font-src 'self'",
+              `connect-src 'self'${assetsUrl ? ` ${assetsUrl}` : ''} *.sentry.io${process.env.NODE_ENV === 'development' ? ' ws://127.0.0.1:* ws://localhost:*' : ''}`,
+              "frame-ancestors 'none'",
+            ].join('; '),
+          },
+        ],
+      },
+    ]
   },
 }
 

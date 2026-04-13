@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 
 import { env } from '@/env.mjs'
 
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
       errors: result.errors,
     })
   } catch (error) {
-    console.error('Error in weekly newsletter cron job:', error)
+    Sentry.captureException(error, { tags: { action: 'weeklyNewsletterCron' } })
     return NextResponse.json(
       { success: false, error: 'Failed to send newsletters' },
       { status: 500 }

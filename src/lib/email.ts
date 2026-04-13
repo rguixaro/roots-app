@@ -1,4 +1,5 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import * as Sentry from '@sentry/nextjs'
 
 import { env } from '@/env.mjs'
 
@@ -211,7 +212,7 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
     await ses.send(command)
     return true
   } catch (error) {
-    console.error('Failed to send welcome email:', error)
+    Sentry.captureException(error, { tags: { action: 'sendWelcomeEmail' } })
     return false
   }
 }
@@ -362,7 +363,7 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
     await ses.send(command)
     return true
   } catch (error) {
-    console.error('Failed to send invitation email:', error)
+    Sentry.captureException(error, { tags: { action: 'sendTreeInvitationEmail' } })
     return false
   }
 }
@@ -605,7 +606,7 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
     await ses.send(command)
     return true
   } catch (error) {
-    console.error('Failed to send newsletter email:', error)
+    Sentry.captureException(error, { tags: { action: 'sendWeeklyNewsletter' } })
     return false
   }
 }

@@ -26,7 +26,7 @@ export interface TreeAccess {
   id: string
   treeId: string
   userId: string
-  user: User
+  user: Pick<User, 'id' | 'name' | 'email' | 'image'>
   role: TreeAccessRole
   createdAt: Date
 }

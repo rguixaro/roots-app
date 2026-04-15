@@ -16,7 +16,7 @@ export interface ActivityDisplay {
  */
 const formatValue = (value: any, field: string, t: (key: string) => string): string => {
   const dateFields = ['birthDate', 'deathDate']
-  if (dateFields.includes(field)) return new Date(value).toISOString().split('T')[0]
+  if (dateFields.includes(field)) return new Date(value).toLocaleDateString()
 
   if (field === 'gender' && TreeNodeGender.includes(value)) return t(value.toLowerCase())
 

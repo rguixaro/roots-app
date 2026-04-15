@@ -1,6 +1,8 @@
 'use server'
 
+import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import * as Sentry from '@sentry/nextjs'
 import type { z } from 'zod'
 
 import { signOut } from '@/auth'
@@ -33,6 +35,10 @@ export const updateProfile = async (
 
     return { error: false }
   } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2002') return { error: true, message: 'error-email-in-use' }
+    }
+    Sentry.captureException(e, { tags: { action: 'updateProfile' } })
     return { error: true, message: 'error' }
   }
 }
@@ -80,6 +86,7 @@ export const deleteProfile = async (): Promise<ProfileResult> => {
 
     return { error: false }
   } catch (e) {
+    Sentry.captureException(e, { tags: { action: 'deleteProfile' } })
     return { error: true, message: 'error' }
   }
 }

@@ -73,6 +73,8 @@
     "error-no-permission": "No tienes permiso para realizar esta acción.",
     "error-user-not-found": "Usuario no encontrado.",
     "error-user-already-in-tree": "El usuario ya forma parte de la familia.",
+    "error-email-in-use": "Este correo ya está en uso.",
+    "error-cannot-connect-to-self": "No se puede conectar una persona consigo misma.",
     "full-name-required": "El nombre completo es obligatorio.",
     "alias-too-long": "El alias no puede tener más de 16 caracteres.",
     "gender-required": "El género es obligatorio.",

@@ -37,7 +37,11 @@ export const getTree = cache(async (slug: string) => {
 
     const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
-      include: { accesses: { include: { user: true } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     return tree
@@ -58,7 +62,11 @@ export const getTreeRoots = cache(async (slug: string) => {
 
     const tree = await db.tree.findFirst({
       where: { slug, accesses: { some: { userId } } },
-      include: { accesses: { include: { user: true } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     if (!tree) return { error: true, message: 'error-tree-not-found' }
@@ -66,7 +74,7 @@ export const getTreeRoots = cache(async (slug: string) => {
     const nodes = await db.treeNode.findMany({
       where: { treeId: tree.id },
       include: { taggedIn: { where: { isProfile: true }, include: { picture: true } } },
-      orderBy: [{ birthDate: 'asc' }, { createdAt: 'desc' }],
+      orderBy: [{ birthDate: 'asc' }, { createdAt: 'asc' }],
     })
 
     const typedNodes = nodes.map((node) => ({
@@ -99,7 +107,10 @@ export const getTreeActivityLogs = cache(async (slug: string) => {
 
     const logs = await db.activityLog.findMany({
       where: { tree: { slug, accesses: { some: { userId } } } },
-      include: { tree: true, user: true },
+      include: {
+        tree: true,
+        user: { select: { id: true, name: true, image: true } },
+      },
       orderBy: { createdAt: 'desc' },
     })
     return { logs: logs }

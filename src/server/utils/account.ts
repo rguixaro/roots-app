@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs'
+
 import { db } from '@/server/db'
 
 import { Account } from '@/types'
@@ -10,7 +12,8 @@ import { Account } from '@/types'
 export const getAccountByUserId = async (userId: string): Promise<Account | null> => {
   try {
     return await db.account.findFirst({ where: { userId } })
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, { level: 'warning', tags: { action: 'getAccountByUserId' } })
     return null
   }
 }

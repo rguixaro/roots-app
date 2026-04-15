@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { randomUUID } from 'crypto'
 import exifr from 'exifr'
+import * as Sentry from '@sentry/nextjs'
 import sharp from 'sharp'
 
 import { env } from '@/env.mjs'
@@ -31,7 +32,13 @@ export async function uploadFileToS3(
     .jpeg({ quality: 85 })
     .withMetadata()
     .toBuffer()
-    .catch((_) => buffer)
+    .catch((err) => {
+      Sentry.captureException(err, {
+        level: 'warning',
+        tags: { action: 'uploadFileToS3', step: 'sharp-compress' },
+      })
+      return buffer
+    })
 
   const takenAt = exif?.DateTimeOriginal ?? exif?.CreateDate
 

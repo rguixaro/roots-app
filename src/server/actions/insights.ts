@@ -1,5 +1,7 @@
 'use server'
 
+import * as Sentry from '@sentry/nextjs'
+
 import { db } from '@/server/db'
 import { assertAuthenticated, calculateDaysUntil, isInCurrentWeekOfYear } from '@/server/utils'
 
@@ -42,6 +44,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
     })
 
     const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
     const birthdays: Milestone[] = []
     const anniversaries: Milestone[] = []
@@ -55,8 +58,15 @@ export async function getMilestones(): Promise<MilestonesResponse> {
 
     const _addBirthday = (tree: Tree, node: TreeNode, birthDate: Date) => {
       let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())
+      // Handle Feb 29 in non-leap years (JS auto-shifts to Mar 1) — clamp to Feb 28
+      if (birthDate.getMonth() === 1 && birthDate.getDate() === 29 && nextBirthday.getMonth() !== 1) {
+        nextBirthday = new Date(today.getFullYear(), 1, 28)
+      }
+      nextBirthday.setHours(0, 0, 0, 0)
       if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)
-      const daysUntil = calculateDaysUntil(nextBirthday)
+      const daysUntil = Math.round(
+        (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+      )
 
       if (daysUntil >= 0 && daysUntil <= 30) {
         birthdays.push({
@@ -65,7 +75,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
           treeName: tree.name,
           treeSlug: tree.slug,
           date: birthDate.toISOString().split('T')[0],
-          age: today.getFullYear() - birthDate.getFullYear() + (daysUntil === 0 ? 0 : 1),
+          age: nextBirthday.getFullYear() - birthDate.getFullYear(),
           picture: _getProfilePic(node)?.fileKey || null,
           daysUntil,
         })
@@ -132,6 +142,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
       memories: memories.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
     }
   } catch (e) {
+    Sentry.captureException(e, { tags: { action: 'getMilestones' } })
     return { birthdays: [], anniversaries: [], memories: [] }
   }
 }
@@ -276,6 +287,7 @@ export async function getHighlights(): Promise<HighlightsResponse> {
       mostMembers,
     }
   } catch (e) {
+    Sentry.captureException(e, { tags: { action: 'getHighlights' } })
     return { oldest: null, newest: null, largest: null, mostPhotos: null, mostMembers: null }
   }
 }

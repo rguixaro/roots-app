@@ -73,6 +73,8 @@
     "error-no-permission": "No tens permís per realitzar aquesta acció.",
     "error-user-not-found": "Usuari no trobat.",
     "error-user-already-in-tree": "L'usuari ja forma part de la família.",
+    "error-email-in-use": "Aquest correu ja està en ús.",
+    "error-cannot-connect-to-self": "No es pot connectar una persona amb si mateixa.",
     "full-name-required": "El nom complet és obligatori.",
     "alias-too-long": "El sobrenom no pot tenir més de 16 caràcters.",
     "gender-required": "El gènere és obligatori.",

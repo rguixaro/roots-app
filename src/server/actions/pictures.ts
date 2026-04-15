@@ -2,6 +2,7 @@
 
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import * as Sentry from '@sentry/nextjs'
 
 import { db } from '@/server/db'
 import { assertRole, assertAuthenticated } from '@/server/utils'
@@ -22,8 +23,10 @@ export const getPictures = async (nodeId: string) => {
     const node = await db.treeNode.findUnique({ where: { id: nodeId } })
     if (!node) return []
 
-    const hasAccess = await db.treeAccess.findFirst({ where: { treeId: node.treeId, userId } })
-    if (!hasAccess) return []
+    const access = await db.treeAccess.findFirst({ where: { treeId: node.treeId, userId } })
+    if (!access) return []
+
+    const canViewMetadata = access.role === 'EDITOR' || access.role === 'ADMIN'
 
     const pictures = await db.pictureTag.findMany({
       where: { nodeId },
@@ -38,9 +41,10 @@ export const getPictures = async (nodeId: string) => {
     })
     return pictures.map((i) => ({
       ...i.picture,
-      metadata: i.picture?.metadata as PictureMetadata | null,
+      metadata: canViewMetadata ? (i.picture?.metadata as PictureMetadata | null) : null,
     }))
   } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'getPictures' } })
     return []
   }
 }
@@ -125,12 +129,18 @@ export const createPicture = async (
     if (fileKey) {
       try {
         await deleteFileFromS3(fileKey)
-      } catch (_) {}
+      } catch (cleanupError) {
+        Sentry.captureException(cleanupError, {
+          level: 'warning',
+          tags: { action: 'createPicture', step: 's3-cleanup' },
+        })
+      }
     }
     if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'createPicture' } })
     return { error: true, message: 'error-picture-upload' }
   }
 }
@@ -157,7 +167,12 @@ export const deletePicture = async (
 
     try {
       await deleteFileFromS3(picture.fileKey)
-    } catch (error) {}
+    } catch (error) {
+      Sentry.captureException(error, {
+        level: 'warning',
+        tags: { action: 'deletePicture', step: 's3-cleanup' },
+      })
+    }
 
     await db.picture.delete({ where: { id: pictureId } })
 
@@ -183,6 +198,7 @@ export const deletePicture = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'deletePicture' } })
     return { error: true, message: 'error-picture-delete' }
   }
 }
@@ -241,6 +257,7 @@ export const createPictureTag = async (
       if (e.code === 'P2002') return { error: true, message: 'error-tag-already-exists' }
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'createPictureTag' } })
     return { error: true, message: 'error' }
   }
 }
@@ -305,6 +322,7 @@ export const deletePictureTag = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'deletePictureTag' } })
     return { error: true, message: 'error' }
   }
 }
@@ -356,6 +374,7 @@ export const setProfilePictureTag = async (
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
+    Sentry.captureException(e, { tags: { action: 'setProfilePictureTag' } })
     return { error: true, message: 'error' }
   }
 }

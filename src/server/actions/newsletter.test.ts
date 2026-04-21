@@ -12,10 +12,12 @@ vi.mock('@/utils/language', () => ({ languageToLocale: vi.fn(() => 'en') }))
 
 import { db } from '@/server/db'
 import { sendWeeklyNewsletter } from '@/lib/email'
+import { languageToLocale } from '@/utils/language'
 import { sendWeeklyNewsletters } from './newsletter'
 
-const mockDb = db as any
-const mockSendNewsletter = sendWeeklyNewsletter as ReturnType<typeof vi.fn>
+const mockDb = vi.mocked(db, { partial: true })
+const mockSendNewsletter = vi.mocked(sendWeeklyNewsletter)
+const mockLanguageToLocale = vi.mocked(languageToLocale)
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -103,6 +105,41 @@ describe('sendWeeklyNewsletters', () => {
     expect(result.emailsSent).toBe(2)
     expect(result.errors).toBe(0)
     expect(mockSendNewsletter).toHaveBeenCalledTimes(2)
+  })
+
+  it('formats each newsletter using the recipient language', async () => {
+    const recentNode = {
+      id: 'n1',
+      fullName: 'NewKid',
+      birthDate: null,
+      deathDate: null,
+      createdAt: new Date(2026, 3, 12),
+    }
+
+    mockLanguageToLocale.mockReturnValueOnce('es')
+    mockDb.tree.findMany.mockResolvedValue([
+      {
+        id: 't1',
+        name: 'Family',
+        slug: 'family',
+        newsletter: true,
+        accesses: [
+          { user: { id: 'u1', email: 'alice@example.com', name: 'Alice', language: 'ES' } },
+        ],
+        nodes: [recentNode],
+      },
+    ])
+    mockDb.treeNode.findMany.mockResolvedValue([recentNode])
+
+    const result = await sendWeeklyNewsletters()
+
+    expect(result.success).toBe(true)
+    expect(mockLanguageToLocale).toHaveBeenCalledWith('ES')
+    expect(mockSendNewsletter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locale: 'es',
+      })
+    )
   })
 
   it('handles individual email failures gracefully', async () => {

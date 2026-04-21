@@ -38,12 +38,12 @@ interface NewsletterEmailParams {
   treeSlug: string
   recentAdditions: Array<{
     name: string
-    addedDate: string
+    addedDate: Date
   }>
   events: Array<{
     name: string
     eventType: 'birthday' | 'anniversary'
-    date: string
+    date: Date
     yearsAgo?: number
   }>
   totalMembers: number
@@ -60,6 +60,16 @@ function getEmailTranslations(locale: Locale = 'en') {
     ca: caMessages,
   } as const
   return messagesMap[locale] || messagesMap.en
+}
+
+const EMAIL_LOCALE_TAGS: Record<Locale, string> = {
+  ca: 'ca-ES',
+  en: 'en-US',
+  es: 'es-ES',
+} as const
+
+function formatEmailDate(date: Date, locale: Locale, options: Intl.DateTimeFormatOptions): string {
+  return new Intl.DateTimeFormat(EMAIL_LOCALE_TAGS[locale], options).format(date)
 }
 
 /**
@@ -439,8 +449,7 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                       <div style="font-size: 32px; font-weight: 700; color: ${ocean[400]}; margin-bottom: 4px;">${totalMembers}</div>
                       <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500;">${t.emails.newsletter['members-total']}</div>
                     </td>
-                  </tr> <p style="margin: 0 0 16px; color: ${ocean[400]}; font-size: 16px; font-weight: 600; text-align: center;">
-                </p>
+                  </tr>
                 </table>
               </div>
 
@@ -460,7 +469,12 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                       ${member.name}
                     </p>
                     <p style="margin: 4px 0 0; color: ${ocean[300]}; font-size: 14px;">
-                      ${new Date(member.addedDate).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      ${formatEmailDate(member.addedDate, locale, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </p>
                   </div>
                 `
@@ -494,7 +508,7 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                     </p>
                     <p style="margin: 4px 0 0; color: ${ocean[300]}; font-size: 14px;">
                       ${replacePlaceholders(t.emails.newsletter[event.eventType === 'birthday' ? 'event-birthday' : 'event-anniversary'], { years: event.yearsAgo || 0 })}
-                      - ${new Date(event.date).toLocaleDateString(locale, { month: 'long', day: 'numeric' })}
+                      - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}
                     </p>
                   </div>
                 `
@@ -563,7 +577,17 @@ ${
   recentAdditions.length > 0
     ? `
 ${t.emails.newsletter['new-members-title']}:
-${recentAdditions.map((member) => `• ${member.name} (${new Date(member.addedDate).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })})`).join('\n')}
+${recentAdditions
+  .map(
+    (member) =>
+      `• ${member.name} (${formatEmailDate(member.addedDate, locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })})`
+  )
+  .join('\n')}
 `
     : `${t.emails.newsletter['new-members-empty']}`
 }
@@ -572,7 +596,12 @@ ${
   events.length > 0
     ? `
 ${t.emails.newsletter['upcoming-events-title']}:
-${events.map((event) => `• ${event.name} - ${replacePlaceholders(t.emails.newsletter[event.eventType === 'birthday' ? 'event-birthday' : 'event-anniversary'], { years: event.yearsAgo || 0 })} - ${new Date(event.date).toLocaleDateString(locale, { month: 'long', day: 'numeric' })}`).join('\n')}
+${events
+  .map(
+    (event) =>
+      `• ${event.name} - ${replacePlaceholders(t.emails.newsletter[event.eventType === 'birthday' ? 'event-birthday' : 'event-anniversary'], { years: event.yearsAgo || 0 })} - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}`
+  )
+  .join('\n')}
 `
     : `${t.emails.newsletter['upcoming-events-empty']}`
 }

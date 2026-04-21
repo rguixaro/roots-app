@@ -69,6 +69,9 @@ import {
   deleteTreeEdge,
   getTreeNodes,
   getTimelineEvents,
+  generateShareToken,
+  getShareLink,
+  joinTreeViaShareToken,
 } from './trees'
 
 const mockDb = db as any
@@ -563,5 +566,191 @@ describe('getTimelineEvents', () => {
     expect(result[0].type).toBe('birth')
     expect(result[1].type).toBe('death')
     expect(result[0].date.getTime()).toBeLessThan(result[1].date.getTime())
+  })
+})
+
+// ─── generateShareToken ──────────────────────────────────
+describe('generateShareToken', () => {
+  it('returns error when not authenticated', async () => {
+    mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
+    const result = await generateShareToken('t1', 7)
+    expect(result.error).toBe(true)
+  })
+
+  it('returns error-no-permission for viewers', async () => {
+    mockAssertRole.mockRejectedValue(new Error('error-no-permission'))
+    const result = await generateShareToken('t1', 7)
+    expect(result).toEqual({ error: true, message: 'error-no-permission' })
+  })
+
+  it('rejects invalid ttlDays values', async () => {
+    const result = await generateShareToken('t1', 5 as any)
+    expect(result).toEqual({ error: true, message: 'error-invalid-ttl' })
+    expect(mockDb.tree.update).not.toHaveBeenCalled()
+  })
+
+  it('generates a token with correct ttl and writes activity log', async () => {
+    mockDb.tree.update.mockResolvedValue({ id: 't1', slug: 'my-tree' })
+    const before = Date.now()
+    const result = await generateShareToken('t1', 7)
+    const after = Date.now()
+
+    expect(result.error).toBe(false)
+    expect(result.token).toMatch(/^[A-Za-z0-9_-]{32}$/)
+    expect(result.expiresAt).toBeInstanceOf(Date)
+    const expiresMs = result.expiresAt!.getTime()
+    expect(expiresMs).toBeGreaterThanOrEqual(before + 7 * 86_400_000)
+    expect(expiresMs).toBeLessThanOrEqual(after + 7 * 86_400_000)
+    expect(mockDb.tree.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 't1' },
+        data: expect.objectContaining({ shareToken: result.token }),
+      })
+    )
+    expect(mockDb.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ action: 'SHARE_TOKEN_GENERATED' }),
+      })
+    )
+  })
+
+  it('rotation produces a different token on each call', async () => {
+    mockDb.tree.update.mockResolvedValue({ id: 't1', slug: 'my-tree' })
+    const a = await generateShareToken('t1', 7)
+    const b = await generateShareToken('t1', 7)
+    expect(a.token).not.toEqual(b.token)
+  })
+})
+
+// ─── getShareLink ────────────────────────────────────────
+describe('getShareLink', () => {
+  it('returns null when not authenticated', async () => {
+    mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
+    const result = await getShareLink('t1')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when role check fails (viewer)', async () => {
+    mockAssertRole.mockRejectedValue(new Error('error-no-permission'))
+    const result = await getShareLink('t1')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when no token is set', async () => {
+    mockDb.tree.findUnique.mockResolvedValue({ shareToken: null, shareTokenExpiresAt: null })
+    const result = await getShareLink('t1')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when token is expired', async () => {
+    mockDb.tree.findUnique.mockResolvedValue({
+      shareToken: 'abc',
+      shareTokenExpiresAt: new Date(Date.now() - 1000),
+    })
+    const result = await getShareLink('t1')
+    expect(result).toBeNull()
+  })
+
+  it('returns token and expiresAt when active', async () => {
+    const expiresAt = new Date(Date.now() + 86_400_000)
+    mockDb.tree.findUnique.mockResolvedValue({ shareToken: 'abc', shareTokenExpiresAt: expiresAt })
+    const result = await getShareLink('t1')
+    expect(result).toEqual({ token: 'abc', expiresAt })
+  })
+})
+
+// ─── joinTreeViaShareToken ───────────────────────────────
+describe('joinTreeViaShareToken', () => {
+  it('returns error when not authenticated', async () => {
+    mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
+    const result = await joinTreeViaShareToken('anytoken')
+    expect(result.error).toBe(true)
+    expect(result.message).toBe('unauthenticated')
+  })
+
+  it('returns error-share-token-invalid for unknown token', async () => {
+    mockDb.tree.findFirst.mockResolvedValue(null)
+    const result = await joinTreeViaShareToken('bogus')
+    expect(result).toEqual({ error: true, message: 'error-share-token-invalid' })
+    expect(mockDb.treeAccess.create).not.toHaveBeenCalled()
+  })
+
+  it('returns error-share-token-expired when token is past expiry', async () => {
+    mockDb.tree.findFirst.mockResolvedValue({
+      id: 't1',
+      slug: 'my-tree',
+      shareTokenExpiresAt: new Date(Date.now() - 1000),
+    })
+    const result = await joinTreeViaShareToken('sometoken')
+    expect(result).toEqual({ error: true, message: 'error-share-token-expired' })
+    expect(mockDb.treeAccess.create).not.toHaveBeenCalled()
+  })
+
+  it('creates TreeAccess with VIEWER role and logs activity', async () => {
+    mockDb.tree.findFirst.mockResolvedValue({
+      id: 't1',
+      slug: 'my-tree',
+      shareTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    })
+    mockDb.treeAccess.create.mockResolvedValue({})
+    mockDb.user.findUnique.mockResolvedValue({ name: 'Alice' })
+
+    const result = await joinTreeViaShareToken('tok')
+    expect(result).toEqual({ error: false, slug: 'my-tree', alreadyMember: false })
+    expect(mockDb.treeAccess.create).toHaveBeenCalledWith({
+      data: { treeId: 't1', userId: 'user-1', role: 'VIEWER' },
+    })
+    expect(mockDb.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ action: 'MEMBER_JOINED_VIA_SHARE' }),
+      })
+    )
+  })
+
+  it('treats P2002 as alreadyMember without demoting role or double-logging', async () => {
+    mockDb.tree.findFirst.mockResolvedValue({
+      id: 't1',
+      slug: 'my-tree',
+      shareTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    })
+    mockDb.treeAccess.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('dup', { code: 'P2002', clientVersion: '6.0.0' })
+    )
+
+    const result = await joinTreeViaShareToken('tok')
+    expect(result).toEqual({ error: false, slug: 'my-tree', alreadyMember: true })
+    expect(mockDb.treeAccess.update).not.toHaveBeenCalled()
+    expect(mockDb.activityLog.create).not.toHaveBeenCalled()
+  })
+
+  it('is idempotent under race (Promise.all with two joins)', async () => {
+    mockDb.tree.findFirst.mockResolvedValue({
+      id: 't1',
+      slug: 'my-tree',
+      shareTokenExpiresAt: new Date(Date.now() + 86_400_000),
+    })
+    mockDb.user.findUnique.mockResolvedValue({ name: 'Alice' })
+
+    let callCount = 0
+    mockDb.treeAccess.create.mockImplementation(async () => {
+      callCount += 1
+      if (callCount === 1) return {}
+      throw new Prisma.PrismaClientKnownRequestError('dup', {
+        code: 'P2002',
+        clientVersion: '6.0.0',
+      })
+    })
+
+    const [r1, r2] = await Promise.all([
+      joinTreeViaShareToken('tok'),
+      joinTreeViaShareToken('tok'),
+    ])
+
+    expect(r1.error).toBe(false)
+    expect(r2.error).toBe(false)
+    const alreadyFlags = [r1.alreadyMember, r2.alreadyMember].sort()
+    expect(alreadyFlags).toEqual([false, true])
+    expect(mockDb.treeAccess.create).toHaveBeenCalledTimes(2)
+    expect(mockDb.activityLog.create).toHaveBeenCalledTimes(1)
   })
 })

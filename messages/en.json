@@ -278,6 +278,9 @@
     "PICTURE_TAG_CREATED": "Image tag added",
     "PICTURE_TAG_DELETED": "Image tag removed",
     "TREE_UPDATED": "Family tree updated",
+    "SHARE_TOKEN_GENERATED": "Share link generated",
+    "MEMBER_JOINED_VIA_SHARE": "Member joined via share link",
+    "expires-on": "Expires on",
     "edited-by": "Edited by",
     "deleted-user": "Deleted user",
     "name": "Name",
@@ -356,5 +359,23 @@
       "link": "Manage your preferences"
     },
     "copyright": "© {year} Roots. All rights reserved."
-  }
-}
+  },
+  "share": {
+    "title": "Share family tree",
+    "description": "Anyone with the link can view this family tree. They'll need to sign in or create an account.",
+    "link-label": "Share link",
+    "no-active-link": "No active share link. Generate one below.",
+    "generate": "Generate link",
+    "rotate": "Generate new link",
+    "copy": "Copy link",
+    "ttl-label": "Link validity",
+    "ttl-1-day": "1 day",
+    "ttl-7-days": "7 days",
+    "ttl-30-days": "30 days",
+    "expires-in": "Expires in {days, plural, =1 {# day} other {# days}}",
+    "expires-today": "Expires today",
+    "toast-generated": "Share link generated.",
+    "error-invalid": "This share link is invalid or no longer active.",
+    "error-expired": "This share link has expired.",
+    "error-generic": "We couldn't process this share link."
+  },}

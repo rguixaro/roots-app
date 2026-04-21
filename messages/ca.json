@@ -278,6 +278,9 @@
     "PICTURE_TAG_CREATED": "Etiqueta d'imatge afegida",
     "PICTURE_TAG_DELETED": "Etiqueta d'imatge eliminada",
     "TREE_UPDATED": "Família actualitzada",
+    "SHARE_TOKEN_GENERATED": "Enllaç per compartir generat",
+    "MEMBER_JOINED_VIA_SHARE": "Membre unit a través de l'enllaç",
+    "expires-on": "Caduca el",
     "edited-by": "Editat per",
     "deleted-user": "Usuari eliminat",
     "name": "Nom",
@@ -356,5 +359,23 @@
       "link": "Gestiona les teves preferències"
     },
     "copyright": "© {year} Roots. Tots els drets reservats."
-  }
-}
+  },
+  "share": {
+    "title": "Comparteix l'arbre familiar",
+    "description": "Qualsevol persona amb aquest enllaç podrà veure l'arbre familiar. Haurà d'iniciar sessió o crear un compte.",
+    "link-label": "Enllaç per compartir",
+    "no-active-link": "No hi ha cap enllaç actiu. Genera'n un a continuació.",
+    "generate": "Generar enllaç",
+    "rotate": "Generar un nou enllaç",
+    "copy": "Copia l'enllaç",
+    "ttl-label": "Validesa de l'enllaç",
+    "ttl-1-day": "1 dia",
+    "ttl-7-days": "7 dies",
+    "ttl-30-days": "30 dies",
+    "expires-in": "Caduca en {days, plural, =1 {# dia} other {# dies}}",
+    "expires-today": "Caduca avui",
+    "toast-generated": "Enllaç generat correctament.",
+    "error-invalid": "Aquest enllaç no és vàlid o ja no està actiu.",
+    "error-expired": "Aquest enllaç ha caducat.",
+    "error-generic": "No s'ha pogut processar aquest enllaç."
+  },}

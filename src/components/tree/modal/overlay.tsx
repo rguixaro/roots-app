@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import {
   Plus,
   Minimize2,
@@ -10,6 +10,7 @@ import {
   Settings2,
   CalendarDays,
   ScanSearch,
+  Share2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
@@ -17,6 +18,8 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 import { useCopyToClipboard } from '@/hooks'
+
+import { ShareDialog } from '@/components/trees/share'
 
 import { cn } from '@/utils'
 
@@ -155,9 +158,15 @@ export function TreeOverlay({
   const downloadRef = useRef<HTMLDivElement>(null)
   const { copy } = useCopyToClipboard()
 
+  const [shareOpen, setShareOpen] = useState(false)
+
   const handleDownload = useCallback(() => {
     toast.info(t_common('unavailable-feature'))
   }, [tree?.slug])
+
+  const handleShare = useCallback(() => {
+    setShareOpen(true)
+  }, [])
 
   return (
     <div>
@@ -223,6 +232,11 @@ export function TreeOverlay({
           <ArrowDownToLine size={20} className={iconClassName} />
         </IconButton>
         {!readonly && (
+          <IconButton onClick={handleShare}>
+            <Share2 size={20} className={iconClassName} />
+          </IconButton>
+        )}
+        {!readonly && (
           <>
             <div className="bg-ocean-300 h-0.5 w-4" />
             <IconLink href={`/trees/logs/${tree?.slug}`}>
@@ -264,6 +278,11 @@ export function TreeOverlay({
           <ArrowDownToLine size={20} className={iconClassName} />
         </IconButton>
         {!readonly && (
+          <IconButton onClick={handleShare}>
+            <Share2 size={20} className={iconClassName} />
+          </IconButton>
+        )}
+        {!readonly && (
           <div className="flex w-full items-center justify-end gap-4">
             <div className="bg-ocean-300 h-4 w-0.5" />
             <IconLink href={`/trees/logs/${tree?.slug}`}>
@@ -275,6 +294,9 @@ export function TreeOverlay({
           </div>
         )}
       </motion.div>
+      {!readonly && (
+        <ShareDialog treeId={tree.id} open={shareOpen} onOpenChange={setShareOpen} />
+      )}
     </div>
   )
 }

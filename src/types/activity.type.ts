@@ -18,6 +18,9 @@ export const ActivityAction = [
   'PICTURE_TAG_DELETED',
 
   'TREE_UPDATED',
+
+  'SHARE_TOKEN_GENERATED',
+  'MEMBER_JOINED_VIA_SHARE',
 ] as const
 export type ActivityAction = (typeof ActivityAction)[number]
 

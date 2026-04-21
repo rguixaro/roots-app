@@ -84,6 +84,18 @@ export const formatActivityLog = (
             )
           : undefined,
       }
+    case 'SHARE_TOKEN_GENERATED':
+      return {
+        title: t('SHARE_TOKEN_GENERATED'),
+        subtitle: meta.expiresAt
+          ? `${t('expires-on')} ${new Date(meta.expiresAt).toLocaleDateString()}`
+          : '',
+      }
+    case 'MEMBER_JOINED_VIA_SHARE':
+      return {
+        title: t('MEMBER_JOINED_VIA_SHARE'),
+        subtitle: meta.joinedName ? `"${meta.joinedName}"` : '',
+      }
 
     default:
       return { title: t(action), subtitle: '' }

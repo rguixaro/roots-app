@@ -359,5 +359,23 @@
       "link": "Gestiona tus preferencias"
     },
     "copyright": "© {year} Roots. Todos los derechos reservados."
-  }
-}
+  },
+  "share": {
+    "title": "Compartir árbol familiar",
+    "description": "Cualquiera con este enlace podrá ver el árbol familiar. Tendrá que iniciar sesión o crear una cuenta.",
+    "link-label": "Enlace para compartir",
+    "no-active-link": "No hay ningún enlace activo. Genera uno a continuación.",
+    "generate": "Generar enlace",
+    "rotate": "Generar nuevo enlace",
+    "copy": "Copiar enlace",
+    "ttl-label": "Validez del enlace",
+    "ttl-1-day": "1 día",
+    "ttl-7-days": "7 días",
+    "ttl-30-days": "30 días",
+    "expires-in": "Caduca en {days, plural, =1 {# día} other {# días}}",
+    "expires-today": "Caduca hoy",
+    "toast-generated": "Enlace generado correctamente.",
+    "error-invalid": "Este enlace no es válido o ya no está activo.",
+    "error-expired": "Este enlace ha caducado.",
+    "error-generic": "No se ha podido procesar este enlace."
+  },}

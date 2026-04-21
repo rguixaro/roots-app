@@ -1,5 +1,6 @@
 'use server'
 
+import crypto from 'node:crypto'
 import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import * as Sentry from '@sentry/nextjs'
@@ -696,5 +697,145 @@ export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> 
   } catch (error) {
     Sentry.captureException(error, { tags: { action: 'getTimelineEvents' } })
     return []
+  }
+}
+
+export type ShareTokenTtlDays = 1 | 7 | 30
+
+interface ShareTokenResult {
+  error: boolean
+  message?: string
+  token?: string
+  expiresAt?: Date
+}
+
+interface JoinResult {
+  error: boolean
+  message?: string
+  slug?: string
+  alreadyMember?: boolean
+}
+
+interface ShareLink {
+  token: string
+  expiresAt: Date
+}
+
+/**
+ * Generate (or rotate) a share token for a tree.
+ * Auth required. ADMIN or EDITOR only.
+ * Overwriting the token implicitly invalidates the previous one.
+ */
+export const generateShareToken = async (
+  treeId: string,
+  ttlDays: ShareTokenTtlDays
+): Promise<ShareTokenResult> => {
+  try {
+    if (ttlDays !== 1 && ttlDays !== 7 && ttlDays !== 30)
+      return { error: true, message: 'error-invalid-ttl' }
+
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId)
+
+    const token = crypto.randomBytes(24).toString('base64url')
+    const expiresAt = new Date(Date.now() + ttlDays * 86_400_000)
+
+    const tree = await db.tree.update({
+      where: { id: treeId },
+      data: { shareToken: token, shareTokenExpiresAt: expiresAt },
+    })
+
+    await db.activityLog.create({
+      data: {
+        treeId,
+        createdBy: userId,
+        action: 'SHARE_TOKEN_GENERATED',
+        entityId: treeId,
+        metadata: { ttlDays, expiresAt: expiresAt.toISOString() },
+      },
+    })
+
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${tree.slug}`)
+
+    return { error: false, token, expiresAt }
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    if (e?.message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
+    Sentry.captureException(e, { tags: { action: 'generateShareToken' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Return the current active (unexpired) share link for a tree.
+ * Auth required. ADMIN or EDITOR only — re-checked server-side.
+ */
+export const getShareLink = async (treeId: string): Promise<ShareLink | null> => {
+  try {
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId)
+
+    const tree = await db.tree.findUnique({
+      where: { id: treeId },
+      select: { shareToken: true, shareTokenExpiresAt: true },
+    })
+
+    if (!tree?.shareToken || !tree.shareTokenExpiresAt) return null
+    if (tree.shareTokenExpiresAt.getTime() < Date.now()) return null
+
+    return { token: tree.shareToken, expiresAt: tree.shareTokenExpiresAt }
+  } catch (e) {
+    Sentry.captureException(e, { tags: { action: 'getShareLink' } })
+    return null
+  }
+}
+
+/**
+ * Join a tree via share token. Auth required.
+ * Creates TreeAccess with VIEWER role if one doesn't already exist.
+ * Never demotes an existing member. Idempotent under race via P2002 catch.
+ */
+export const joinTreeViaShareToken = async (token: string): Promise<JoinResult> => {
+  try {
+    const userId = await assertAuthenticated()
+
+    const tree = await db.tree.findFirst({
+      where: { shareToken: token },
+      select: { id: true, slug: true, shareTokenExpiresAt: true },
+    })
+    if (!tree) return { error: true, message: 'error-share-token-invalid' }
+
+    if (!tree.shareTokenExpiresAt || tree.shareTokenExpiresAt.getTime() < Date.now())
+      return { error: true, message: 'error-share-token-expired' }
+
+    let alreadyMember = false
+    try {
+      await db.treeAccess.create({ data: { treeId: tree.id, userId, role: 'VIEWER' } })
+
+      const user = await db.user.findUnique({ where: { id: userId }, select: { name: true } })
+      await db.activityLog.create({
+        data: {
+          treeId: tree.id,
+          createdBy: userId,
+          action: 'MEMBER_JOINED_VIA_SHARE',
+          entityId: userId,
+          metadata: { joinedName: user?.name ?? null },
+        },
+      })
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        alreadyMember = true
+      } else throw e
+    }
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+
+    return { error: false, slug: tree.slug, alreadyMember }
+  } catch (e: any) {
+    if (e?.message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
+    Sentry.captureException(e, { tags: { action: 'joinTreeViaShareToken' } })
+    return { error: true, message: 'error' }
   }
 }

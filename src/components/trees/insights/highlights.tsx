@@ -26,30 +26,32 @@ function formatRelativeTime(
 }
 
 export async function Highlights() {
-  const { oldest, newest, largest, mostPhotos, mostMembers } = await getHighlights()
+  const { oldest, youngest, largest, mostPhotos, mostMembers } = await getHighlights()
   const t_insights = await getTranslations('insights')
 
   const cards: HighlightCard[] = [
     oldest && {
       title: t_insights('oldest-ancestor-title'),
       value: oldest.name,
-      subtitle: t_insights('oldest-ancestor-subtitle', {
+      subtitle: t_insights('ancestor-born-subtitle', {
         year: oldest.birthYear ?? 'N/A',
+        gender: oldest.gender ?? 'N/A',
       }),
       treeName: oldest.treeName,
       treeSlug: oldest.treeSlug,
       picture: oldest.picture,
     },
-    newest &&
-      newest.addedAt && {
-        title: t_insights('recently-added-title'),
-        value: newest.name,
-        subtitle: t_insights('recently-added-subtitle', {
-          relativeTime: formatRelativeTime(newest.addedAt, t_insights),
+    youngest &&
+      youngest.addedAt && {
+        title: t_insights('youngest-ancestor-title'),
+        value: youngest.name,
+        subtitle: t_insights('ancestor-born-subtitle', {
+          year: youngest.birthYear ?? 'N/A',
+          gender: youngest.gender ?? 'N/A',
         }),
-        treeName: newest.treeName,
-        treeSlug: newest.treeSlug,
-        picture: newest.picture,
+        treeName: youngest.treeName,
+        treeSlug: youngest.treeSlug,
+        picture: youngest.picture,
       },
     largest && {
       title: t_insights('most-children-title'),

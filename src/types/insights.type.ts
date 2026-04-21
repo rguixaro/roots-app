@@ -1,3 +1,5 @@
+import { TreeNodeGender } from './tree.type'
+
 export interface Milestone {
   id: string
   name: string
@@ -23,6 +25,7 @@ export interface Highlight {
   name: string
   treeName: string
   treeSlug: string
+  gender?: TreeNodeGender
   addedAt?: string
   birthDate?: string
   birthYear?: number
@@ -34,7 +37,7 @@ export interface Highlight {
 
 export interface HighlightsResponse {
   oldest: Highlight | null
-  newest: Highlight | null
+  youngest: Highlight | null
   largest: Highlight | null
   mostPhotos: Highlight | null
   mostMembers: Highlight | null

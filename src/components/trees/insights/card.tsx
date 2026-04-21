@@ -41,7 +41,7 @@ export function HighlightItem({
           {item.picture && (
             <Picture
               fileKey={item.picture}
-              classNameContainer="h-12 w-12 shadow-center-sm border-ocean-400 flex-shrink-0"
+              classNameContainer="h-12 w-12 shadow-center-sm flex-shrink-0"
             />
           )}
           {isTreeNameOnly ? (

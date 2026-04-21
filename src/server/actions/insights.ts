@@ -58,14 +58,17 @@ export async function getMilestones(): Promise<MilestonesResponse> {
 
     const _addBirthday = (tree: Tree, node: TreeNode, birthDate: Date) => {
       let nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())
-      // Handle Feb 29 in non-leap years (JS auto-shifts to Mar 1) — clamp to Feb 28
-      if (birthDate.getMonth() === 1 && birthDate.getDate() === 29 && nextBirthday.getMonth() !== 1) {
+      if (
+        birthDate.getMonth() === 1 &&
+        birthDate.getDate() === 29 &&
+        nextBirthday.getMonth() !== 1
+      ) {
         nextBirthday = new Date(today.getFullYear(), 1, 28)
       }
       nextBirthday.setHours(0, 0, 0, 0)
       if (nextBirthday < today) nextBirthday.setFullYear(today.getFullYear() + 1)
       const daysUntil = Math.round(
-        (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+        (nextBirthday.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       )
 
       if (daysUntil >= 0 && daysUntil <= 30) {
@@ -171,7 +174,7 @@ export async function getHighlights(): Promise<HighlightsResponse> {
     })
 
     let oldestAncestor: Highlight | null = null
-    let newestMember: Highlight | null = null
+    let youngestAncestor: Highlight | null = null
     let mostPhotos: Highlight | null = null
     let mostChildren: Highlight | null = null
     let mostMembers: Highlight | null = null
@@ -189,6 +192,7 @@ export async function getHighlights(): Promise<HighlightsResponse> {
         oldestAncestor = {
           id: oldest.id,
           name: oldest.fullName,
+          gender: oldest.gender,
           treeName: t.name,
           treeSlug: t.slug,
           picture: picture?.fileKey,
@@ -198,21 +202,23 @@ export async function getHighlights(): Promise<HighlightsResponse> {
         }
       }
       const youngest = t.nodes.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) => new Date(b.birthDate!).getTime() - new Date(a.birthDate!).getTime()
       )[0]
 
       if (
         youngest &&
-        (!newestMember ||
-          new Date(youngest.createdAt).getTime() > new Date(newestMember.addedAt!).getTime())
+        (!youngestAncestor ||
+          new Date(youngest.birthDate!).getTime() > new Date(youngestAncestor.birthDate!).getTime())
       ) {
         const picture = youngest.taggedIn.find((tag) => tag.isProfile)?.picture
-        newestMember = {
+        youngestAncestor = {
           id: youngest.id,
           name: youngest.fullName,
           treeName: t.name,
           treeSlug: t.slug,
           picture: picture?.fileKey,
+          birthDate: youngest.birthDate!.toISOString(),
+          birthYear: new Date(youngest.birthDate!).getFullYear(),
           addedAt: youngest.createdAt.toISOString(),
         }
       }
@@ -281,13 +287,13 @@ export async function getHighlights(): Promise<HighlightsResponse> {
 
     return {
       oldest: oldestAncestor,
-      newest: newestMember,
+      youngest: youngestAncestor,
       largest: mostChildren,
       mostPhotos,
       mostMembers,
     }
   } catch (e) {
     Sentry.captureException(e, { tags: { action: 'getHighlights' } })
-    return { oldest: null, newest: null, largest: null, mostPhotos: null, mostMembers: null }
+    return { oldest: null, youngest: null, largest: null, mostPhotos: null, mostMembers: null }
   }
 }

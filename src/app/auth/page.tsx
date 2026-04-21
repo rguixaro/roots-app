@@ -17,9 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     robots: {
-      index: true,
-      follow: true,
-      googleBot: { index: true, follow: true },
+      index: false,
+      follow: false,
+      googleBot: { index: false, follow: false },
     },
     alternates: {
       canonical: '/auth',

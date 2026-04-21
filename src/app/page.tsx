@@ -26,6 +26,17 @@ export default async function TreesPage() {
       </div>
       <div className="w-3/4 self-center sm:w-3/4">
         <div className="text-ocean-400 flex h-full items-center justify-center">
+          <div className="mb-5 h-full w-full sm:w-4/5 md:w-3/5">
+            <TypographyH5>{t_insights('highlights')}</TypographyH5>
+            <p className="mt-2">{t_insights('highlights-description')} </p>
+          </div>
+        </div>
+      </div>
+      <div className="flex w-full items-center justify-center self-center">
+        <Highlights />
+      </div>
+      <div className="mb-10 w-3/4 self-center sm:w-3/4">
+        <div className="text-ocean-400 flex h-full items-center justify-center">
           <div className="mb-4 h-full w-full sm:w-4/5 md:w-3/5">
             <div className="mx-auto my-6 w-5/6 items-center justify-center">
               <div className="bg-ocean-100 shadow-center-sm h-1 rounded" />
@@ -33,17 +44,6 @@ export default async function TreesPage() {
             <Milestones />
           </div>
         </div>
-      </div>
-      <div className="w-3/4 self-center sm:w-3/4">
-        <div className="text-ocean-400 flex h-full items-center justify-center">
-          <div className="mb-5 h-full w-full sm:w-4/5 md:w-3/5">
-            <TypographyH5>{t_insights('highlights')}</TypographyH5>
-            <p className="mt-2">{t_insights('highlights-description')} </p>
-          </div>
-        </div>
-      </div>
-      <div className="mb-20 flex w-full items-center justify-center self-center">
-        <Highlights />
       </div>
     </main>
   )

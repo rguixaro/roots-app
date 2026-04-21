@@ -23,7 +23,6 @@ export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
       alias: '',
       birthPlace: '',
       deathPlace: '',
-      biography: '',
     },
   })
 

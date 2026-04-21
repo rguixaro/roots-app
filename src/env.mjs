@@ -25,7 +25,6 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
 
     /// Sentry
-    SENTRY_DSN: z.string().url().optional(),
     SENTRY_ORG: z.string().optional(),
 
     /// AWS
@@ -40,6 +39,9 @@ export const env = createEnv({
 
     /// Public
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: z.string().url(),
+  },
+  client: {
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   },
   runtimeEnv: {
     /// Environment
@@ -61,7 +63,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
 
     /// Sentry
-    SENTRY_DSN: process.env.SENTRY_DSN,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     SENTRY_ORG: process.env.SENTRY_ORG,
 
     /// AWS

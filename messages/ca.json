@@ -133,6 +133,8 @@
     "anniversary-description": "{type, select, birth {{name} va néixer fa {yearsAgo, plural, one {# any} other {# anys}}} death {En memòria de {name}, fa {yearsAgo, plural, one {# any} other {# anys}}} other {}}",
     "memories-on-this-week": "Records d'aquesta setmana al llarg dels anys",
     "memory-description": "{yearsAgo, plural, =0 {Aquest any} one {Fa # any} other {Fa # anys}}",
+    "show-more": "Mostra'n {count, plural, one {# més} other {# més}}",
+    "show-less": "Mostra'n menys",
     "highlights": "Aspectes destacats de les teves famílies",
     "highlights-description": "Descobreix dades interessants i estadístiques sobre els teus arbres genealògics.",
     "highlights-empty": "No hi ha aspectes destacats disponibles per a les teves famílies encara. Comença a afegir membres i relacions per veure informació interessant aquí.",

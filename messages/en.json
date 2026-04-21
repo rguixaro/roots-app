@@ -133,6 +133,8 @@
     "anniversary-description": "{type, select, birth {{name} was born {yearsAgo, plural, one {# year ago} other {# years ago}}} death {In memory of {name}, {yearsAgo, plural, one {# year ago} other {# years ago}}} other {}}",
     "memories-on-this-week": "Memories of this week over the years",
     "memory-description": "{yearsAgo, plural, =0 {This year} one {# year ago} other {# years ago}}",
+    "show-more": "Show {count, plural, one {# more} other {# more}}",
+    "show-less": "Show less",
     "highlights": "Family highlights",
     "highlights-description": "Discover interesting facts and statistics about your family trees.",
     "highlights-empty": "There are no highlights available for your families yet. Start adding members and relationships to see interesting insights here.",

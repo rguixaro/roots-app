@@ -133,6 +133,8 @@
     "anniversary-description": "{type, select, birth {{name} nació hace {yearsAgo, plural, one {# año} other {# años}}} death {En memoria de {name}, hace {yearsAgo, plural, one {# año} other {# años}}} other {}}",
     "memories-on-this-week": "Recuerdos de esta semana a lo largo de los años",
     "memory-description": "{yearsAgo, plural, =0 {Este año} one {Hace # año} other {Hace # años}}",
+    "show-more": "Mostrar {count, plural, one {# más} other {# más}}",
+    "show-less": "Mostrar menos",
     "highlights": "Aspectos destacados de tus familias",
     "highlights-description": "Descubre datos interesantes y estadísticas sobre tus árboles genealógicos.",
     "highlights-empty": "No hay aspectos destacados disponibles para tus familias aún. Comienza a añadir miembros y relaciones para ver información interesante aquí.",

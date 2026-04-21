@@ -8,6 +8,10 @@ import { TypographyH5, Picture } from '@/ui'
 
 import { getLocalizedDay, getLocalizedMonth } from '@/utils'
 
+import { Expandable } from './expandable'
+
+const MILESTONES_VISIBLE_LIMIT = 5
+
 export async function Milestones() {
   const t_insights = await getTranslations('insights')
 
@@ -38,7 +42,7 @@ export async function Milestones() {
               <Calendar size={20} />
               {t_insights('on-the-next-thirty-days')}
             </span>
-            <div className="mt-2 space-y-3">
+            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
               {anniversaries.map((item, i) => (
                 <div key={i} className="flex items-center space-x-3 p-2">
                   <Picture
@@ -66,7 +70,7 @@ export async function Milestones() {
                   </div>
                 </div>
               ))}
-            </div>
+            </Expandable>
           </div>
         )}
         {hasAnniversaries && hasBirthdays && (
@@ -80,7 +84,7 @@ export async function Milestones() {
               <Cake size={20} />
               {t_insights('birthdays-this-month')}
             </span>
-            <div className="mt-2 space-y-3">
+            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
               {birthdays.map((item, i) => (
                 <div key={i} className="flex items-center space-x-2 p-2">
                   <Picture
@@ -108,7 +112,7 @@ export async function Milestones() {
                   </div>
                 </div>
               ))}
-            </div>
+            </Expandable>
           </div>
         )}
         {(hasBirthdays || hasAnniversaries) && hasMemories && (
@@ -122,7 +126,7 @@ export async function Milestones() {
               <Camera size={20} />
               {t_insights('memories-on-this-week')}
             </span>
-            <div className="mt-2 space-y-3">
+            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
               {memories.map((item, i) => (
                 <div key={i} className="flex items-center space-x-2 p-2">
                   <Picture
@@ -154,7 +158,7 @@ export async function Milestones() {
                   </div>
                 </div>
               ))}
-            </div>
+            </Expandable>
           </div>
         )}
       </div>

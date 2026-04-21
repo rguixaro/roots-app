@@ -47,7 +47,11 @@ export const createTree = async (values: z.infer<typeof CreateTreeSchema>): Prom
         newsletter: values.newsletter,
         accesses: { create: { userId, role: 'ADMIN' } },
       },
-      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     revalidatePath('/')
@@ -90,7 +94,11 @@ export const updateTree = async (
         newsletter: values.newsletter,
         slug: slugify(values.name),
       },
-      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     const changes = getChanges(prevTree, values, ['name', 'type', 'newsletter'])
@@ -151,7 +159,11 @@ export const inviteMember = async (
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     const inviter = await db.user.findUnique({ where: { id: inviterId } })
@@ -199,6 +211,13 @@ export const updateMember = async (
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId, ['ADMIN'])
 
+    if (role !== 'ADMIN') {
+      const remainingAdmins = await db.treeAccess.count({
+        where: { treeId, role: 'ADMIN', userId: { not: memberId } },
+      })
+      if (remainingAdmins === 0) return { error: true, message: 'error-tree-admin-required' }
+    }
+
     await db.treeAccess.update({
       where: { treeId_userId: { treeId, userId: memberId } },
       data: { role },
@@ -206,7 +225,11 @@ export const updateMember = async (
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     revalidatePath('/')
@@ -233,11 +256,26 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId, ['ADMIN'])
 
+    const target = await db.treeAccess.findUnique({
+      where: { treeId_userId: { treeId, userId: memberId } },
+      select: { role: true },
+    })
+    if (target?.role === 'ADMIN') {
+      const remainingAdmins = await db.treeAccess.count({
+        where: { treeId, role: 'ADMIN', userId: { not: memberId } },
+      })
+      if (remainingAdmins === 0) return { error: true, message: 'error-tree-admin-required' }
+    }
+
     await db.treeAccess.delete({ where: { treeId_userId: { treeId, userId: memberId } } })
 
     const tree = await db.tree.findUnique({
       where: { id: treeId },
-      include: { accesses: { include: { user: { select: { id: true, name: true, email: true, image: true } } } } },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+      },
     })
 
     revalidatePath('/')
@@ -380,7 +418,8 @@ export const createTreeEdge = async (
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
 
-    if (values.fromNodeId === values.toNodeId) return { error: true, message: 'error-cannot-connect-to-self' }
+    if (values.fromNodeId === values.toNodeId)
+      return { error: true, message: 'error-cannot-connect-to-self' }
 
     const [fromNode, toNode] = await Promise.all([
       db.treeNode.findFirst({ where: { id: values.fromNodeId, treeId: values.treeId } }),

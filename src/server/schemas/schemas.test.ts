@@ -165,7 +165,6 @@ describe('CreateTreeNodeSchema', () => {
       birthDate: null,
       deathPlace: null,
       deathDate: null,
-      biography: null,
     })
     expect(result.success).toBe(true)
   })

@@ -221,7 +221,7 @@ export function useEdgeOperations(
   const deleteEdge = useCallback(
     async (edgeId: string, closeContextMenu: () => void) => {
       try {
-        let edgeIdToDelete = edgeId
+        const edgeIdToDelete = edgeId
 
         const clickedEdge = treeEdges.find((e) => e.id === edgeId)
 

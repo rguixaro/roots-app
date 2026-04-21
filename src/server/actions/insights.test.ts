@@ -234,14 +234,14 @@ describe('getHighlights', () => {
     const result = await getHighlights()
     expect(result).toEqual({
       oldest: null,
-      newest: null,
+      youngest: null,
       largest: null,
       mostPhotos: null,
       mostMembers: null,
     })
   })
 
-  it('returns correct oldest, newest, largest, mostPhotos, mostMembers', async () => {
+  it('returns correct oldest, youngest, largest, mostPhotos, mostMembers', async () => {
     mockDb.tree.findMany.mockResolvedValue([
       {
         id: 't1',
@@ -281,8 +281,9 @@ describe('getHighlights', () => {
     expect(result.oldest?.name).toBe('Grandpa')
     expect(result.oldest?.birthYear).toBe(1930)
 
-    // Newest by createdAt
-    expect(result.newest?.name).toBe('Baby')
+    // Youngest by birthDate
+    expect(result.youngest?.name).toBe('Baby')
+    expect(result.youngest?.birthYear).toBe(2025)
 
     // Largest branch by PARENT edgesFrom count
     expect(result.largest?.name).toBe('Grandpa')

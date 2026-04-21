@@ -4,9 +4,28 @@ import { Prisma } from '@prisma/client'
 vi.mock('@/server/db', () => ({
   db: {
     tree: { create: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
-    treeAccess: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-    treeNode: { create: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), update: vi.fn(), delete: vi.fn() },
-    treeEdge: { create: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), delete: vi.fn(), deleteMany: vi.fn() },
+    treeAccess: {
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      count: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    treeNode: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    treeEdge: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
     activityLog: { create: vi.fn() },
     user: { findUnique: vi.fn() },
     picture: { findMany: vi.fn(), deleteMany: vi.fn() },
@@ -113,7 +132,9 @@ describe('updateTree', () => {
     mockDb.tree.update.mockResolvedValue(updatedTree)
     mockDb.activityLog.create.mockResolvedValue({})
     const { getChanges } = await import('@/server/utils')
-    ;(getChanges as ReturnType<typeof vi.fn>).mockReturnValue({ name: { before: 'Old', after: 'Updated' } })
+    ;(getChanges as ReturnType<typeof vi.fn>).mockReturnValue({
+      name: { before: 'Old', after: 'Updated' },
+    })
 
     const result = await updateTree('t1', values)
     expect(result.error).toBe(false)
@@ -218,6 +239,7 @@ describe('updateMember', () => {
   })
 
   it('updates member role successfully', async () => {
+    mockDb.treeAccess.count.mockResolvedValue(1)
     mockDb.treeAccess.update.mockResolvedValue({})
     mockDb.tree.findUnique.mockResolvedValue({ id: 't1', accesses: [] })
     const result = await updateMember('t1', 'user-2', 'EDITOR')
@@ -226,6 +248,21 @@ describe('updateMember', () => {
       where: { treeId_userId: { treeId: 't1', userId: 'user-2' } },
       data: { role: 'EDITOR' },
     })
+  })
+
+  it('prevents demoting the last admin', async () => {
+    mockDb.treeAccess.count.mockResolvedValue(0)
+    const result = await updateMember('t1', 'user-1', 'EDITOR')
+    expect(result).toEqual({ error: true, message: 'error-tree-admin-required' })
+    expect(mockDb.treeAccess.update).not.toHaveBeenCalled()
+  })
+
+  it('skips last-admin check when promoting to ADMIN', async () => {
+    mockDb.treeAccess.update.mockResolvedValue({})
+    mockDb.tree.findUnique.mockResolvedValue({ id: 't1', accesses: [] })
+    const result = await updateMember('t1', 'user-2', 'ADMIN')
+    expect(result.error).toBe(false)
+    expect(mockDb.treeAccess.count).not.toHaveBeenCalled()
   })
 })
 
@@ -244,6 +281,7 @@ describe('removeMember', () => {
   })
 
   it('removes member successfully', async () => {
+    mockDb.treeAccess.findUnique.mockResolvedValue({ role: 'EDITOR' })
     mockDb.treeAccess.delete.mockResolvedValue({})
     mockDb.tree.findUnique.mockResolvedValue({ id: 't1', accesses: [] })
     const result = await removeMember('t1', 'user-2')
@@ -251,6 +289,24 @@ describe('removeMember', () => {
     expect(mockDb.treeAccess.delete).toHaveBeenCalledWith({
       where: { treeId_userId: { treeId: 't1', userId: 'user-2' } },
     })
+  })
+
+  it('prevents removing the last admin', async () => {
+    mockDb.treeAccess.findUnique.mockResolvedValue({ role: 'ADMIN' })
+    mockDb.treeAccess.count.mockResolvedValue(0)
+    const result = await removeMember('t1', 'user-1')
+    expect(result).toEqual({ error: true, message: 'error-tree-admin-required' })
+    expect(mockDb.treeAccess.delete).not.toHaveBeenCalled()
+  })
+
+  it('allows removing an admin when another admin remains', async () => {
+    mockDb.treeAccess.findUnique.mockResolvedValue({ role: 'ADMIN' })
+    mockDb.treeAccess.count.mockResolvedValue(1)
+    mockDb.treeAccess.delete.mockResolvedValue({})
+    mockDb.tree.findUnique.mockResolvedValue({ id: 't1', accesses: [] })
+    const result = await removeMember('t1', 'user-2')
+    expect(result.error).toBe(false)
+    expect(mockDb.treeAccess.delete).toHaveBeenCalled()
   })
 })
 
@@ -404,10 +460,13 @@ describe('deleteTreeNode', () => {
 
     const result = await deleteTreeNode('n1', 't1')
     expect(result.error).toBe(false)
-    expect(Sentry.captureException).toHaveBeenCalledWith(s3Error, expect.objectContaining({
-      level: 'warning',
-      tags: expect.objectContaining({ action: 'deleteTreeNode', step: 's3-cleanup' }),
-    }))
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      s3Error,
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ action: 'deleteTreeNode', step: 's3-cleanup' }),
+      })
+    )
     expect(mockDb.treeNode.delete).toHaveBeenCalledWith({ where: { id: 'n1' } })
   })
 })
@@ -427,7 +486,12 @@ describe('deleteTreeEdge', () => {
   })
 
   it('deletes edge successfully', async () => {
-    mockDb.treeEdge.findFirst.mockResolvedValue({ id: 'e1', fromNodeId: 'n1', toNodeId: 'n2', type: 'PARENT' })
+    mockDb.treeEdge.findFirst.mockResolvedValue({
+      id: 'e1',
+      fromNodeId: 'n1',
+      toNodeId: 'n2',
+      type: 'PARENT',
+    })
     mockDb.treeNode.findFirst
       .mockResolvedValueOnce({ id: 'n1', fullName: 'A' })
       .mockResolvedValueOnce({ id: 'n2', fullName: 'B' })

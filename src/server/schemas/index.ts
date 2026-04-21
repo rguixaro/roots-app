@@ -99,15 +99,28 @@ export const CreateTreeNodeSchema = z.object({
   deathPlace: z.string().nullable().optional(),
   deathDate: z.coerce.date().optional().nullable(),
   gender: z.enum(TreeNodeGender, { required_error: 'gender-required' }),
-  biography: z.string().nullable().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   edgesFrom: z
-    .array(z.object({ id: z.string(), fromNodeId: z.string(), toNodeId: z.string(), type: z.enum(TreeEdgeType) }))
+    .array(
+      z.object({
+        id: z.string(),
+        fromNodeId: z.string(),
+        toNodeId: z.string(),
+        type: z.enum(TreeEdgeType),
+      })
+    )
     .optional()
     .nullable(),
   edgesTo: z
-    .array(z.object({ id: z.string(), fromNodeId: z.string(), toNodeId: z.string(), type: z.enum(TreeEdgeType) }))
+    .array(
+      z.object({
+        id: z.string(),
+        fromNodeId: z.string(),
+        toNodeId: z.string(),
+        type: z.enum(TreeEdgeType),
+      })
+    )
     .optional()
     .nullable(),
 })

@@ -36,10 +36,10 @@ export function PictureContextMenu({
   onSetProfile,
   onClose,
 }: PictureContextMenuProps) {
-  if (!visible || !picture) return null
-
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
+
+  if (!visible || !picture) return null
 
   const className =
     'hover:bg-ocean-100/50 focus:bg-ocean-100/50 text-ocean-400 flex w-full cursor-pointer items-center gap-2 rounded-md mt-2 px-3 py-2 text-sm transition-colors'

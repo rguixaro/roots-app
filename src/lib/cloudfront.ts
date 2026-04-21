@@ -35,7 +35,7 @@ export async function setCloudFrontCookies(response: NextResponse): Promise<{ ex
       name,
       value,
       path: '/',
-      httpOnly: false,
+      httpOnly: true,
       secure: true,
       sameSite: 'lax',
       domain: env.COOKIES_DOMAIN,

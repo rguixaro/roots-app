@@ -12,6 +12,10 @@ const { AMAZON_REGION, AMAZON_S3_BUCKET_NAME } = env
 
 const s3 = new S3Client({ region: AMAZON_REGION })
 
+const S3_KEY_PREFIX = 'roots/'
+
+const toS3Key = (fileKey: string) => `${S3_KEY_PREFIX}${fileKey}`
+
 /**
  * Uploads a file to S3
  * @param file {File} - The file to upload
@@ -74,7 +78,7 @@ export async function uploadFileToS3(
   await s3.send(
     new PutObjectCommand({
       Bucket: AMAZON_S3_BUCKET_NAME,
-      Key: `roots/${fileKey}`,
+      Key: toS3Key(fileKey),
       Body: compressedBuffer,
       ContentType: 'image/jpeg',
     })
@@ -91,7 +95,7 @@ export async function deleteFileFromS3(fileKey: string): Promise<void> {
   await s3.send(
     new DeleteObjectCommand({
       Bucket: AMAZON_S3_BUCKET_NAME,
-      Key: fileKey,
+      Key: toS3Key(fileKey),
     })
   )
 }

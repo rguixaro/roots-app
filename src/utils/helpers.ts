@@ -37,13 +37,13 @@ export function normalizePath(p: string): string {
 }
 
 /**
- * Determine if the current route is a tree detail route
+ * Determine if the current route is the full-screen tree graph view.
  * @param pathname {string} - The current pathname
- * @returns {boolean} - True if it's a tree detail route, false otherwise
+ * @returns {boolean} - True if it's the tree graph view
  */
 export function isTreeDetailRoute(pathname: string): boolean {
   const p = normalizePath(pathname)
-  return /^\/trees\/[^\/]+$/.test(p) && !p.includes('/edit') && !p.includes('/new')
+  return /^\/trees\/view\/[^\/]+$/.test(p)
 }
 
 /**

@@ -1,24 +1,35 @@
 import { getTranslations } from 'next-intl/server'
 
 import { auth } from '@/auth'
-import { getTreeRoots } from '@/server/queries'
+
+import { getTreeInfo } from '@/server/actions'
 
 import { NotFoundClient } from '@/components/layout'
-import { TreeWrapper } from '@/components/tree'
+import {
+  TreeInfoHubToolbar,
+  TreeInfoHeader,
+  TreeInfoShareDownload,
+  TreeInfoDemographics,
+  TreeInfoGenerations,
+  TreeInfoRelationships,
+  TreeInfoLifeStats,
+  TreeInfoPlaces,
+  TreeInfoPictures,
+  TreeInfoCompleteness,
+  TreeInfoUpcomingEvents,
+  TreeInfoCollaborators,
+} from '@/components/trees/info'
 
-import { TypographyH4 } from '@/ui'
+import { TreeAccessRole } from '@/types'
 
 export default async function TreePage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth()
   if (!session) return null
 
   const { slug } = await params
-
-  const result = await getTreeRoots(slug)
-  const t_errors = await getTranslations('errors')
   const t_common = await getTranslations('common')
 
-  if (!result) return null
+  const result = await getTreeInfo(slug)
 
   if ('error' in result) {
     return (
@@ -26,21 +37,28 @@ export default async function TreePage({ params }: { params: Promise<{ slug: str
     )
   }
 
-  const { tree, nodes, edges } = result
-  const userAccess = tree?.accesses.find((a) => a.userId === session?.user?.id)
-  const readonly = userAccess?.role === 'VIEWER'
+  const info = result
+  const myAccess = info.collaborators.list.find((c) => c.id === session.user?.id)
+  const role: TreeAccessRole = myAccess?.role ?? 'VIEWER'
 
   return (
-    <div className="h-full w-full text-center">
-      {!tree ? (
-        <div className="text-ocean-200 mt-10 flex h-32 flex-col items-center justify-center">
-          <TypographyH4>{t_errors('error-tree-not-found')}</TypographyH4>
+    <main className="flex flex-col items-start justify-center pb-12">
+      <div className="mx-auto w-11/12 max-w-4xl self-center py-6">
+        <TreeInfoHubToolbar slug={info.tree.slug} role={role} />
+        <div className="mt-6 space-y-6">
+          <TreeInfoHeader info={info} />
+          <TreeInfoShareDownload treeId={info.tree.id} canShare={role !== 'VIEWER'} />
+          <TreeInfoDemographics info={info} />
+          <TreeInfoGenerations info={info} />
+          <TreeInfoRelationships info={info} />
+          <TreeInfoLifeStats info={info} />
+          <TreeInfoPlaces info={info} />
+          <TreeInfoPictures info={info} />
+          <TreeInfoUpcomingEvents info={info} />
+          <TreeInfoCompleteness info={info} />
+          <TreeInfoCollaborators info={info} />
         </div>
-      ) : (
-        <div className="bg-ocean-200/15 border-ocean-400 h-full w-full border-12 shadow-inner">
-          <TreeWrapper readonly={readonly} tree={tree} nodes={nodes} edges={edges} />
-        </div>
-      )}
-    </div>
+      </div>
+    </main>
   )
 }

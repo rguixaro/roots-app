@@ -1,25 +1,9 @@
 'use client'
 
-import React, { useCallback, useRef, useState } from 'react'
-import {
-  Plus,
-  Minimize2,
-  ChevronLeft,
-  Logs,
-  ArrowDownToLine,
-  Settings2,
-  CalendarDays,
-  ScanSearch,
-  Share2,
-} from 'lucide-react'
+import React from 'react'
+import { Plus, Minimize2, ChevronLeft, ScanSearch } from 'lucide-react'
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
-import { useTranslations } from 'next-intl'
-import { toast } from 'sonner'
-
-import { useCopyToClipboard } from '@/hooks'
-
-import { ShareDialog } from '@/components/trees/share'
 
 import { cn } from '@/utils'
 
@@ -50,15 +34,6 @@ const slideFromTop: Variants = {
   hidden: { y: -50, opacity: 0 },
   visible: {
     y: 0,
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 25, delay: 0.2 },
-  },
-}
-
-const slideFromRight: Variants = {
-  hidden: { x: 50, opacity: 0 },
-  visible: {
-    x: 0,
     opacity: 1,
     transition: { type: 'spring', stiffness: 300, damping: 25, delay: 0.2 },
   },
@@ -151,32 +126,10 @@ export function TreeOverlay({
   onResetView,
   onFocus,
 }: TreeOverlayProps) {
-  const t_common = useTranslations('common')
-
   const iconClassName = 'text-ocean-50 group-hover:text-pale-ocean transition-colors duration-300'
-
-  const downloadRef = useRef<HTMLDivElement>(null)
-  const { copy } = useCopyToClipboard()
-
-  const [shareOpen, setShareOpen] = useState(false)
-
-  const handleDownload = useCallback(() => {
-    toast.info(t_common('unavailable-feature'))
-  }, [tree?.slug])
-
-  const handleShare = useCallback(() => {
-    setShareOpen(true)
-  }, [])
 
   return (
     <div>
-      <div
-        ref={downloadRef}
-        className="pointer-events-none fixed inset-0 -z-50 opacity-0"
-        aria-hidden="true"
-      >
-        <div className="react-flow-container" />
-      </div>
       <motion.div
         variants={slideFromLeft}
         initial="hidden"
@@ -186,7 +139,7 @@ export function TreeOverlay({
           'bg-ocean-400 rounded-lg rounded-t-none rounded-l-none ps-1 pe-3 pt-2 pb-4'
         )}
       >
-        <IconLink href="/">
+        <IconLink href={`/trees/${tree?.slug}`}>
           <ChevronLeft size={20} className={iconClassName} />
         </IconLink>
       </motion.div>
@@ -200,7 +153,12 @@ export function TreeOverlay({
           'max-w-[70vw] sm:max-w-none'
         )}
       >
-        <span className="text-ocean-50 text-lg font-extrabold md:text-xl">{tree.name}</span>
+        <Link
+          href={`/trees/${tree?.slug}`}
+          className="text-ocean-50 hover:text-pale-ocean text-lg font-extrabold transition-colors md:text-xl"
+        >
+          {tree.name}
+        </Link>
         <div className="bg-ocean-300 hidden h-4 w-0.5 sm:block" />
         {!readonly && (
           <IconButton onClick={onCreateNode} className="hidden sm:block">
@@ -217,45 +175,12 @@ export function TreeOverlay({
         )}
       </motion.div>
       <motion.div
-        variants={slideFromRight}
-        initial="hidden"
-        animate="visible"
-        className={cn(
-          'bg-ocean-400 absolute top-0 right-0 z-10 hidden flex-col gap-4 ps-3 pe-1 pt-2 pb-4 sm:flex',
-          'shadow-center-lg items-center justify-center rounded-lg rounded-t-none rounded-r-none rounded-bl-lg'
-        )}
-      >
-        <IconLink href={`/trees/timeline/${tree?.slug}`}>
-          <CalendarDays size={20} className={iconClassName} />
-        </IconLink>
-        <IconButton onClick={handleDownload}>
-          <ArrowDownToLine size={20} className={iconClassName} />
-        </IconButton>
-        {!readonly && (
-          <IconButton onClick={handleShare}>
-            <Share2 size={20} className={iconClassName} />
-          </IconButton>
-        )}
-        {!readonly && (
-          <>
-            <div className="bg-ocean-300 h-0.5 w-4" />
-            <IconLink href={`/trees/logs/${tree?.slug}`}>
-              <Logs size={20} className={iconClassName} />
-            </IconLink>
-            <IconLink href={`/trees/edit/${tree?.slug}`}>
-              <Settings2 size={20} className={iconClassName} />
-            </IconLink>
-          </>
-        )}
-      </motion.div>
-      <motion.div
         variants={slideFromBottom}
         initial="hidden"
         animate="visible"
         className={cn(
           'bg-ocean-400 absolute right-0 bottom-0 left-0 z-10 flex gap-4 px-4 pt-3 pb-1 sm:hidden',
-          'shadow-center-lg items-center',
-          !readonly ? 'justify-between' : 'justify-center gap-8'
+          'shadow-center-lg items-center justify-center gap-8'
         )}
       >
         {!readonly && (
@@ -271,32 +196,7 @@ export function TreeOverlay({
             <ScanSearch size={20} className={iconClassName} />
           </IconButton>
         )}
-        <IconLink href={`/trees/timeline/${tree?.slug}`}>
-          <CalendarDays size={20} className={iconClassName} />
-        </IconLink>
-        <IconButton onClick={handleDownload}>
-          <ArrowDownToLine size={20} className={iconClassName} />
-        </IconButton>
-        {!readonly && (
-          <IconButton onClick={handleShare}>
-            <Share2 size={20} className={iconClassName} />
-          </IconButton>
-        )}
-        {!readonly && (
-          <div className="flex w-full items-center justify-end gap-4">
-            <div className="bg-ocean-300 h-4 w-0.5" />
-            <IconLink href={`/trees/logs/${tree?.slug}`}>
-              <Logs size={20} className={iconClassName} />
-            </IconLink>
-            <IconLink href={`/trees/edit/${tree?.slug}`}>
-              <Settings2 size={20} className={iconClassName} />
-            </IconLink>
-          </div>
-        )}
       </motion.div>
-      {!readonly && (
-        <ShareDialog treeId={tree.id} open={shareOpen} onOpenChange={setShareOpen} />
-      )}
     </div>
   )
 }

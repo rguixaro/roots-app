@@ -353,7 +353,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
 
   return (
     <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
-      <GoBack to={`/trees/${currentTree.slug}`} />
+      <GoBack variant="filled" to={`/trees/${currentTree.slug}`} className="w-auto" />
       <TypographyH4 className="mt-4">{t_trees('tree-edit')}</TypographyH4>
       <p className="mb-4">{t_trees('tree-edit-description')} </p>
       <Form {...form}>
@@ -486,7 +486,6 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             <Tabs.Content value="members" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
               <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean flex-col items-start rounded-xl border-2 p-3">
-                <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
                   {t_trees('tree-members-info')}
                 </FormDescription>

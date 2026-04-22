@@ -15,7 +15,7 @@ export const ActivityFeed = async (slug: string) => {
 
   return (
     <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
-      <GoBack to={`/trees/${slug}`} />
+      <GoBack variant="filled" to={`/trees/${slug}`} className="w-auto" />
       <TypographyH5>{t_trees('recent-activity')}</TypographyH5>
       <p className="mb-5">{t_trees('recent-activity-description')} </p>
       {activityLogs?.map((log, i) => (

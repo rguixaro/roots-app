@@ -105,6 +105,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
           treeSlug: tree.slug,
           date: date.toISOString().split('T')[0],
           yearsAgo: today.getFullYear() - date.getFullYear(),
+          daysUntil,
           picture: _getProfilePic(node)?.fileKey || null,
           type,
         })
@@ -154,7 +155,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
 
     return {
       birthdays: birthdays.sort((a, b) => (a.daysUntil ?? 0) - (b.daysUntil ?? 0)),
-      anniversaries: anniversaries.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
+      anniversaries: anniversaries.sort((a, b) => (a.daysUntil ?? 0) - (b.daysUntil ?? 0)),
       memories: memories.sort((a, b) => (b.yearsAgo ?? 0) - (a.yearsAgo ?? 0)),
     }
   } catch (e) {

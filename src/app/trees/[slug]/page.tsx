@@ -43,7 +43,7 @@ export default async function TreePage({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="flex flex-col items-start justify-center pb-12">
-      <div className="mx-auto w-11/12 max-w-4xl self-center py-6">
+      <div className="mx-auto w-11/12 max-w-6xl self-center py-6">
         <TreeInfoHubToolbar slug={info.tree.slug} role={role} />
         <div className="mt-6 space-y-6">
           <TreeInfoHeader info={info} />

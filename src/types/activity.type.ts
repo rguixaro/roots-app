@@ -21,6 +21,8 @@ export const ActivityAction = [
 
   'SHARE_TOKEN_GENERATED',
   'MEMBER_JOINED_VIA_SHARE',
+
+  'NOTE_UPDATED',
 ] as const
 export type ActivityAction = (typeof ActivityAction)[number]
 

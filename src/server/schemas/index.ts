@@ -30,8 +30,19 @@ export const ActivityAction = [
 
   'SHARE_TOKEN_GENERATED',
   'MEMBER_JOINED_VIA_SHARE',
+
+  'NOTE_UPDATED',
 ] as const
 export type ActivityAction = (typeof ActivityAction)[number]
+
+// Schema for updating a tree's shared note
+export const MAX_TREE_NOTE_LENGTH = 10_000
+
+export const UpdateTreeNoteSchema = z.object({
+  treeId: z.string().min(1),
+  content: z.string().max(MAX_TREE_NOTE_LENGTH, { message: 'error-note-too-long' }),
+})
+export type UpdateTreeNoteSchema = z.infer<typeof UpdateTreeNoteSchema>
 
 // Schema for creating a new tree
 export const CreateTreeSchema = z.object({

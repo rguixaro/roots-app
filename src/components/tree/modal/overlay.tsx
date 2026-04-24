@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Plus, Minimize2, ChevronLeft, ScanSearch } from 'lucide-react'
+import { Plus, Minimize2, ChevronLeft, ScanSearch, NotebookPen } from 'lucide-react'
 import Link from 'next/link'
 import { motion, Variants } from 'framer-motion'
 
@@ -160,6 +160,9 @@ export function TreeOverlay({
           {tree.name}
         </Link>
         <div className="bg-ocean-300 hidden h-4 w-0.5 sm:block" />
+        <IconLink href={`/trees/notes/${tree?.slug}?from=view`} className="hidden sm:block">
+          <NotebookPen size={20} className={iconClassName} />
+        </IconLink>
         {!readonly && (
           <IconButton onClick={onCreateNode} className="hidden sm:block">
             <Plus size={20} className={iconClassName} />
@@ -183,6 +186,9 @@ export function TreeOverlay({
           'shadow-center-lg items-center justify-center gap-8'
         )}
       >
+        <IconLink href={`/trees/notes/${tree?.slug}?from=view`}>
+          <NotebookPen size={20} className={iconClassName} />
+        </IconLink>
         {!readonly && (
           <IconButton onClick={onCreateNode}>
             <Plus size={20} className={iconClassName} />

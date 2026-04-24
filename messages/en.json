@@ -99,7 +99,8 @@
     "error-tag-already-exists": "This picture is already tagged with this member",
     "error-tag-not-found": "This tag does not exist",
     "error-tag-create": "An error occurred while adding the tag",
-    "error-tag-remove": "An error occurred while removing the tag"
+    "error-tag-remove": "An error occurred while removing the tag",
+    "error-note-too-long": "Note is too long"
   },
   "enums": {
     "human": "Human",
@@ -139,6 +140,18 @@
     "feedback-title": "Feedback welcome",
     "feedback-description": "<app>{appName}</app> is a small personal project built in the open. If you run into a bug or have an idea, GitHub is the best place to reach me",
     "github-cta": "View on GitHub"
+  },
+  "notes": {
+    "title": "Note",
+    "description": "A shared note for this family",
+    "empty-viewer": "The note is empty",
+    "empty-editor-placeholder": "Start writing a note for this family…",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Note saved",
+    "char-counter": "{count} / {max}",
+    "last-updated-by": "Updated by {name}",
+    "never-edited": "Never edited"
   },
   "insights": {
     "milestones": "Birthdays and milestones",
@@ -300,6 +313,7 @@
     "TREE_UPDATED": "Family tree updated",
     "SHARE_TOKEN_GENERATED": "Share link generated",
     "MEMBER_JOINED_VIA_SHARE": "Member joined via share link",
+    "NOTE_UPDATED": "Note updated",
     "expires-on": "Expires on",
     "edited-by": "Edited by",
     "deleted-user": "Deleted user",
@@ -409,6 +423,8 @@
     "action-logs-description": "Recent changes",
     "action-settings": "Settings",
     "action-settings-description": "Edit and manage",
+    "action-notes": "Note",
+    "action-notes-description": "Shared note",
     "action-share": "Share",
     "action-share-description": "Invite via link",
     "action-export-image": "Save as image",

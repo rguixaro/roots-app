@@ -99,7 +99,8 @@
     "error-tag-already-exists": "Aquesta imatge ja està etiquetada amb aquest membre",
     "error-tag-not-found": "Aquesta etiqueta no existeix",
     "error-tag-create": "S'ha produït un error en afegir l'etiqueta",
-    "error-tag-remove": "S'ha produït un error en eliminar l'etiqueta"
+    "error-tag-remove": "S'ha produït un error en eliminar l'etiqueta",
+    "error-note-too-long": "La nota és massa llarga"
   },
   "enums": {
     "human": "Humana",
@@ -139,6 +140,18 @@
     "feedback-title": "Feedback benvingut",
     "feedback-description": "<app>{appName}</app> és un petit projecte personal construït en obert. Si trobes un error o tens una idea, GitHub és el millor lloc per contactar-me",
     "github-cta": "Veure a GitHub"
+  },
+  "notes": {
+    "title": "Nota",
+    "description": "Una nota compartida per a aquesta família",
+    "empty-viewer": "La nota està buida",
+    "empty-editor-placeholder": "Comença a escriure la nota per a aquesta família…",
+    "save": "Desa",
+    "saving": "Desant…",
+    "saved": "Nota desada",
+    "char-counter": "{count} / {max}",
+    "last-updated-by": "Actualitzada per {name}",
+    "never-edited": "Mai editada"
   },
   "insights": {
     "milestones": "Aniversaris i efemèrides",
@@ -300,6 +313,7 @@
     "TREE_UPDATED": "Família actualitzada",
     "SHARE_TOKEN_GENERATED": "Enllaç per compartir generat",
     "MEMBER_JOINED_VIA_SHARE": "Membre unit a través de l'enllaç",
+    "NOTE_UPDATED": "Nota actualitzada",
     "expires-on": "Caduca el",
     "edited-by": "Editat per",
     "deleted-user": "Usuari eliminat",
@@ -409,6 +423,8 @@
     "action-logs-description": "Canvis recents",
     "action-settings": "Ajustos",
     "action-settings-description": "Edita i gestiona",
+    "action-notes": "Nota",
+    "action-notes-description": "Nota compartida",
     "action-share": "Compartir",
     "action-share-description": "Convida amb enllaç",
     "action-export-image": "Desa com a imatge",

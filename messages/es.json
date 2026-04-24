@@ -99,7 +99,8 @@
     "error-tag-already-exists": "Esta imagen ya está etiquetada con este miembro",
     "error-tag-not-found": "Esta etiqueta no existe",
     "error-tag-create": "Se ha producido un error al añadir la etiqueta",
-    "error-tag-remove": "Se ha producido un error al eliminar la etiqueta"
+    "error-tag-remove": "Se ha producido un error al eliminar la etiqueta",
+    "error-note-too-long": "La nota es demasiado larga"
   },
   "enums": {
     "human": "Humana",
@@ -139,6 +140,18 @@
     "feedback-title": "Feedback bienvenido",
     "feedback-description": "<app>{appName}</app> es un pequeño proyecto personal construido en abierto. Si encuentras un error o tienes una idea, GitHub es el mejor sitio para contactarme",
     "github-cta": "Ver en GitHub"
+  },
+  "notes": {
+    "title": "Nota",
+    "description": "Una nota compartida para esta familia",
+    "empty-viewer": "La nota está vacía",
+    "empty-editor-placeholder": "Empieza a escribir la nota para esta familia…",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "saved": "Nota guardada",
+    "char-counter": "{count} / {max}",
+    "last-updated-by": "Actualizada por {name}",
+    "never-edited": "Nunca editada"
   },
   "insights": {
     "milestones": "Cumpleaños y efemérides",
@@ -300,6 +313,7 @@
     "TREE_UPDATED": "Familia actualizada",
     "SHARE_TOKEN_GENERATED": "Enlace para compartir generado",
     "MEMBER_JOINED_VIA_SHARE": "Miembro unido a través del enlace",
+    "NOTE_UPDATED": "Nota actualizada",
     "expires-on": "Expira el",
     "edited-by": "Editado por",
     "deleted-user": "Usuario eliminado",
@@ -409,6 +423,8 @@
     "action-logs-description": "Cambios recientes",
     "action-settings": "Ajustes",
     "action-settings-description": "Edita y gestiona",
+    "action-notes": "Nota",
+    "action-notes-description": "Nota compartida",
     "action-share": "Compartir",
     "action-share-description": "Invita por enlace",
     "action-export-image": "Guardar imagen",

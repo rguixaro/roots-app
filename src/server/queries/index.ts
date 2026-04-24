@@ -129,6 +129,53 @@ export const getTreeRoots = cache(async (slug: string) => {
 })
 
 /**
+ * Get the shared note for a tree (singleton per tree).
+ * Returns the note content, last-edit metadata, and whether the current user
+ * can edit. Note row does not have to exist yet — returns empty content when
+ * missing. Auth required.
+ */
+export const getTreeNote = cache(async (slug: string) => {
+  try {
+    const userId = await assertAuthenticated()
+
+    const tree = await db.tree.findFirst({
+      where: { slug, accesses: { some: { userId } } },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        type: true,
+        accesses: { where: { userId }, select: { role: true } },
+        note: {
+          include: {
+            updatedBy: { select: { id: true, name: true, image: true } },
+          },
+        },
+      },
+    })
+
+    if (!tree) return { error: true as const, message: 'error-tree-not-found' as const }
+
+    const role = tree.accesses[0]?.role
+    const canEdit = role === 'EDITOR' || role === 'ADMIN'
+
+    return {
+      error: false as const,
+      currentUserId: userId,
+      canEdit,
+      tree: { id: tree.id, slug: tree.slug, name: tree.name, type: tree.type },
+      note: {
+        content: tree.note?.content ?? '',
+        updatedAt: tree.note?.updatedAt ?? null,
+        updatedBy: tree.note?.updatedBy ?? null,
+      },
+    }
+  } catch (error) {
+    throw error
+  }
+})
+
+/**
  * Get the latest activity logs for the specified tree
  * Auth required.
  * @param treeId Tree ID

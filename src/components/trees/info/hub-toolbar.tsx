@@ -3,6 +3,7 @@ import {
   TreePine,
   CalendarDays,
   Logs,
+  NotebookPen,
   Settings2,
   ArrowUpRight,
   type LucideIcon,
@@ -57,7 +58,7 @@ export async function TreeInfoHubToolbar({ slug, role }: HubToolbarProps) {
   return (
     <div>
       <GoBack variant="filled" to="/" className="w-auto" />
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <HubActionCard
           href={`/trees/view/${slug}`}
           icon={TreePine}
@@ -69,6 +70,12 @@ export async function TreeInfoHubToolbar({ slug, role }: HubToolbarProps) {
           icon={CalendarDays}
           label={t('action-timeline')}
           description={t('action-timeline-description')}
+        />
+        <HubActionCard
+          href={`/trees/notes/${slug}`}
+          icon={NotebookPen}
+          label={t('action-notes')}
+          description={t('action-notes-description')}
         />
         {canEdit && (
           <>

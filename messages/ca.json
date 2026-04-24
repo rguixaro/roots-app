@@ -134,6 +134,13 @@
     "empty-title": "Comença el teu arbre familiar",
     "empty-description": "Crea la teva primera família per explorar, preservar i compartir les teves arrels"
   },
+  "about": {
+    "title": "Sobre <app>{appName}</app>",
+    "features-title": "Què pots fer",
+    "feedback-title": "Feedback benvingut",
+    "feedback-description": "<app>{appName}</app> és un petit projecte personal construït en obert. Si trobes un error o tens una idea, GitHub és el millor lloc per contactar-me",
+    "github-cta": "Veure a GitHub"
+  },
   "insights": {
     "milestones": "Aniversaris i efemèrides",
     "milestones-description": "Aquí pots veure els propers aniversaris i esdeveniments destacats dels membres de la teva família.",

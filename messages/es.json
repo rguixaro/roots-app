@@ -134,6 +134,13 @@
     "empty-title": "Empieza tu árbol genealógico",
     "empty-description": "Crea tu primera familia para explorar, preservar y compartir tus raíces"
   },
+  "about": {
+    "title": "Sobre <app>{appName}</app>",
+    "features-title": "Qué puedes hacer",
+    "feedback-title": "Feedback bienvenido",
+    "feedback-description": "<app>{appName}</app> es un pequeño proyecto personal construido en abierto. Si encuentras un error o tienes una idea, GitHub es el mejor sitio para contactarme",
+    "github-cta": "Ver en GitHub"
+  },
   "insights": {
     "milestones": "Cumpleaños y efemérides",
     "milestones-description": "Aquí puedes ver los próximos cumpleaños y acontecimientos destacados de los miembros de tu familia.",

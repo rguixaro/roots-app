@@ -134,6 +134,13 @@
     "empty-title": "Start your family tree",
     "empty-description": "Create your first family to explore, preserve, and share your roots"
   },
+  "about": {
+    "title": "About <app>{appName}</app>",
+    "features-title": "What you can do",
+    "feedback-title": "Feedback welcome",
+    "feedback-description": "<app>{appName}</app> is a small personal project built in the open. If you run into a bug or have an idea, GitHub is the best place to reach me",
+    "github-cta": "View on GitHub"
+  },
   "insights": {
     "milestones": "Birthdays and milestones",
     "milestones-description": "Here you can see upcoming birthdays and notable events of your family members.",

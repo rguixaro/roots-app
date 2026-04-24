@@ -36,7 +36,10 @@ describe('getTrees', () => {
     expect(result).toEqual({ trees })
     expect(mockDb.tree.findMany).toHaveBeenCalledWith({
       where: { accesses: { some: { userId: 'user-1' } } },
-      include: { accesses: true },
+      include: {
+        accesses: true,
+        _count: { select: { nodes: true } },
+      },
     })
   })
 

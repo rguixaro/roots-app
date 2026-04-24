@@ -40,7 +40,7 @@ export async function TreeInfoCollaborators({ info }: CollaboratorsProps) {
         <span>{t('collaborators-editors', { count: info.collaborators.byRole.EDITOR })}</span>
         <span>{t('collaborators-viewers', { count: info.collaborators.byRole.VIEWER })}</span>
       </div>
-      <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+      <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
         {info.collaborators.list.map((c) => (
           <div
             key={c.id}

@@ -38,7 +38,7 @@ export async function TreeInfoPictures({ info }: PicturesProps) {
       {p.mostPhotographed.length > 0 && (
         <div>
           <p className="mb-2 text-xs font-medium opacity-70">{t('pictures-most-photographed')}</p>
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+          <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
             {p.mostPhotographed.map((m) => (
               <MemberCard
                 key={m.id}

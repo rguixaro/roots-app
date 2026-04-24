@@ -37,7 +37,7 @@ export async function TreeInfoUpcomingEvents({ info }: UpcomingEventsProps) {
               <Cake size={14} />
               {t('upcoming-birthdays')}
             </p>
-            <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+            <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
               {u.birthdays.map((b) => (
                 <MemberCard
                   key={b.id}
@@ -59,7 +59,7 @@ export async function TreeInfoUpcomingEvents({ info }: UpcomingEventsProps) {
               <Calendar size={14} />
               {t('upcoming-anniversaries')}
             </p>
-            <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+            <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
               {u.anniversaries.map((a) => (
                 <MemberCard
                   key={`${a.id}-${a.type}`}
@@ -83,7 +83,7 @@ export async function TreeInfoUpcomingEvents({ info }: UpcomingEventsProps) {
               <Camera size={14} />
               {t('upcoming-memories')}
             </p>
-            <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+            <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
               {u.memoriesThisWeek.map((m) => (
                 <MemberCard
                   key={m.id}

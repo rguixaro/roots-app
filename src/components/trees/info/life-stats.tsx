@@ -35,7 +35,7 @@ export async function TreeInfoLifeStats({ info }: LifeStatsProps) {
       {ls.topLongestLived.length > 0 && (
         <div className="mb-5">
           <p className="mb-2 text-xs font-medium opacity-70">{t('life-longest-lived')}</p>
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+          <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
             {ls.topLongestLived.map((m) => (
               <MemberCard
                 key={m.id}

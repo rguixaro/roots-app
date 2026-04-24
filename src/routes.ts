@@ -8,7 +8,7 @@ export const AUTH_ROUTES: string[] = ['/auth', '/auth/error']
  * Routes that require authentication.
  * Auth required.
  */
-export const PROTECTED_ROUTES: string[] = ['/', '/profile', '/trees', '/trees/new']
+export const PROTECTED_ROUTES: string[] = ['/', '/profile', '/trees', '/trees/new', '/about']
 
 /**
  * Trees routes prefix.

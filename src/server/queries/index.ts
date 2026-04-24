@@ -17,9 +17,42 @@ export const getTrees = cache(async () => {
 
     const trees = await db.tree.findMany({
       where: { accesses: { some: { userId: userId } } },
-      include: { accesses: true },
+      include: {
+        accesses: true,
+        _count: { select: { nodes: true } },
+      },
     })
     return { trees: trees }
+  } catch (error) {
+    throw error
+  }
+})
+
+/**
+ * Get the tree the current user most recently interacted with.
+ * Uses the latest ActivityLog created by this user on any tree they have access to.
+ * Falls back to `null` when the user has no activity logs.
+ * Auth required.
+ */
+export const getLastActiveTree = cache(async () => {
+  try {
+    const userId = await assertAuthenticated()
+
+    const log = await db.activityLog.findFirst({
+      where: {
+        createdBy: userId,
+        tree: { accesses: { some: { userId } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        tree: {
+          include: { _count: { select: { nodes: true } } },
+        },
+      },
+    })
+
+    if (!log?.tree) return null
+    return { tree: log.tree, lastActivityAt: log.createdAt }
   } catch (error) {
     throw error
   }

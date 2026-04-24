@@ -38,7 +38,7 @@ export async function TreeInfoRelationships({ info }: RelationshipsProps) {
       {r.topFamilies.length > 0 && (
         <div className="mt-4">
           <p className="mb-2 text-xs font-medium opacity-70">{t(mostChildrenKey)}</p>
-          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+          <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">
             {r.topFamilies.map((m) => (
               <MemberCard
                 key={m.id}

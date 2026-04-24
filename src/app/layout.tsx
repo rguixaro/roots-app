@@ -99,6 +99,7 @@ export default async function RootLayout({
 
   const session = await auth()
   const userName = session?.user.name
+  const userImage = session?.user.image ?? null
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -112,7 +113,7 @@ export default async function RootLayout({
           <SessionProvider>
             <NextIntlClientProvider messages={messages}>
               <CookiesProvider />
-              <Header username={userName || ''} />
+              <Header username={userName || ''} userImage={userImage} />
               <main className="flex-1">{children}</main>
               <Footer />
               <ToasterProvider />

@@ -1,167 +1,124 @@
 import Link from 'next/link'
-import { Calendar, Cake, Camera } from 'lucide-react'
+import { Cake, Calendar, Camera } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 import { getMilestones } from '@/server/actions'
 
-import { TypographyH5, Picture } from '@/ui'
+import { MemberCard } from '../info/member-card'
+import { Section } from '../info/section'
 
-import { getLocalizedDay, getLocalizedMonth } from '@/utils'
+import type { Milestone } from '@/types'
 
-import { Expandable } from './expandable'
-
-const MILESTONES_VISIBLE_LIMIT = 5
-
+/**
+ * Cross-tree "what's coming up" section on the dashboard. Mirrors the tree
+ * hub's upcoming-events layout: three horizontal scrollable strips (birthdays,
+ * anniversaries, memories-this-week) built from `<MemberCard>`s.
+ * Each card deep-links to its source tree's hub.
+ */
 export async function Milestones() {
   const t_insights = await getTranslations('insights')
+  const locale = await getLocale()
 
   const { anniversaries, birthdays, memories } = await getMilestones()
 
-  const hasBirthdays = birthdays.length > 0
-  const hasAnniversaries = anniversaries.length > 0
-  const hasMemories = memories.length > 0
+  const hasAny = anniversaries.length > 0 || birthdays.length > 0 || memories.length > 0
 
-  if (!hasBirthdays && !hasAnniversaries)
-    return (
-      <div>
-        <TypographyH5>{t_insights('milestones')}</TypographyH5>
-        <p className="mt-2 mb-4">{t_insights('milestones-empty')}</p>
-      </div>
-    )
-
-  const locale = await getLocale()
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(locale, { month: 'long', day: 'numeric' })
 
   return (
-    <div>
-      <TypographyH5>{t_insights('milestones')}</TypographyH5>
-      <p className="mt-2 mb-4">{t_insights('milestones-description')} </p>
-      <div className="text-ocean-400 bg-pale-ocean shadow-center-sm flex h-full w-full flex-col rounded-lg">
-        {hasAnniversaries && (
-          <div className="p-4">
-            <span className="flex items-center gap-2 font-bold">
-              <Calendar size={20} />
-              {t_insights('on-the-next-thirty-days')}
-            </span>
-            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
-              {anniversaries.map((item, i) => (
-                <div key={i} className="flex items-center space-x-3 p-2">
-                  <Picture
-                    fileKey={item.picture}
-                    classNameContainer="h-16 w-16 shadow-center-sm flex-shrink-0"
-                  />
-                  <div key={i} className="flex-col items-center justify-between rounded">
-                    <p className="text-sm font-medium">
-                      {t_insights('anniversary-description', {
-                        name: item.name,
-                        yearsAgo: item.yearsAgo ?? 0,
-                        type: item.type ?? 'birth',
-                      })}
-                    </p>
-                    <div className="flex gap-2 text-xs font-medium opacity-70">
-                      <span>{item.date}</span>
-                      {' · '}
-                      <Link
-                        href={`/trees/${item.treeSlug}`}
-                        className="decoration-dotted underline-offset-4 hover:underline"
-                      >
-                        {item.treeName}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </Expandable>
-          </div>
+    <Section title={t_insights('milestones')} description={t_insights('milestones-description')}>
+      {!hasAny && <p className="text-sm italic opacity-70">{t_insights('milestones-empty')}</p>}
+
+      <div className="space-y-6">
+        {birthdays.length > 0 && (
+          <MilestoneStrip icon={<Cake size={14} />} heading={t_insights('birthdays-this-month')}>
+            {birthdays.map((b) => (
+              <MilestoneCard
+                key={`b-${b.id}`}
+                item={b}
+                primary={t_insights('birthday-description', {
+                  name: b.name,
+                  age: b.age ?? 0,
+                  daysUntil: b.daysUntil ?? 0,
+                })}
+                secondary={`${b.date ? formatDate(b.date) : ''} · ${b.treeName}`}
+              />
+            ))}
+          </MilestoneStrip>
         )}
-        {hasAnniversaries && hasBirthdays && (
-          <div className="mx-auto w-5/6 items-center justify-center">
-            <div className="bg-ocean-50 shadow-center-sm h-0.5 rounded opacity-70" />
-          </div>
+
+        {anniversaries.length > 0 && (
+          <MilestoneStrip
+            icon={<Calendar size={14} />}
+            heading={t_insights('on-the-next-thirty-days')}
+          >
+            {anniversaries.map((a) => (
+              <MilestoneCard
+                key={`a-${a.id}-${a.type}`}
+                item={a}
+                primary={t_insights('anniversary-description', {
+                  name: a.name,
+                  yearsAgo: a.yearsAgo ?? 0,
+                  type: a.type ?? 'birth',
+                })}
+                secondary={`${a.date ? formatDate(a.date) : ''} · ${a.treeName}`}
+              />
+            ))}
+          </MilestoneStrip>
         )}
-        {hasBirthdays && (
-          <div className="p-4">
-            <span className="flex items-center gap-2 font-bold">
-              <Cake size={20} />
-              {t_insights('birthdays-this-month')}
-            </span>
-            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
-              {birthdays.map((item, i) => (
-                <div key={i} className="flex items-center space-x-2 p-2">
-                  <Picture
-                    fileKey={item.picture}
-                    classNameContainer="h-16 w-16 shadow-center-sm flex-shrink-0"
-                  />
-                  <div key={i} className="flex-col items-center justify-between rounded">
-                    <p className="text-sm font-medium">
-                      {t_insights('birthday-description', {
-                        name: item.name,
-                        daysUntil: item.daysUntil ?? 0,
-                        age: item.age ?? 0,
-                      })}
-                    </p>
-                    <div className="flex gap-2 text-xs font-medium opacity-70">
-                      <span>{item.date}</span>
-                      {' · '}
-                      <Link
-                        href={`/trees/${item.treeSlug}`}
-                        className="decoration-dotted underline-offset-4 hover:underline"
-                      >
-                        {item.treeName}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </Expandable>
-          </div>
-        )}
-        {(hasBirthdays || hasAnniversaries) && hasMemories && (
-          <div className="mx-auto w-5/6 items-center justify-center">
-            <div className="bg-ocean-50 shadow-center-sm h-0.5 rounded opacity-70" />
-          </div>
-        )}
-        {hasMemories && (
-          <div className="p-4">
-            <span className="flex items-center gap-2 font-bold">
-              <Camera size={20} />
-              {t_insights('memories-on-this-week')}
-            </span>
-            <Expandable limit={MILESTONES_VISIBLE_LIMIT} className="mt-2 space-y-3">
-              {memories.map((item, i) => (
-                <div key={i} className="flex items-center space-x-2 p-2">
-                  <Picture
-                    fileKey={item.picture}
-                    classNameContainer="h-16 w-16 shadow-center-sm flex-shrink-0"
-                  />
-                  <div key={i} className="flex-col items-center justify-between rounded">
-                    <p className="text-sm font-medium">
-                      {t_insights('memory-description', { yearsAgo: item.yearsAgo ?? 0 })}
-                    </p>
-                    <p className="text-xs font-medium">
-                      {item.name.split(', ').map((name, i) => (
-                        <span key={i}>
-                          {name}
-                          {i < item.name.split(', ').length - 1 ? ', ' : ''}
-                        </span>
-                      ))}
-                    </p>
-                    <div className="flex gap-2 text-xs font-medium opacity-70">
-                      <span>{item.date}</span>
-                      {' · '}
-                      <Link
-                        href={`/trees/${item.treeSlug}`}
-                        className="decoration-dotted underline-offset-4 hover:underline"
-                      >
-                        {item.treeName}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </Expandable>
-          </div>
+
+        {memories.length > 0 && (
+          <MilestoneStrip icon={<Camera size={14} />} heading={t_insights('memories-on-this-week')}>
+            {memories.map((m) => (
+              <MilestoneCard
+                key={`m-${m.id}`}
+                item={m}
+                primary={t_insights('memory-description', {
+                  yearsAgo: m.yearsAgo ?? 0,
+                })}
+                secondary={`${m.date ? formatDate(m.date) : ''} · ${m.treeName}`}
+              />
+            ))}
+          </MilestoneStrip>
         )}
       </div>
+    </Section>
+  )
+}
+
+function MilestoneStrip({
+  icon,
+  heading,
+  children,
+}: {
+  icon: React.ReactNode
+  heading: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <p className="mb-2 flex items-center gap-2 text-xs font-semibold opacity-80">
+        {icon}
+        {heading}
+      </p>
+      <div className="no-scrollbar -mx-2 flex gap-3 overflow-x-auto px-2 py-2">{children}</div>
     </div>
+  )
+}
+
+function MilestoneCard({
+  item,
+  primary,
+  secondary,
+}: {
+  item: Milestone
+  primary: string
+  secondary: string
+}) {
+  return (
+    <Link href={`/trees/${item.treeSlug}`} className="shrink-0">
+      <MemberCard picture={item.picture} name={item.name} primary={primary} secondary={secondary} />
+    </Link>
   )
 }

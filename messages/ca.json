@@ -3,7 +3,7 @@
     "return": "Tornar",
     "tree": "Familia",
     "trees": "Famílies",
-    "trees-description": "Aquí tens totes les teves famílies. Pots crear-ne de noves o gestionar les existents",
+    "trees-description": "Obre una família per explorar els seus detalls",
     "page-not-found": "Pàgina no trobada",
     "tree-not-found": "Família no trobada",
     "confirm": "Confirmar",
@@ -122,6 +122,14 @@
     "share-memories-description": "Preserva històries i fotos per a les generacions futures",
     "private-and-secure-title": "Privat i segur",
     "private-and-secure-description": "Les dades de la teva família es mantenen segures i privades"
+  },
+  "home": {
+    "good-morning": "Bon dia, {name}",
+    "good-afternoon": "Bona tarda, {name}",
+    "good-evening": "Bona nit, {name}",
+    "continue": "Continua on ho vas deixar",
+    "empty-title": "Comença el teu arbre familiar",
+    "empty-description": "Crea la teva primera família per explorar, preservar i compartir les teves arrels"
   },
   "insights": {
     "milestones": "Aniversaris i efemèrides",

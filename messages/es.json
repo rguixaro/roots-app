@@ -3,7 +3,7 @@
     "return": "Volver",
     "tree": "Familia",
     "trees": "Familias",
-    "trees-description": "Aquí están todas tus familias. Puedes crear nuevas o gestionar las existentes",
+    "trees-description": "Abre una familia para explorar sus detalles",
     "page-not-found": "Página no encontrada",
     "tree-not-found": "Familia no encontrada",
     "confirm": "Confirmar",
@@ -122,6 +122,14 @@
     "share-memories-description": "Preserva historias y fotos para las generaciones futuras",
     "private-and-secure-title": "Privado y Seguro",
     "private-and-secure-description": "Los datos de tu familia permanecen seguros y privados"
+  },
+  "home": {
+    "good-morning": "Buenos días, {name}",
+    "good-afternoon": "Buenas tardes, {name}",
+    "good-evening": "Buenas noches, {name}",
+    "continue": "Continúa donde lo dejaste",
+    "empty-title": "Empieza tu árbol genealógico",
+    "empty-description": "Crea tu primera familia para explorar, preservar y compartir tus raíces"
   },
   "insights": {
     "milestones": "Cumpleaños y efemérides",

@@ -1,42 +1,77 @@
+import Link from 'next/link'
+import { Plus, Sprout } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 import { getTrees } from '@/server/queries'
 
 import { ItemTree } from '@/components/trees'
-
-import { Tree } from '@/types'
+import { Section } from '../info/section'
+import type { TreeFeedItem } from './item'
 
 import { cn } from '@/utils'
 
 export const TreesFeed = async () => {
   const t_common = await getTranslations('common')
+  const t_trees = await getTranslations('trees')
+  const t_home = await getTranslations('home')
 
-  const trees = (await getTrees())?.trees
-  const treesWithAdd = [null as Tree | null, ...(trees ?? [])]
+  const raw = (await getTrees())?.trees ?? []
+  const trees: TreeFeedItem[] = raw.map((t) => ({
+    id: t.id,
+    slug: t.slug,
+    name: t.name,
+    type: t.type,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    memberCount: (t as any)._count?.nodes ?? 0,
+  }))
+
+  if (trees.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center sm:py-16">
+        <div className="bg-ocean-100/60 mb-5 rounded-full p-5">
+          <Sprout size={40} className="stroke-ocean-300" />
+        </div>
+        <h2 className="text-ocean-400 mb-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
+          {t_home('empty-title')}
+        </h2>
+        <p className="text-ocean-300 mb-6 max-w-sm text-sm">
+          {t_home('empty-description')}
+        </p>
+        <Link
+          href="/trees/new"
+          className={cn(
+            'bg-ocean-200 hover:bg-ocean-300 shadow-center-sm group text-neutral-50',
+            'flex items-center gap-2 rounded-xl px-6 py-3',
+            'text-sm font-bold transition-colors duration-200'
+          )}
+        >
+          <Plus size={18} className="transition-transform duration-200 group-hover:rotate-90" />
+          {t_trees('tree-create')}
+        </Link>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <div className="w-3/4 self-center sm:w-3/4">
-        <div className="text-ocean-400 flex h-full items-center justify-center">
-          <div className="h-full w-full sm:w-4/5 md:w-3/5">
-            <p className="text-ocean-400 mt-2 mb-4">{t_common('trees-description')}</p>
-          </div>
-        </div>
+    <Section title={t_common('trees')} description={t_common('trees-description')}>
+      <div className="border-ocean-200/20 divide-ocean-100/60 divide-y overflow-hidden rounded-xl border-2">
+        {trees.map((tree, i) => (
+          <ItemTree key={tree.id} tree={tree} index={i} />
+        ))}
       </div>
-      <div
+      <Link
+        href="/trees/new"
         className={cn(
-          'no-scrollbar mx-auto flex w-full overflow-x-auto overflow-y-hidden',
-          'sm:w-[90%] md:w-[75%] lg:w-[65%] xl:w-[55%]',
-          treesWithAdd.length <= 2 ? 'justify-center' : 'justify-start',
-          treesWithAdd.length === 3 && 'sm:justify-center'
+          'bg-ocean-200 hover:bg-ocean-300 shadow-center-sm group text-neutral-50',
+          'mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3',
+          'text-sm font-bold transition-colors duration-200'
         )}
       >
-        <div className="flex w-max flex-row gap-2 px-4">
-          {treesWithAdd.map((item, i) => (
-            <ItemTree key={i} tree={item} index={i} />
-          ))}
-        </div>
-      </div>
-    </div>
+        <Plus size={18} className="transition-transform duration-200 group-hover:rotate-90" />
+        {t_trees('tree-create')}
+      </Link>
+    </Section>
   )
 }

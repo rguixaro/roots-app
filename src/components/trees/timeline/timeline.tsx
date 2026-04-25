@@ -7,13 +7,26 @@ import { ChevronsLeftRightEllipsis, Columns3, Rows3 } from 'lucide-react'
 
 import { GoBack } from '@/components/layout'
 
-import { Picture, TypographyH5 } from '@/ui'
+import { Picture, TypographyH4 } from '@/ui'
 
 import { TimelineEvent, TimelineNode } from '@/types'
 
 import { cn } from '@/utils'
 
 import { AnimatedEvent, Orientation } from './event'
+
+const eventBgClass = (type: TimelineEvent['type']): string => {
+  switch (type) {
+    case 'birth':
+      return 'bg-pale-ocean'
+    case 'death':
+      return 'bg-ocean-100'
+    case 'marriage':
+      return 'bg-rose-100'
+    case 'divorce':
+      return 'bg-slate-200'
+  }
+}
 
 const DAY_MS = 1000 * 60 * 60 * 24
 const BASE_PIXELS_PER_YEAR = 50
@@ -39,11 +52,6 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
 
   const isHorizontal = orientation === 'horizontal'
 
-  /**
-   * Compute timeline items with positions based on event dates.
-   * Offsets are axis-agnostic — used as `x` in horizontal mode and `y` in vertical mode.
-   * @return { nodes: TimelineNode[]; positions: number[]; span: number }
-   */
   const items = useMemo(() => {
     const sorted = [...events].sort((a, b) => a.date.getTime() - b.date.getTime())
     if (sorted.length === 0) return { nodes: [], positions: [], span: 0 }
@@ -89,30 +97,28 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
   let eventIndex = 0
 
   return (
-    <div className="text-ocean-400 z-0 my-2 flex w-full flex-col items-center pt-2">
-      <div className="flex w-3/4 flex-col sm:w-3/4">
-        <GoBack variant="filled" to={`/trees/${slug}`} className="w-auto" />
-        <div className="flex items-center justify-between gap-2">
-          <TypographyH5>{t_trees('timeline')}</TypographyH5>
-          <button
-            type="button"
-            onClick={toggleOrientation}
-            aria-label={t_trees('timeline-orientation-toggle')}
-            title={
-              isHorizontal
-                ? t_trees('timeline-orientation-vertical')
-                : t_trees('timeline-orientation-horizontal')
-            }
-            className={cn(
-              'text-ocean-400 bg-pale-ocean hover:bg-ocean-200/15 border-ocean-200/20 shadow-center-sm',
-              'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-2 transition-colors'
-            )}
-          >
-            {isHorizontal ? <Rows3 size={18} /> : <Columns3 size={18} />}
-          </button>
-        </div>
-        <p className="mb-5">{t_trees('timeline-description')}</p>
+    <div className="text-ocean-400 z-0 flex w-full flex-col">
+      <GoBack variant="filled" to={`/trees/${slug}`} className="w-auto" />
+      <div className="flex items-center justify-between gap-2">
+        <TypographyH4>{t_trees('timeline')}</TypographyH4>
+        <button
+          type="button"
+          onClick={toggleOrientation}
+          aria-label={t_trees('timeline-orientation-toggle')}
+          title={
+            isHorizontal
+              ? t_trees('timeline-orientation-vertical')
+              : t_trees('timeline-orientation-horizontal')
+          }
+          className={cn(
+            'text-ocean-400 bg-pale-ocean hover:bg-ocean-200/15 border-ocean-200/20 shadow-center-sm',
+            'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border-2 transition-colors'
+          )}
+        >
+          {isHorizontal ? <Rows3 size={18} /> : <Columns3 size={18} />}
+        </button>
       </div>
+      <p className="mb-5">{t_trees('timeline-description')}</p>
 
       {isHorizontal ? (
         <div className="styled-scrollbar relative h-72 w-full overflow-x-auto px-36">
@@ -163,7 +169,7 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                       className={cn(
                         'shadow-center-sm absolute bottom-1/2 left-1/2 mb-2 flex w-36 -translate-x-1/2 flex-col items-center px-2 py-2 text-center',
                         'group-hover:bg-ocean-400 space-y-2 rounded-lg transition-all duration-300 select-none',
-                        event.item.type == 'birth' ? 'bg-pale-ocean' : 'bg-ocean-100'
+                        eventBgClass(event.item.type)
                       )}
                     >
                       <div className="group-hover:text-ocean-50 text-ocean-400 self-start text-xs font-medium opacity-70 transition-colors">
@@ -193,7 +199,7 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                       className={cn(
                         'shadow-center-sm absolute top-1/2 left-1/2 mt-8 flex w-36 -translate-x-1/2 flex-col items-center px-0 py-2 text-center',
                         'group-hover:bg-ocean-400 space-y-0 rounded-lg px-2 transition-colors duration-300 select-none',
-                        event.item.type == 'birth' ? 'bg-pale-ocean' : 'bg-ocean-100'
+                        eventBgClass(event.item.type)
                       )}
                     >
                       <div className="group-hover:text-ocean-50 text-ocean-400 self-start text-xs font-medium opacity-70 transition-colors">
@@ -280,7 +286,7 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                     className={cn(
                       'shadow-center-sm absolute top-1/2 flex w-44 -translate-y-1/2 flex-col items-start px-3 py-2 text-left',
                       'group-hover:bg-ocean-400 space-y-1 rounded-lg transition-all duration-300 select-none',
-                      event.item.type == 'birth' ? 'bg-pale-ocean' : 'bg-ocean-100',
+                      eventBgClass(event.item.type),
                       isLeft ? 'right-6' : 'left-6'
                     )}
                   >

@@ -7,6 +7,7 @@ vi.mock('@/server/db', () => ({
     tree: { findMany: vi.fn(), findFirst: vi.fn() },
     treeNode: { findMany: vi.fn() },
     treeEdge: { findMany: vi.fn() },
+    union: { findMany: vi.fn() },
     activityLog: { findMany: vi.fn() },
   },
 }))
@@ -23,7 +24,6 @@ beforeEach(() => {
   mockAssertAuth.mockResolvedValue('user-1')
 })
 
-// ─── getTrees ───────────────────────────────────────────
 describe('getTrees', () => {
   it('returns trees for authenticated user', async () => {
     const trees = [
@@ -49,7 +49,6 @@ describe('getTrees', () => {
   })
 })
 
-// ─── getTree ────────────────────────────────────────────
 describe('getTree', () => {
   it('returns tree by slug with user access', async () => {
     const tree = {
@@ -80,7 +79,6 @@ describe('getTree', () => {
   })
 })
 
-// ─── getTreeRoots ───────────────────────────────────────
 describe('getTreeRoots', () => {
   it('returns tree + nodes + edges', async () => {
     const tree = {
@@ -107,12 +105,14 @@ describe('getTreeRoots', () => {
     mockDb.tree.findFirst.mockResolvedValue(tree)
     mockDb.treeNode.findMany.mockResolvedValue(nodes)
     mockDb.treeEdge.findMany.mockResolvedValue(edges)
+    mockDb.union.findMany.mockResolvedValue([])
 
     const result = await getTreeRoots('family')
     expect(result).toHaveProperty('tree', tree)
     expect(result).toHaveProperty('edges', edges)
+    expect(result).toHaveProperty('unions', [])
     expect(result.nodes).toHaveLength(1)
-    expect(result.nodes[0].fullName).toBe('Alice')
+    expect(result.nodes![0].fullName).toBe('Alice')
   })
 
   it('returns error when tree not found', async () => {
@@ -123,7 +123,6 @@ describe('getTreeRoots', () => {
   })
 })
 
-// ─── getTreeActivityLogs ────────────────────────────────
 describe('getTreeActivityLogs', () => {
   it('returns logs for tree user has access to', async () => {
     const logs = [

@@ -15,7 +15,9 @@ export interface ActivityDisplay {
  * @returns The formatted value as string
  */
 const formatValue = (value: any, field: string, t: (key: string) => string): string => {
-  const dateFields = ['birthDate', 'deathDate']
+  if (value === null || value === undefined || value === '') return '-'
+
+  const dateFields = ['birthDate', 'deathDate', 'marriedAt', 'divorcedAt']
   if (dateFields.includes(field)) return new Date(value).toLocaleDateString()
 
   if (field === 'gender' && TreeNodeGender.includes(value)) return t(value.toLowerCase())
@@ -96,6 +98,32 @@ export const formatActivityLog = (
         title: t('MEMBER_JOINED_VIA_SHARE'),
         subtitle: meta.joinedName ? `"${meta.joinedName}"` : '',
       }
+    case 'UNION_CREATED':
+    case 'UNION_DELETED': {
+      const a = meta.spouseAName
+      const b = meta.spouseBName
+      const subtitle = a && b ? `"${a}" - "${b}"` : a ? `"${a}"` : ''
+      const fields = ['marriedAt', 'divorcedAt', 'place'] as const
+      const details = fields
+        .filter((f) => meta[f] !== null && meta[f] !== undefined && meta[f] !== '')
+        .map((f) => `${t(f)}: "${formatValue(meta[f], f, t)}"`)
+      return { title: t(action), subtitle, details: details.length ? details : undefined }
+    }
+    case 'UNION_UPDATED': {
+      const a = meta.spouseAName
+      const b = meta.spouseBName
+      const subtitle = a && b ? `"${a}" - "${b}"` : a ? `"${a}"` : ''
+      return {
+        title: t('UNION_UPDATED'),
+        subtitle,
+        details: meta.changes
+          ? Object.entries(meta.changes).map(
+              ([field, change]: [string, any]) =>
+                `${t(field)}: "${formatValue(change.before, field, t)}" → "${formatValue(change.after, field, t)}"`
+            )
+          : undefined,
+      }
+    }
 
     default:
       return { title: t(action), subtitle: '' }

@@ -26,7 +26,7 @@ export default async function TreeViewPage({ params }: { params: Promise<{ slug:
     )
   }
 
-  const { tree, nodes, edges } = result
+  const { tree, nodes, edges, unions } = result
   const userAccess = tree?.accesses.find((a) => a.userId === session?.user?.id)
   const readonly = userAccess?.role === 'VIEWER'
 
@@ -37,8 +37,14 @@ export default async function TreeViewPage({ params }: { params: Promise<{ slug:
           <TypographyH4>{t_errors('error-tree-not-found')}</TypographyH4>
         </div>
       ) : (
-        <div className="bg-ocean-200/15 border-ocean-400 h-full w-full border-12 shadow-inner">
-          <TreeWrapper readonly={readonly} tree={tree} nodes={nodes} edges={edges} />
+        <div className="bg-ocean-200/15 h-full w-full shadow-inner">
+          <TreeWrapper
+            readonly={readonly}
+            tree={tree}
+            nodes={nodes}
+            edges={edges}
+            unions={unions}
+          />
         </div>
       )}
     </div>

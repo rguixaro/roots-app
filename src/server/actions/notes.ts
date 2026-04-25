@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import * as Sentry from '@sentry/nextjs'
 
 import { db } from '@/server/db'
-import { assertAuthenticated, assertRole } from '@/server/utils'
+import { assertAuthenticated, assertRole, assertTreeWritable } from '@/server/utils'
 import { UpdateTreeNoteSchema } from '@/server/schemas'
 
 /**
@@ -14,6 +14,17 @@ import { UpdateTreeNoteSchema } from '@/server/schemas'
  * user only write one log entry to keep the activity feed useful.
  */
 const ACTIVITY_LOG_DEBOUNCE_MIN = 10
+const TREE_WRITE_ERROR_MESSAGES = ['error-no-permission', 'error-tree-pending-deletion'] as const
+
+type TreeWriteErrorMessage = (typeof TREE_WRITE_ERROR_MESSAGES)[number]
+
+const getActionErrorMessage = (error: unknown): string | undefined =>
+  error instanceof Error ? error.message : undefined
+
+const isTreeWriteError = (error: unknown) => {
+  const message = getActionErrorMessage(error)
+  return !!message && TREE_WRITE_ERROR_MESSAGES.includes(message as TreeWriteErrorMessage)
+}
 
 /**
  * Create or update the singleton shared note for a tree.
@@ -22,9 +33,10 @@ const ACTIVITY_LOG_DEBOUNCE_MIN = 10
  * Writes a debounced NOTE_UPDATED activity log — consecutive saves by the same
  * user within ACTIVITY_LOG_DEBOUNCE_MIN minutes only produce a single log entry.
  */
-export const updateTreeNote = async (
-  input: { treeId: string; content: string }
-): Promise<{ error: boolean; message?: string }> => {
+export const updateTreeNote = async (input: {
+  treeId: string
+  content: string
+}): Promise<{ error: boolean; message?: string }> => {
   try {
     const userId = await assertAuthenticated()
 
@@ -36,10 +48,14 @@ export const updateTreeNote = async (
 
     const { treeId, content } = parsed.data
 
-    const tree = await db.tree.findUnique({ where: { id: treeId }, select: { id: true, slug: true } })
+    const tree = await db.tree.findUnique({
+      where: { id: treeId },
+      select: { id: true, slug: true },
+    })
     if (!tree) return { error: true, message: 'error-tree-not-found' }
 
     await assertRole(treeId, userId, ['EDITOR', 'ADMIN'])
+    await assertTreeWritable(treeId)
 
     // Upsert by unique treeId — first edit creates the row, subsequent edits update it.
     await db.treeNote.upsert({
@@ -75,8 +91,8 @@ export const updateTreeNote = async (
     revalidatePath(`/trees/notes/${tree.slug}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }

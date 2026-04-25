@@ -15,7 +15,10 @@ import { sendWeeklyNewsletter } from '@/lib/email'
 import { languageToLocale } from '@/utils/language'
 import { sendWeeklyNewsletters } from './newsletter'
 
-const mockDb = vi.mocked(db, { partial: true })
+const mockDb = db as unknown as {
+  tree: { findMany: ReturnType<typeof vi.fn> }
+  treeNode: { findMany: ReturnType<typeof vi.fn> }
+}
 const mockSendNewsletter = vi.mocked(sendWeeklyNewsletter)
 const mockLanguageToLocale = vi.mocked(languageToLocale)
 
@@ -164,9 +167,7 @@ describe('sendWeeklyNewsletters', () => {
     ])
     mockDb.treeNode.findMany.mockResolvedValue([recentNode])
 
-    mockSendNewsletter
-      .mockResolvedValueOnce(true)
-      .mockRejectedValueOnce(new Error('SMTP failure'))
+    mockSendNewsletter.mockResolvedValueOnce(true).mockRejectedValueOnce(new Error('SMTP failure'))
 
     const result = await sendWeeklyNewsletters()
     expect(result.success).toBe(true)
@@ -188,9 +189,7 @@ describe('sendWeeklyNewsletters', () => {
         name: 'Family A',
         slug: 'family-a',
         newsletter: true,
-        accesses: [
-          { user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } },
-        ],
+        accesses: [{ user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } }],
         nodes: [recentNode],
       },
       {

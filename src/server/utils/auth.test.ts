@@ -7,7 +7,7 @@ vi.mock('@/auth', () => ({
 import { assertAuthenticated } from './auth'
 import { auth } from '@/auth'
 
-const mockedAuth = vi.mocked(auth)
+const mockedAuth = auth as unknown as ReturnType<typeof vi.fn>
 
 describe('assertAuthenticated', () => {
   it('returns userId when session is valid', async () => {

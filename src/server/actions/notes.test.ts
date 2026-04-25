@@ -14,21 +14,24 @@ vi.mock('@/auth', () => ({ auth: vi.fn(), signOut: vi.fn() }))
 vi.mock('@/server/utils', () => ({
   assertAuthenticated: vi.fn(),
   assertRole: vi.fn(),
+  assertTreeWritable: vi.fn(),
 }))
 
 import { db } from '@/server/db'
-import { assertAuthenticated, assertRole } from '@/server/utils'
+import { assertAuthenticated, assertRole, assertTreeWritable } from '@/server/utils'
 import { updateTreeNote } from './notes'
 import { MAX_TREE_NOTE_LENGTH } from '@/server/schemas'
 
 const mockDb = db as any
 const mockAssertAuth = assertAuthenticated as ReturnType<typeof vi.fn>
 const mockAssertRole = assertRole as ReturnType<typeof vi.fn>
+const mockAssertTreeWritable = assertTreeWritable as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   vi.clearAllMocks()
   mockAssertAuth.mockResolvedValue('user-1')
   mockAssertRole.mockResolvedValue(undefined)
+  mockAssertTreeWritable.mockResolvedValue(undefined)
   mockDb.tree.findUnique.mockResolvedValue({ id: 't1', slug: 'family' })
   mockDb.activityLog.findFirst.mockResolvedValue(null)
   mockDb.treeNote.upsert.mockResolvedValue({ id: 'n1', treeId: 't1', content: 'hello' })

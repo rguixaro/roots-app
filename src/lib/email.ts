@@ -31,6 +31,24 @@ interface TreeInvitationEmailParams {
   locale?: Locale
 }
 
+interface TreeDeletionRequestedEmailParams {
+  recipientEmail: string
+  recipientName: string
+  treeName: string
+  treeSlug: string
+  requestedByName: string
+  requestedAt: Date
+  availableAt: Date
+  locale?: Locale
+}
+
+interface TreeDeletedEmailParams {
+  recipientEmail: string
+  recipientName: string
+  treeName: string
+  locale?: Locale
+}
+
 interface NewsletterEmailParams {
   recipientEmail: string
   recipientName: string
@@ -374,6 +392,268 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
     return true
   } catch (error) {
     Sentry.captureException(error, { tags: { action: 'sendTreeInvitationEmail' } })
+    return false
+  }
+}
+
+export async function sendTreeDeletionRequestedEmail(
+  params: TreeDeletionRequestedEmailParams
+): Promise<boolean> {
+  const {
+    recipientEmail,
+    recipientName,
+    treeName,
+    treeSlug,
+    requestedByName,
+    requestedAt,
+    availableAt,
+    locale = 'en',
+  } = params
+  const t = getEmailTranslations(locale)
+  const settingsUrl = `${AUTH_URL}/trees/settings/${treeSlug}`
+
+  const requestedAtLabel = formatEmailDate(requestedAt, locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+  const availableAtLabel = formatEmailDate(availableAt, locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="${locale}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${t.emails['tree-deletion-requested'].title} - ${treeName}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 40px 40px 24px; text-align: center; background-color: ${ocean[400]}; border-radius: 16px;">
+              <h1 style="margin: 0 0 8px; color: ${ocean[0]}; font-size: 28px; font-weight: 700;">
+                ${treeName}
+              </h1>
+              <p style="margin: 0; color: ${ocean[50]}; font-size: 16px; font-weight: 500;">
+                ${t.emails['tree-deletion-requested'].title}
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px; color: ${ocean[400]}; font-size: 18px; line-height: 1.6; font-weight: 600;">
+                ${replacePlaceholders(t.emails['tree-deletion-requested'].greeting, { name: recipientName })}
+              </p>
+
+              <p style="margin: 0 0 32px; color: ${ocean[400]}; font-size: 16px; line-height: 1.7;">
+                ${replacePlaceholders(t.emails['tree-deletion-requested'].body, { tree: treeName, requester: requestedByName })}
+              </p>
+
+              <!-- Summary -->
+              <div style="background: ${ocean[50]}; border-radius: 0px 0px 16px 16px; border-top: 6px solid ${ocean[400]}; padding: 24px; margin-bottom: 32px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="text-align: center; padding: 8px;">
+                      <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500; margin-bottom: 6px;">${t.emails['tree-deletion-requested']['requested-at']}</div>
+                      <div style="font-size: 16px; font-weight: 700; color: ${ocean[400]};">${requestedAtLabel}</div>
+                    </td>
+                    <td style="text-align: center; padding: 8px; border-left: 2px solid ${ocean[100]};">
+                      <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500; margin-bottom: 6px;">${t.emails['tree-deletion-requested']['available-at']}</div>
+                      <div style="font-size: 16px; font-weight: 700; color: ${ocean[400]};">${availableAtLabel}</div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 24px 0;">
+                    <a href="${settingsUrl}" style="display: inline-block; padding: 16px 40px; background-color: ${ocean[400]}; color: ${ocean[0]}; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 16px; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);">
+                      ${t.emails['tree-deletion-requested'].cta}
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; border-top: 2px solid ${ocean[200]};">
+              <p style="margin: 0; color: ${ocean[200]}; font-size: 12px; text-align: center; line-height: 1.6;">
+                ${t.emails['tree-deletion-requested'].footer}
+                <br>
+                ${t.emails['tree-deletion-requested'].link}
+                <br>
+                <a href="${settingsUrl}" style="color: ${ocean[300]}; text-decoration: underline;">${settingsUrl}</a>
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer Text -->
+        <p style="margin: 24px 0 0; color: ${ocean[100]}; font-size: 12px; text-align: center;">
+          ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim()
+
+  const textBody = `
+${treeName} - ${t.emails['tree-deletion-requested'].title}
+
+${replacePlaceholders(t.emails['tree-deletion-requested'].greeting, { name: recipientName })}
+
+${replacePlaceholders(t.emails['tree-deletion-requested'].body, { tree: treeName, requester: requestedByName })}
+
+${t.emails['tree-deletion-requested']['requested-at']}: ${requestedAtLabel}
+${t.emails['tree-deletion-requested']['available-at']}: ${availableAtLabel}
+
+${t.emails['tree-deletion-requested'].cta}: ${settingsUrl}
+
+---
+${t.emails['tree-deletion-requested'].footer}
+${t.emails['tree-deletion-requested'].link}: ${settingsUrl}
+
+${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
+  `.trim()
+
+  try {
+    const command = new SendEmailCommand({
+      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+      Destination: { ToAddresses: [recipientEmail] },
+      Message: {
+        Subject: {
+          Data: replacePlaceholders(t.emails['tree-deletion-requested'].subject, {
+            tree: treeName,
+          }),
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: { Data: htmlBody, Charset: 'UTF-8' },
+          Text: { Data: textBody, Charset: 'UTF-8' },
+        },
+      },
+    })
+
+    await ses.send(command)
+    return true
+  } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'sendTreeDeletionRequestedEmail' } })
+    return false
+  }
+}
+
+export async function sendTreeDeletedEmail(params: TreeDeletedEmailParams): Promise<boolean> {
+  const { recipientEmail, recipientName, treeName, locale = 'en' } = params
+  const t = getEmailTranslations(locale)
+
+  const htmlBody = `
+<!DOCTYPE html>
+<html lang="${locale}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${t.emails['tree-deleted'].title} - ${treeName}</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="border-radius: 16px; box-shadow: 0 4px 16px rgba(2, 132, 199, 0.1);">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 40px 40px 24px; text-align: center; background-color: ${ocean[400]}; border-radius: 16px;">
+              <h1 style="margin: 0 0 8px; color: ${ocean[0]}; font-size: 28px; font-weight: 700;">
+                ${treeName}
+              </h1>
+              <p style="margin: 0; color: ${ocean[50]}; font-size: 16px; font-weight: 500;">
+                ${t.emails['tree-deleted'].title}
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Content -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px; color: ${ocean[400]}; font-size: 18px; line-height: 1.6; font-weight: 600;">
+                ${replacePlaceholders(t.emails['tree-deleted'].greeting, { name: recipientName })}
+              </p>
+
+              <p style="margin: 0; color: ${ocean[400]}; font-size: 16px; line-height: 1.7;">
+                ${replacePlaceholders(t.emails['tree-deleted'].body, { tree: treeName })}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; border-top: 2px solid ${ocean[200]};">
+              <p style="margin: 0; color: ${ocean[200]}; font-size: 12px; text-align: center; line-height: 1.6;">
+                ${t.emails['tree-deleted'].footer}
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Footer Text -->
+        <p style="margin: 24px 0 0; color: ${ocean[100]}; font-size: 12px; text-align: center;">
+          ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim()
+
+  const textBody = `
+${treeName} - ${t.emails['tree-deleted'].title}
+
+${replacePlaceholders(t.emails['tree-deleted'].greeting, { name: recipientName })}
+
+${replacePlaceholders(t.emails['tree-deleted'].body, { tree: treeName })}
+
+---
+${t.emails['tree-deleted'].footer}
+
+${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
+  `.trim()
+
+  try {
+    const command = new SendEmailCommand({
+      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+      Destination: { ToAddresses: [recipientEmail] },
+      Message: {
+        Subject: {
+          Data: replacePlaceholders(t.emails['tree-deleted'].subject, { tree: treeName }),
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: { Data: htmlBody, Charset: 'UTF-8' },
+          Text: { Data: textBody, Charset: 'UTF-8' },
+        },
+      },
+    })
+
+    await ses.send(command)
+    return true
+  } catch (error) {
+    Sentry.captureException(error, { tags: { action: 'sendTreeDeletedEmail' } })
     return false
   }
 }

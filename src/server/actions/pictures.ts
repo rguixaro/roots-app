@@ -5,11 +5,23 @@ import { revalidatePath } from 'next/cache'
 import * as Sentry from '@sentry/nextjs'
 
 import { db } from '@/server/db'
-import { assertRole, assertAuthenticated } from '@/server/utils'
+import { assertRole, assertAuthenticated, assertTreeWritable } from '@/server/utils'
 
 import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
 
 import { Picture, PictureMetadata, PictureTag } from '@/types'
+
+const TREE_WRITE_ERROR_MESSAGES = ['error-no-permission', 'error-tree-pending-deletion'] as const
+
+type TreeWriteErrorMessage = (typeof TREE_WRITE_ERROR_MESSAGES)[number]
+
+const getActionErrorMessage = (error: unknown): string | undefined =>
+  error instanceof Error ? error.message : undefined
+
+const isTreeWriteError = (error: unknown) => {
+  const message = getActionErrorMessage(error)
+  return !!message && TREE_WRITE_ERROR_MESSAGES.includes(message as TreeWriteErrorMessage)
+}
 
 /**
  * Get all pictures for a specific node
@@ -72,6 +84,7 @@ export const createPicture = async (
     if (!node) return { error: true, message: 'error-node-not-found' }
 
     await assertRole(node.treeId, userId)
+    await assertTreeWritable(node.treeId)
 
     let date: Date
     let metadata: PictureMetadata
@@ -125,7 +138,7 @@ export const createPicture = async (
         metadata: picture.metadata as PictureMetadata | null,
       },
     }
-  } catch (e: any) {
+  } catch (e) {
     if (fileKey) {
       try {
         await deleteFileFromS3(fileKey)
@@ -136,7 +149,7 @@ export const createPicture = async (
         })
       }
     }
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -164,6 +177,7 @@ export const deletePicture = async (
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+    await assertTreeWritable(picture.treeId)
 
     try {
       await deleteFileFromS3(picture.fileKey)
@@ -193,8 +207,8 @@ export const deletePicture = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -224,6 +238,7 @@ export const createPictureTag = async (
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+    await assertTreeWritable(picture.treeId)
 
     const node = await db.treeNode.findFirst({ where: { id: nodeId, treeId: picture.treeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
@@ -251,8 +266,8 @@ export const createPictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false, tag: newTag }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tag-already-exists' }
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
@@ -285,6 +300,7 @@ export const deletePictureTag = async (
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+    await assertTreeWritable(picture.treeId)
 
     if (picture.tags.length <= 1) return { error: true, message: 'error-picture-at-least-one-tag' }
 
@@ -317,8 +333,8 @@ export const deletePictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }
@@ -345,6 +361,7 @@ export const setProfilePictureTag = async (
     if (!picture) return { error: true, message: 'error-picture-not-found' }
 
     await assertRole(picture.treeId, userId)
+    await assertTreeWritable(picture.treeId)
 
     const node = await db.treeNode.findFirst({ where: { id: nodeId, treeId: picture.treeId } })
     if (!node) return { error: true, message: 'error-node-not-found' }
@@ -369,8 +386,8 @@ export const setProfilePictureTag = async (
     revalidatePath(`/trees/${picture.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-not-found' }
     }

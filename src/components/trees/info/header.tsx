@@ -35,6 +35,12 @@ export async function TreeInfoHeader({ info }: HeaderProps) {
         <TypographyH4>{info.tree.name}</TypographyH4>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs opacity-70">
           <span>{t_enums(info.tree.type.toLowerCase())}</span>
+          {info.tree.deletionRequest && (
+            <>
+              <span>·</span>
+              <span className="font-bold">{t('pending-deletion')}</span>
+            </>
+          )}
           <span>·</span>
           <span>
             {t('header-created')} {createdLabel}

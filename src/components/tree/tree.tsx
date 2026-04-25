@@ -133,7 +133,7 @@ export default function StyledTree({ readonly, tree, nodes, edges, unions }: Sty
           // eslint-disable-next-line no-console
           console.warn(`[React Flow]: ${message}`)
         }}
-        onConnect={edgeOperations.onConnect}
+        onConnect={readonly ? undefined : edgeOperations.onConnect}
         onPaneClick={treeState.collapseAllNodes}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
@@ -141,6 +141,7 @@ export default function StyledTree({ readonly, tree, nodes, edges, unions }: Sty
         zoomOnScroll
         deleteKeyCode={null}
         nodesDraggable={false}
+        nodesConnectable={!readonly}
         edgesFocusable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}

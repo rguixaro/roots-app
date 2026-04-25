@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { useForm, useFieldArray, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderIcon } from 'lucide-react'
@@ -10,7 +11,15 @@ import { type z } from 'zod'
 import * as Tabs from '@radix-ui/react-tabs'
 
 import { CreateTreeSchema, TreeType } from '@/server/schemas'
-import { updateTree, inviteMember, updateMember, removeMember } from '@/server/actions'
+import {
+  approveTreeDeletion,
+  cancelTreeDeletion,
+  inviteMember,
+  removeMember,
+  requestTreeDeletion,
+  updateMember,
+  updateTree,
+} from '@/server/actions'
 
 import { GoBack } from '@/components/layout'
 import { StyledSelector } from '@/components/trees/form'
@@ -35,11 +44,11 @@ import { checkKeyDown, isValidEmail } from '@/utils'
 type FormValues = z.infer<typeof CreateTreeSchema>
 
 interface MemberItemProps {
-  field: any
   index: number
   form: UseFormReturn<FormValues>
   loading: boolean
   loadingUpdate: boolean
+  treeLocked: boolean
   currentUserId: string
   currentUserRole: TreeAccessRole
   currentMemberRole: TreeAccessRole
@@ -48,9 +57,9 @@ interface MemberItemProps {
   setCurrMember: (value: { index: number; memberId?: string } | null) => void
   setDialogOpen: (open: boolean) => void
   remove: (index: number) => void
-  t_trees: any
-  t_common: any
-  t_errors: any
+  t_trees: ReturnType<typeof useTranslations>
+  t_common: ReturnType<typeof useTranslations>
+  t_errors: ReturnType<typeof useTranslations>
 }
 
 /**
@@ -63,6 +72,7 @@ const MemberItem = ({
   form,
   loading,
   loadingUpdate,
+  treeLocked,
   currentUserId,
   currentUserRole,
   currentMemberRole,
@@ -74,7 +84,7 @@ const MemberItem = ({
   t_trees,
   t_common,
   t_errors,
-}: Omit<MemberItemProps, 'field'>) => {
+}: MemberItemProps) => {
   const memberRole = form.watch(`members.${index}.role`)
   const memberEmail = form.watch(`members.${index}.email`) || ''
   const memberName = form.watch(`members.${index}.name`) || ''
@@ -97,7 +107,7 @@ const MemberItem = ({
                   {...form.register(`members.${index}.email`)}
                   placeholder={t_trees('tree-member-email')}
                   className="w-full"
-                  disabled={loading}
+                  disabled={loading || treeLocked}
                 />
               ) : (
                 <FormLabel>
@@ -110,7 +120,7 @@ const MemberItem = ({
                 <Button
                   type="button"
                   variant={'outline'}
-                  disabled={!canInvite}
+                  disabled={!canInvite || treeLocked}
                   onClick={() => inviteUser(memberEmail!, memberRole!)}
                   className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 hidden text-xs font-bold sm:block"
                 >
@@ -121,7 +131,7 @@ const MemberItem = ({
                 <Button
                   type="button"
                   variant={'outline'}
-                  disabled={!canUpdate || loadingUpdate}
+                  disabled={!canUpdate || loadingUpdate || treeLocked}
                   onClick={() => updateUser(memberId!, memberRole!)}
                   className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 hidden text-xs font-bold sm:block"
                 >
@@ -133,12 +143,16 @@ const MemberItem = ({
                   </div>
                 </Button>
               )}
-              {currentUserRole === 'ADMIN' && currentUserId !== memberId && (
+              {currentUserRole === 'ADMIN' && currentUserId !== memberId && !treeLocked && (
                 <Button
                   type="button"
                   onClick={() => {
-                    if (memberId) (setCurrMember({ index, memberId }), setDialogOpen(true))
-                    else remove(index)
+                    if (memberId) {
+                      setCurrMember({ index, memberId })
+                      setDialogOpen(true)
+                    } else {
+                      remove(index)
+                    }
                   }}
                   className="bg-ocean-300 hover:bg-ocean-400 text-pale-ocean hidden text-xs font-bold sm:block"
                 >
@@ -152,7 +166,7 @@ const MemberItem = ({
               <StyledSelector
                 types={TreeAccessRole}
                 value={memberRole}
-                disabled={currentUserRole !== 'ADMIN' || currentUserId === memberId}
+                disabled={currentUserRole !== 'ADMIN' || currentUserId === memberId || treeLocked}
                 setValue={(value) => {
                   if (memberRole === 'ADMIN' && value !== 'ADMIN') {
                     const admins = form.getValues('members')?.filter((m) => m.role === 'ADMIN')
@@ -174,7 +188,7 @@ const MemberItem = ({
               <Button
                 type="button"
                 variant={'outline'}
-                disabled={!canInvite}
+                disabled={!canInvite || treeLocked}
                 onClick={() => inviteUser(memberEmail!, memberRole!)}
                 className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 visible w-full text-xs font-bold sm:hidden sm:w-auto"
               >
@@ -185,7 +199,7 @@ const MemberItem = ({
               <Button
                 type="button"
                 variant={'outline'}
-                disabled={!canUpdate || loadingUpdate}
+                disabled={!canUpdate || loadingUpdate || treeLocked}
                 onClick={() => updateUser(memberId!, memberRole!)}
                 className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean disabled:bg-ocean-50 visible w-full text-xs font-bold sm:hidden sm:w-auto"
               >
@@ -197,7 +211,7 @@ const MemberItem = ({
                 </div>
               </Button>
             )}
-            {currentUserRole === 'ADMIN' && currentUserId != memberId && (
+            {currentUserRole === 'ADMIN' && currentUserId != memberId && !treeLocked && (
               <Button
                 type="button"
                 onClick={() => {
@@ -226,6 +240,8 @@ interface EditTreeProps {
 }
 
 export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
+  const router = useRouter()
+  const locale = useLocale()
   const t_trees = useTranslations('trees')
   const t_common = useTranslations('common')
   const t_errors = useTranslations('errors')
@@ -233,12 +249,31 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
 
   const [loading, setLoading] = useState<boolean>(false)
   const [loadingUpdate, setLoadingUpdate] = useState<boolean>(false)
+  const [loadingDeletion, setLoadingDeletion] = useState<boolean>(false)
 
   const [currentTree, setCurrentTree] = useState<Tree>(tree)
 
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [deletionDialog, setDeletionDialog] = useState<'request' | 'cancel' | 'approve' | null>(
+    null
+  )
   const [currMember, setCurrMember] = useState<{ index: number; memberId?: string } | null>(null)
-  const currentUserRole = tree.accesses?.find((a) => a.userId === currentUserId)?.role || 'VIEWER'
+  const currentUserRole =
+    currentTree.accesses?.find((a) => a.userId === currentUserId)?.role || 'VIEWER'
+  const isAdmin = currentUserRole === 'ADMIN'
+  const deletionRequest = currentTree.deletionRequest
+  const treeLocked = !!deletionRequest
+  const nodeCount = currentTree._count?.nodes ?? 0
+  const deletionAvailableAt = deletionRequest
+    ? new Date(new Date(deletionRequest.requestedAt).getTime() + 7 * 86_400_000)
+    : null
+  const canApproveDeletion = deletionAvailableAt
+    ? deletionAvailableAt.getTime() <= Date.now()
+    : false
+  const formatDate = (date: Date) =>
+    new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric' }).format(
+      date
+    )
 
   const form = useForm<FormValues>({
     resolver: zodResolver(CreateTreeSchema),
@@ -332,6 +367,49 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
       if (tree) resetTree(tree)
     })
 
+  const handleRequestDeletion = async () => {
+    setLoadingDeletion(true)
+    try {
+      const { error, message, tree, deleted } = await requestTreeDeletion(currentTree.id)
+      if (error) return toast.error(t_errors(message || 'error'))
+      if (deleted) {
+        toast.success(t_toasts('tree-deleted'))
+        router.push('/')
+        router.refresh()
+        return
+      }
+      toast.success(t_toasts('tree-deletion-requested'))
+      if (tree) resetTree(tree)
+    } finally {
+      setLoadingDeletion(false)
+    }
+  }
+
+  const handleCancelDeletion = async () => {
+    setLoadingDeletion(true)
+    try {
+      const { error, message, tree } = await cancelTreeDeletion(currentTree.id)
+      if (error) return toast.error(t_errors(message || 'error'))
+      toast.success(t_toasts('tree-deletion-cancelled'))
+      if (tree) resetTree(tree)
+    } finally {
+      setLoadingDeletion(false)
+    }
+  }
+
+  const handleApproveDeletion = async () => {
+    setLoadingDeletion(true)
+    try {
+      const { error, message } = await approveTreeDeletion(currentTree.id)
+      if (error) return toast.error(t_errors(message || 'error'))
+      toast.success(t_toasts('tree-deleted'))
+      router.push('/')
+      router.refresh()
+    } finally {
+      setLoadingDeletion(false)
+    }
+  }
+
   /**
    * Reset the form and current tree state.
    * @param tree {Tree}
@@ -354,8 +432,8 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
   return (
     <div className="text-ocean-400 z-0 flex w-full flex-col">
       <GoBack variant="filled" to={`/trees/${currentTree.slug}`} className="w-auto" />
-      <TypographyH4>{t_trees('tree-edit')}</TypographyH4>
-      <p className="mb-4">{t_trees('tree-edit-description')} </p>
+      <TypographyH4>{t_trees('tree-settings')}</TypographyH4>
+      <p className="mb-4">{t_trees('tree-settings-description')} </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)}>
           <Tabs.Root defaultValue="general">
@@ -396,7 +474,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                           {...field}
                           placeholder={t_trees('name')}
                           className="w-auto"
-                          disabled={loading}
+                          disabled={loading || treeLocked}
                         />
                       </FormControl>
                       <FormMessage />
@@ -432,7 +510,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={loading || treeName === currentTree.name}
+                  disabled={loading || treeLocked || treeName === currentTree.name}
                   className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
@@ -443,6 +521,87 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                   </div>
                 </Button>
               </div>
+              {isAdmin && !deletionRequest && (
+                <div className="my-5">
+                  <Button
+                    type="button"
+                    disabled={loadingDeletion}
+                    className="bg-ocean-300 hover:bg-ocean-400 text-pale-ocean"
+                    onClick={() => setDeletionDialog('request')}
+                  >
+                    <div className="flex items-center space-x-3">
+                      {loadingDeletion && <LoaderIcon size={16} className="animate-spin" />}
+                      <span className="text-sm font-bold">
+                        {nodeCount > 0
+                          ? t_trees('tree-deletion-request')
+                          : t_trees('tree-delete-now')}
+                      </span>
+                    </div>
+                  </Button>
+                </div>
+              )}
+              {deletionRequest && (
+                <>
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+                    <TypographyH5>{t_trees('tree-deletion-title')}</TypographyH5>
+                    <span className="bg-ocean-100/60 text-ocean-400 rounded-full px-3 py-1 text-xs font-bold">
+                      {t_trees('tree-pending-deletion')}
+                    </span>
+                  </div>
+                  <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 p-3 text-left">
+                    <FormDescription className="text-sm opacity-70">
+                      {t_trees('tree-deletion-info')}
+                    </FormDescription>
+                    <div className="border-ocean-100/60 bg-ocean-100/15 my-4 rounded-lg border p-3 text-sm">
+                      <div className="font-bold">{t_trees('tree-pending-deletion')}</div>
+                      <div className="mt-2 space-y-1 opacity-80">
+                        <p>
+                          {t_trees('tree-deletion-requested-at')}{' '}
+                          {formatDate(new Date(deletionRequest.requestedAt))}
+                        </p>
+                        <p>
+                          {t_trees('tree-deletion-requested-by')}{' '}
+                          {deletionRequest.requestedBy?.name ||
+                            deletionRequest.requestedBy?.email ||
+                            t_trees('tree-deletion-unknown-requester')}
+                        </p>
+                        {deletionAvailableAt && (
+                          <p>
+                            {t_trees('tree-deletion-available-at')}{' '}
+                            {formatDate(deletionAvailableAt)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    {isAdmin && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={loadingDeletion}
+                          className="bg-ocean-50 border-ocean-200 text-ocean-200 hover:bg-ocean-200 hover:text-pale-ocean"
+                          onClick={() => setDeletionDialog('cancel')}
+                        >
+                          {t_trees('tree-deletion-cancel')}
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={loadingDeletion || !canApproveDeletion}
+                          className="bg-ocean-300 hover:bg-ocean-400 text-pale-ocean"
+                          onClick={() => setDeletionDialog('approve')}
+                        >
+                          <div className="flex items-center space-x-3">
+                            {loadingDeletion && <LoaderIcon size={16} className="animate-spin" />}
+                            <span className="text-sm font-bold">
+                              {t_trees('tree-deletion-approve')}
+                            </span>
+                          </div>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </Tabs.Content>
             <Tabs.Content value="settings" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('settings-tab')}</TypographyH5>
@@ -461,6 +620,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                           types={['Enabled', 'Disabled'] as const}
                           value={form.getValues('newsletter') ? 'Enabled' : 'Disabled'}
                           setValue={(value) => form.setValue('newsletter', value === 'Enabled')}
+                          disabled={treeLocked}
                         />
                       </FormControl>
                       <FormMessage />
@@ -471,7 +631,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
               <div className="my-5">
                 <Button
                   type="submit"
-                  disabled={loading || newsletter === currentTree.newsletter}
+                  disabled={loading || treeLocked || newsletter === currentTree.newsletter}
                   className="hover:bg-ocean-300 text-pale-ocean"
                 >
                   <div className="flex items-center space-x-3">
@@ -499,6 +659,7 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                     form={form}
                     loading={loading}
                     loadingUpdate={loadingUpdate}
+                    treeLocked={treeLocked}
                     currentUserId={currentUserId}
                     currentUserRole={currentUserRole}
                     currentMemberRole={field.role}
@@ -513,11 +674,11 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
                   />
                 ))}
               </div>
-              {currentUserRole === 'ADMIN' && (
+              {currentUserRole === 'ADMIN' && !treeLocked && (
                 <div className="my-5">
                   <Button
                     type="button"
-                    disabled={loading}
+                    disabled={loading || treeLocked}
                     className="hover:bg-ocean-300 text-pale-ocean"
                     onClick={() =>
                       append({
@@ -545,6 +706,34 @@ export const EditTree = ({ userId: currentUserId, tree }: EditTreeProps) => {
             onConfirm={() => {
               if (currMember) removeUser(currMember.index, currMember.memberId)
               setDialogOpen(false)
+            }}
+          />
+          <ConfirmDialog
+            open={deletionDialog !== null}
+            title={
+              deletionDialog === 'cancel'
+                ? t_trees('tree-deletion-cancel-confirm')
+                : deletionDialog === 'approve'
+                  ? t_trees('tree-deletion-approve-confirm')
+                  : nodeCount > 0
+                    ? t_trees('tree-deletion-request-confirm')
+                    : t_trees('tree-delete-now-confirm')
+            }
+            description={
+              deletionDialog === 'cancel'
+                ? t_trees('tree-deletion-cancel-confirm-description')
+                : deletionDialog === 'approve'
+                  ? t_trees('tree-deletion-approve-confirm-description')
+                  : nodeCount > 0
+                    ? t_trees('tree-deletion-request-confirm-description')
+                    : t_trees('tree-delete-now-confirm-description')
+            }
+            onCancel={() => setDeletionDialog(null)}
+            onConfirm={() => {
+              if (deletionDialog === 'request') handleRequestDeletion()
+              if (deletionDialog === 'cancel') handleCancelDeletion()
+              if (deletionDialog === 'approve') handleApproveDeletion()
+              setDeletionDialog(null)
             }}
           />
         </form>

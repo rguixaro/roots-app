@@ -420,6 +420,12 @@ export async function getTreeInfo(slug: string): Promise<TreeInfoResult> {
             user: { select: { id: true, name: true, email: true, image: true } },
           },
         },
+        deletionRequest: {
+          include: {
+            requestedBy: { select: { id: true, name: true, email: true, image: true } },
+            approvedBy: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
       },
     })
 
@@ -833,6 +839,7 @@ export async function getTreeInfo(slug: string): Promise<TreeInfoResult> {
         newsletter: tree.newsletter,
         ageInDays,
         lastActivityAt,
+        deletionRequest: tree.deletionRequest,
       },
       overview: {
         totalMembers: nodes.length,

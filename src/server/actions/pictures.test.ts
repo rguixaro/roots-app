@@ -6,7 +6,14 @@ vi.mock('@/server/db', () => ({
     treeNode: { findUnique: vi.fn(), findFirst: vi.fn() },
     treeAccess: { findFirst: vi.fn() },
     picture: { create: vi.fn(), findUnique: vi.fn(), delete: vi.fn() },
-    pictureTag: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), delete: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    pictureTag: {
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+    },
     activityLog: { create: vi.fn() },
     $transaction: vi.fn(),
   },
@@ -21,6 +28,7 @@ vi.mock('@/auth', () => ({ auth: vi.fn(), signOut: vi.fn() }))
 vi.mock('@/server/utils', () => ({
   assertAuthenticated: vi.fn(),
   assertRole: vi.fn(),
+  assertTreeWritable: vi.fn(),
   slugify: vi.fn(),
   getChanges: vi.fn(),
   checkTreeAccess: vi.fn(),
@@ -31,7 +39,7 @@ vi.mock('@/server/utils', () => ({
 }))
 
 import { db } from '@/server/db'
-import { assertAuthenticated, assertRole } from '@/server/utils'
+import { assertAuthenticated, assertRole, assertTreeWritable } from '@/server/utils'
 import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
 import * as Sentry from '@sentry/nextjs'
 import {
@@ -46,6 +54,7 @@ import {
 const mockDb = db as any
 const mockAssertAuth = assertAuthenticated as ReturnType<typeof vi.fn>
 const mockAssertRole = assertRole as ReturnType<typeof vi.fn>
+const mockAssertTreeWritable = assertTreeWritable as ReturnType<typeof vi.fn>
 const mockUpload = uploadFileToS3 as ReturnType<typeof vi.fn>
 const mockDeleteS3 = deleteFileFromS3 as ReturnType<typeof vi.fn>
 
@@ -53,6 +62,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockAssertAuth.mockResolvedValue('user-1')
   mockAssertRole.mockResolvedValue(undefined)
+  mockAssertTreeWritable.mockResolvedValue(undefined)
   mockDb.$transaction.mockImplementation(async (fn: any) => fn(mockDb))
 })
 
@@ -133,9 +143,17 @@ describe('createPicture', () => {
     const node = { id: 'n1', treeId: 't1', fullName: 'John', alias: null }
     mockDb.treeNode.findUnique.mockResolvedValue(node)
     mockUpload.mockResolvedValue(['key1', new Date(), { width: 100 }])
-    mockDb.picture.create.mockResolvedValue({ id: 'p1', treeId: 't1', fileKey: 'key1', metadata: { width: 100 } })
+    mockDb.picture.create.mockResolvedValue({
+      id: 'p1',
+      treeId: 't1',
+      fileKey: 'key1',
+      metadata: { width: 100 },
+    })
     mockDb.pictureTag.create.mockResolvedValue({
-      id: 'pt1', pictureId: 'p1', nodeId: 'n1', isProfile: false,
+      id: 'pt1',
+      pictureId: 'p1',
+      nodeId: 'n1',
+      isProfile: false,
       node: { id: 'n1', fullName: 'John', alias: null },
     })
     mockDb.activityLog.create.mockResolvedValue({})
@@ -179,7 +197,9 @@ describe('deletePicture', () => {
 
   it('deletes picture and S3 file', async () => {
     mockDb.picture.findUnique.mockResolvedValue({
-      id: 'p1', treeId: 't1', fileKey: 'key1',
+      id: 'p1',
+      treeId: 't1',
+      fileKey: 'key1',
       tags: [{ node: { id: 'n1', fullName: 'John' } }],
     })
     mockDeleteS3.mockResolvedValue(undefined)
@@ -195,7 +215,9 @@ describe('deletePicture', () => {
   it('handles S3 cleanup failure gracefully', async () => {
     const s3Error = new Error('S3 delete failed')
     mockDb.picture.findUnique.mockResolvedValue({
-      id: 'p1', treeId: 't1', fileKey: 'key1',
+      id: 'p1',
+      treeId: 't1',
+      fileKey: 'key1',
       tags: [{ node: { id: 'n1', fullName: 'John' } }],
     })
     mockDeleteS3.mockRejectedValue(s3Error)
@@ -204,10 +226,13 @@ describe('deletePicture', () => {
 
     const result = await deletePicture('p1')
     expect(result.error).toBe(false)
-    expect(Sentry.captureException).toHaveBeenCalledWith(s3Error, expect.objectContaining({
-      level: 'warning',
-      tags: expect.objectContaining({ action: 'deletePicture', step: 's3-cleanup' }),
-    }))
+    expect(Sentry.captureException).toHaveBeenCalledWith(
+      s3Error,
+      expect.objectContaining({
+        level: 'warning',
+        tags: expect.objectContaining({ action: 'deletePicture', step: 's3-cleanup' }),
+      })
+    )
     expect(mockDb.picture.delete).toHaveBeenCalledWith({ where: { id: 'p1' } })
   })
 })
@@ -244,7 +269,13 @@ describe('createPictureTag', () => {
     mockDb.picture.findUnique.mockResolvedValue({ id: 'p1', treeId: 't1', tree: {} })
     mockDb.treeNode.findFirst.mockResolvedValue({ id: 'n1', fullName: 'John' })
     mockDb.pictureTag.findUnique.mockResolvedValue(null)
-    const newTag = { id: 'pt1', pictureId: 'p1', nodeId: 'n1', isProfile: false, node: { id: 'n1', fullName: 'John', alias: null } }
+    const newTag = {
+      id: 'pt1',
+      pictureId: 'p1',
+      nodeId: 'n1',
+      isProfile: false,
+      node: { id: 'n1', fullName: 'John', alias: null },
+    }
     mockDb.pictureTag.create.mockResolvedValue(newTag)
     mockDb.activityLog.create.mockResolvedValue({})
 
@@ -269,7 +300,8 @@ describe('deletePictureTag', () => {
 
   it('rejects when last tag', async () => {
     mockDb.picture.findUnique.mockResolvedValue({
-      id: 'p1', treeId: 't1',
+      id: 'p1',
+      treeId: 't1',
       tags: [{ nodeId: 'n1' }],
     })
     const result = await deletePictureTag('p1', 'n1')
@@ -278,7 +310,8 @@ describe('deletePictureTag', () => {
 
   it('deletes tag successfully', async () => {
     mockDb.picture.findUnique.mockResolvedValue({
-      id: 'p1', treeId: 't1',
+      id: 'p1',
+      treeId: 't1',
       tags: [{ nodeId: 'n1' }, { nodeId: 'n2' }],
     })
     mockDb.treeNode.findUnique.mockResolvedValue({ id: 'n1', fullName: 'John' })

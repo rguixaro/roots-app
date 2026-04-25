@@ -3,7 +3,20 @@ import { Prisma } from '@prisma/client'
 
 vi.mock('@/server/db', () => ({
   db: {
-    tree: { create: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
+    tree: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    treeDeletionRequest: {
+      create: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
     treeAccess: {
       findFirst: vi.fn(),
       findUnique: vi.fn(),
@@ -11,13 +24,16 @@ vi.mock('@/server/db', () => ({
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
+      deleteMany: vi.fn(),
     },
     treeNode: {
       create: vi.fn(),
       findFirst: vi.fn(),
       findMany: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
       delete: vi.fn(),
+      deleteMany: vi.fn(),
     },
     treeEdge: {
       create: vi.fn(),
@@ -26,22 +42,29 @@ vi.mock('@/server/db', () => ({
       delete: vi.fn(),
       deleteMany: vi.fn(),
     },
-    activityLog: { create: vi.fn() },
+    activityLog: { create: vi.fn(), deleteMany: vi.fn() },
     user: { findUnique: vi.fn() },
     picture: { findMany: vi.fn(), deleteMany: vi.fn() },
     pictureTag: { deleteMany: vi.fn() },
+    union: { deleteMany: vi.fn() },
+    treeNote: { deleteMany: vi.fn() },
     $transaction: vi.fn(),
   },
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn(), captureMessage: vi.fn() }))
-vi.mock('@/lib/email', () => ({ sendTreeInvitationEmail: vi.fn().mockResolvedValue(true) }))
+vi.mock('@/lib/email', () => ({
+  sendTreeDeletedEmail: vi.fn().mockResolvedValue(true),
+  sendTreeDeletionRequestedEmail: vi.fn().mockResolvedValue(true),
+  sendTreeInvitationEmail: vi.fn().mockResolvedValue(true),
+}))
 vi.mock('@/lib/s3', () => ({ deleteFileFromS3: vi.fn().mockResolvedValue(undefined) }))
 vi.mock('@/utils/language', () => ({ languageToLocale: vi.fn(() => 'en') }))
 vi.mock('@/auth', () => ({ auth: vi.fn(), signOut: vi.fn() }))
 vi.mock('@/server/utils', () => ({
   assertAuthenticated: vi.fn(),
   assertRole: vi.fn(),
+  assertTreeWritable: vi.fn(),
   slugify: vi.fn((s: string) => s.toLowerCase().replace(/\s+/g, '-')),
   getChanges: vi.fn(),
   checkTreeAccess: vi.fn(),
@@ -52,8 +75,12 @@ vi.mock('@/server/utils', () => ({
 }))
 
 import { db } from '@/server/db'
-import { assertAuthenticated, assertRole } from '@/server/utils'
-import { sendTreeInvitationEmail } from '@/lib/email'
+import { assertAuthenticated, assertRole, assertTreeWritable } from '@/server/utils'
+import {
+  sendTreeDeletedEmail,
+  sendTreeDeletionRequestedEmail,
+  sendTreeInvitationEmail,
+} from '@/lib/email'
 import { deleteFileFromS3 } from '@/lib/s3'
 import * as Sentry from '@sentry/nextjs'
 import {
@@ -72,16 +99,21 @@ import {
   generateShareToken,
   getShareLink,
   joinTreeViaShareToken,
+  requestTreeDeletion,
+  cancelTreeDeletion,
+  approveTreeDeletion,
 } from './trees'
 
 const mockDb = db as any
 const mockAssertAuth = assertAuthenticated as ReturnType<typeof vi.fn>
 const mockAssertRole = assertRole as ReturnType<typeof vi.fn>
+const mockAssertTreeWritable = assertTreeWritable as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   vi.clearAllMocks()
   mockAssertAuth.mockResolvedValue('user-1')
   mockAssertRole.mockResolvedValue(undefined)
+  mockAssertTreeWritable.mockResolvedValue(undefined)
   mockDb.$transaction.mockImplementation(async (fn: any) => fn(mockDb))
 })
 
@@ -153,6 +185,137 @@ describe('updateTree', () => {
     const result = await updateTree('t1', values)
     expect(result.error).toBe(false)
     expect(mockDb.activityLog.create).not.toHaveBeenCalled()
+  })
+})
+
+describe('tree deletion lifecycle', () => {
+  it('creates a deletion request for trees with nodes and notifies admins', async () => {
+    const requestedAt = new Date('2026-04-01T00:00:00Z')
+    const request = {
+      id: 'dr1',
+      treeId: 't1',
+      requestedAt,
+      requestedById: 'user-1',
+      requestedBy: { id: 'user-1', name: 'Alice', email: 'alice@example.com', image: null },
+      approvedBy: null,
+      approvedAt: null,
+    }
+    const tree = {
+      id: 't1',
+      name: 'Family',
+      slug: 'family',
+      deletionRequest: null,
+      _count: { nodes: 2 },
+      accesses: [{ user: { email: 'alice@example.com', name: 'Alice', language: 'EN' } }],
+    }
+    mockDb.tree.findUnique.mockResolvedValueOnce(tree).mockResolvedValueOnce({
+      ...tree,
+      accesses: [],
+      deletionRequest: request,
+    })
+    mockDb.user.findUnique.mockResolvedValue({ name: 'Alice', email: 'alice@example.com' })
+    mockDb.treeDeletionRequest.create.mockResolvedValue(request)
+
+    const result = await requestTreeDeletion('t1')
+
+    expect(result.error).toBe(false)
+    expect(result.deleted).toBeUndefined()
+    expect(mockDb.treeDeletionRequest.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { treeId: 't1', requestedById: 'user-1' } })
+    )
+    expect(sendTreeDeletionRequestedEmail).toHaveBeenCalled()
+  })
+
+  it('hard deletes immediately when the tree has no nodes', async () => {
+    mockDb.tree.findUnique
+      .mockResolvedValueOnce({
+        id: 't1',
+        name: 'Empty',
+        slug: 'empty',
+        deletionRequest: null,
+        _count: { nodes: 0 },
+        accesses: [],
+      })
+      .mockResolvedValueOnce({
+        id: 't1',
+        name: 'Empty',
+        slug: 'empty',
+        accesses: [{ user: { email: 'admin@example.com', name: 'Admin', language: 'EN' } }],
+        Picture: [{ id: 'p1', fileKey: 'images/tree_t1/a.jpg' }],
+      })
+    mockDb.tree.delete.mockResolvedValue({})
+
+    const result = await requestTreeDeletion('t1')
+
+    expect(result).toEqual({ error: false, deleted: true })
+    expect(mockDb.tree.delete).toHaveBeenCalledWith({ where: { id: 't1' } })
+    expect(deleteFileFromS3).toHaveBeenCalledWith('images/tree_t1/a.jpg')
+    expect(sendTreeDeletedEmail).toHaveBeenCalled()
+  })
+
+  it('cancels a deletion request', async () => {
+    const request = { id: 'dr1', requestedAt: new Date('2026-04-01T00:00:00Z') }
+    mockDb.tree.findUnique.mockResolvedValueOnce({
+      id: 't1',
+      slug: 'family',
+      deletionRequest: request,
+    })
+    mockDb.treeDeletionRequest.delete.mockResolvedValue({})
+    mockDb.tree.findUnique.mockResolvedValueOnce({ id: 't1', accesses: [], deletionRequest: null })
+
+    const result = await cancelTreeDeletion('t1')
+
+    expect(result.error).toBe(false)
+    expect(mockDb.treeDeletionRequest.delete).toHaveBeenCalledWith({ where: { treeId: 't1' } })
+    expect(mockDb.activityLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ action: 'TREE_DELETION_CANCELLED' }),
+      })
+    )
+  })
+
+  it('prevents approving a non-empty tree before the grace period passes', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-05T00:00:00Z'))
+    mockDb.tree.findUnique.mockResolvedValue({
+      id: 't1',
+      deletionRequest: { id: 'dr1', requestedAt: new Date('2026-04-01T00:00:00Z') },
+      _count: { nodes: 1 },
+    })
+
+    const result = await approveTreeDeletion('t1')
+
+    expect(result.error).toBe(true)
+    expect(result.message).toBe('error-tree-deletion-not-ready')
+    expect(mockDb.tree.delete).not.toHaveBeenCalled()
+    vi.useRealTimers()
+  })
+
+  it('approves and hard deletes after the grace period', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-04-09T00:00:00Z'))
+    mockDb.tree.findUnique
+      .mockResolvedValueOnce({
+        id: 't1',
+        deletionRequest: { id: 'dr1', requestedAt: new Date('2026-04-01T00:00:00Z') },
+        _count: { nodes: 1 },
+      })
+      .mockResolvedValueOnce({
+        id: 't1',
+        name: 'Family',
+        slug: 'family',
+        accesses: [],
+        Picture: [],
+      })
+    mockDb.treeDeletionRequest.update.mockResolvedValue({})
+    mockDb.tree.delete.mockResolvedValue({})
+
+    const result = await approveTreeDeletion('t1')
+
+    expect(result).toEqual({ error: false, deleted: true })
+    expect(mockDb.treeDeletionRequest.update).toHaveBeenCalled()
+    expect(mockDb.tree.delete).toHaveBeenCalledWith({ where: { id: 't1' } })
+    vi.useRealTimers()
   })
 })
 
@@ -724,10 +887,7 @@ describe('joinTreeViaShareToken', () => {
       })
     })
 
-    const [r1, r2] = await Promise.all([
-      joinTreeViaShareToken('tok'),
-      joinTreeViaShareToken('tok'),
-    ])
+    const [r1, r2] = await Promise.all([joinTreeViaShareToken('tok'), joinTreeViaShareToken('tok')])
 
     expect(r1.error).toBe(false)
     expect(r2.error).toBe(false)

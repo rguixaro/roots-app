@@ -38,6 +38,7 @@ describe('getTrees', () => {
       where: { accesses: { some: { userId: 'user-1' } } },
       include: {
         accesses: true,
+        deletionRequest: true,
         _count: { select: { nodes: true } },
       },
     })
@@ -55,7 +56,9 @@ describe('getTree', () => {
       id: 't1',
       name: 'Family',
       slug: 'family',
-      accesses: [{ user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', image: null } }],
+      accesses: [
+        { user: { id: 'user-1', name: 'Alice', email: 'alice@example.com', image: null } },
+      ],
     }
     mockDb.tree.findFirst.mockResolvedValue(tree)
 
@@ -67,6 +70,13 @@ describe('getTree', () => {
         accesses: {
           include: { user: { select: { id: true, name: true, email: true, image: true } } },
         },
+        deletionRequest: {
+          include: {
+            requestedBy: { select: { id: true, name: true, email: true, image: true } },
+            approvedBy: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
+        _count: { select: { nodes: true } },
       },
     })
   })

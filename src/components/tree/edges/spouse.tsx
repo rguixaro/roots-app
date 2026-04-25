@@ -42,7 +42,7 @@ export function SpouseEdge(props: EdgeProps) {
               aria-label="Open marriage menu"
               className={cn(
                 'flex h-6 w-12 cursor-pointer items-center justify-center',
-                'text-ocean-300 border-ocean-200/60 bg-pale-ocean shadow-center-sm rounded-full border-2',
+                'text-ocean-300 border-ocean-200/60 bg-pale-ocean shadow-center-sm rounded-lg border-2',
                 'transition-[transform,scale] duration-200 hover:scale-110'
               )}
             >

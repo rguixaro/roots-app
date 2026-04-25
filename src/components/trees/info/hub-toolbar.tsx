@@ -86,7 +86,7 @@ export async function TreeInfoHubToolbar({ slug, role }: HubToolbarProps) {
               description={t('action-logs-description')}
             />
             <HubActionCard
-              href={`/trees/edit/${slug}`}
+              href={`/trees/settings/${slug}`}
               icon={Settings2}
               label={t('action-settings')}
               description={t('action-settings-description')}

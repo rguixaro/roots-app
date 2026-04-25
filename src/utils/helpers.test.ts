@@ -5,7 +5,7 @@ import { isTreeDetailRoute } from './helpers'
 /**
  * `isTreeDetailRoute` gates header visibility — it should only return true
  * for the full-screen graph view (`/trees/view/[slug]`), which has its own
- * overlay nav. Every other tree route (hub, timeline, logs, edit) keeps
+ * overlay nav. Every other tree route (hub, timeline, logs, settings) keeps
  * the global header.
  */
 describe('isTreeDetailRoute', () => {
@@ -34,7 +34,7 @@ describe('isTreeDetailRoute', () => {
   it('does not match other tree routes', () => {
     expect(isTreeDetailRoute('/trees/timeline/family')).toBe(false)
     expect(isTreeDetailRoute('/trees/logs/family')).toBe(false)
-    expect(isTreeDetailRoute('/trees/edit/family')).toBe(false)
+    expect(isTreeDetailRoute('/trees/settings/family')).toBe(false)
     expect(isTreeDetailRoute('/trees/new')).toBe(false)
   })
 

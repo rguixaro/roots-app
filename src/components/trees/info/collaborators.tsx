@@ -74,7 +74,7 @@ export async function TreeInfoCollaborators({ info }: CollaboratorsProps) {
       {canManage && (
         <div className="mt-3 flex justify-end">
           <Link
-            href={`/trees/edit/${info.tree.slug}`}
+            href={`/trees/settings/${info.tree.slug}`}
             className="text-ocean-400 hover:bg-ocean-200/15 inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors"
           >
             {t('collaborators-manage')}

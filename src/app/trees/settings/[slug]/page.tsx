@@ -7,7 +7,7 @@ import { getTree } from '@/server/queries'
 import { EditTree } from '@/components/trees/form'
 import { TypographyH4 } from '@/ui'
 
-export default async function TreeEditPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TreeSettingsPage({ params }: { params: Promise<{ slug: string }> }) {
   const session = await auth()
   if (!session) return null
 

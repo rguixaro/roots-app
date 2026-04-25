@@ -25,6 +25,7 @@ export const TreesFeed = async () => {
     updatedAt: t.updatedAt,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     memberCount: (t as any)._count?.nodes ?? 0,
+    pendingDeletion: !!t.deletionRequest,
   }))
 
   if (trees.length === 0) {
@@ -36,9 +37,7 @@ export const TreesFeed = async () => {
         <h2 className="text-ocean-400 mb-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
           {t_home('empty-title')}
         </h2>
-        <p className="text-ocean-300 mb-6 max-w-sm text-sm">
-          {t_home('empty-description')}
-        </p>
+        <p className="text-ocean-300 mb-6 max-w-sm text-sm">{t_home('empty-description')}</p>
         <Link
           href="/trees/new"
           className={cn(

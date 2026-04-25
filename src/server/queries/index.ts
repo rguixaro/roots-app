@@ -19,6 +19,7 @@ export const getTrees = cache(async () => {
       where: { accesses: { some: { userId: userId } } },
       include: {
         accesses: true,
+        deletionRequest: true,
         _count: { select: { nodes: true } },
       },
     })
@@ -74,6 +75,13 @@ export const getTree = cache(async (slug: string) => {
         accesses: {
           include: { user: { select: { id: true, name: true, email: true, image: true } } },
         },
+        deletionRequest: {
+          include: {
+            requestedBy: { select: { id: true, name: true, email: true, image: true } },
+            approvedBy: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
+        _count: { select: { nodes: true } },
       },
     })
 
@@ -99,6 +107,7 @@ export const getTreeRoots = cache(async (slug: string) => {
         accesses: {
           include: { user: { select: { id: true, name: true, email: true, image: true } } },
         },
+        deletionRequest: true,
       },
     })
 
@@ -142,6 +151,7 @@ export const getTreeNote = cache(async (slug: string) => {
         slug: true,
         name: true,
         type: true,
+        deletionRequest: { select: { id: true } },
         accesses: { where: { userId }, select: { role: true } },
         note: {
           include: {
@@ -154,7 +164,7 @@ export const getTreeNote = cache(async (slug: string) => {
     if (!tree) return { error: true as const, message: 'error-tree-not-found' as const }
 
     const role = tree.accesses[0]?.role
-    const canEdit = role === 'EDITOR' || role === 'ADMIN'
+    const canEdit = (role === 'EDITOR' || role === 'ADMIN') && !tree.deletionRequest
 
     return {
       error: false as const,

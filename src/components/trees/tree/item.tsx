@@ -11,7 +11,7 @@ import { cn } from '@/utils'
 
 import { Icon } from '../icon'
 
-export type TreeFeedItem = TreeSchema & { memberCount?: number }
+export type TreeFeedItem = TreeSchema & { memberCount?: number; pendingDeletion?: boolean }
 
 export function ItemTree({ tree, index }: { tree: TreeFeedItem; index: number }) {
   const t_trees = useTranslations('trees')
@@ -43,6 +43,12 @@ export function ItemTree({ tree, index }: { tree: TreeFeedItem; index: number })
               <>
                 <span>·</span>
                 <span>{t_trees('tree-member-count', { count: tree.memberCount })}</span>
+              </>
+            )}
+            {tree.pendingDeletion && (
+              <>
+                <span>·</span>
+                <span className="font-bold">{t_trees('tree-pending-deletion')}</span>
               </>
             )}
           </div>

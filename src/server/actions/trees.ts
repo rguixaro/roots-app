@@ -18,9 +18,19 @@ import {
   AttachChildToUnionSchema,
 } from '@/server/schemas'
 import type { TreeAccessRole } from '@/server/schemas'
-import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
+import {
+  slugify,
+  assertRole,
+  assertAuthenticated,
+  assertTreeWritable,
+  getChanges,
+} from '@/server/utils'
 
-import { sendTreeInvitationEmail } from '@/lib/email'
+import {
+  sendTreeDeletedEmail,
+  sendTreeDeletionRequestedEmail,
+  sendTreeInvitationEmail,
+} from '@/lib/email'
 
 import { languageToLocale } from '@/utils/language'
 
@@ -30,6 +40,151 @@ interface TreeResult {
   error: boolean
   message?: string
   tree?: Tree
+}
+
+interface TreeDeletionResult extends TreeResult {
+  deleted?: boolean
+  availableAt?: Date
+}
+
+const TREE_DELETION_GRACE_PERIOD_DAYS = 7
+const MS_PER_DAY = 86_400_000
+const TREE_WRITE_ERROR_MESSAGES = ['error-no-permission', 'error-tree-pending-deletion'] as const
+
+const getTreeDeletionAvailableAt = (requestedAt: Date) =>
+  new Date(requestedAt.getTime() + TREE_DELETION_GRACE_PERIOD_DAYS * MS_PER_DAY)
+
+const getActionErrorMessage = (error: unknown): string | undefined =>
+  error instanceof Error ? error.message : undefined
+
+const isTreeWriteError = (error: unknown) => {
+  const message = getActionErrorMessage(error)
+  return !!message && TREE_WRITE_ERROR_MESSAGES.includes(message as TreeWriteErrorMessage)
+}
+
+type TreeWriteErrorMessage = (typeof TREE_WRITE_ERROR_MESSAGES)[number]
+
+type TreeAdminRecipient = {
+  user: { email: string | null; name: string | null; language?: 'CA' | 'ES' | 'EN' | null }
+}
+
+async function sendDeletionRequestedEmails({
+  admins,
+  treeName,
+  treeSlug,
+  requestedByName,
+  requestedAt,
+  availableAt,
+}: {
+  admins: TreeAdminRecipient[]
+  treeName: string
+  treeSlug: string
+  requestedByName: string
+  requestedAt: Date
+  availableAt: Date
+}) {
+  await Promise.all(
+    admins
+      .filter((access) => access.user.email)
+      .map((access) =>
+        sendTreeDeletionRequestedEmail({
+          recipientEmail: access.user.email!,
+          recipientName: access.user.name || access.user.email!,
+          treeName,
+          treeSlug,
+          requestedByName,
+          requestedAt,
+          availableAt,
+          locale: access.user.language ? languageToLocale(access.user.language) : 'en',
+        }).catch((err) =>
+          Sentry.captureException(err, {
+            level: 'warning',
+            tags: { action: 'requestTreeDeletion', step: 'send-email' },
+          })
+        )
+      )
+  )
+}
+
+async function sendDeletedEmails({
+  admins,
+  treeName,
+}: {
+  admins: TreeAdminRecipient[]
+  treeName: string
+}) {
+  await Promise.all(
+    admins
+      .filter((access) => access.user.email)
+      .map((access) =>
+        sendTreeDeletedEmail({
+          recipientEmail: access.user.email!,
+          recipientName: access.user.name || access.user.email!,
+          treeName,
+          locale: access.user.language ? languageToLocale(access.user.language) : 'en',
+        }).catch((err) =>
+          Sentry.captureException(err, {
+            level: 'warning',
+            tags: { action: 'approveTreeDeletion', step: 'send-email' },
+          })
+        )
+      )
+  )
+}
+
+async function hardDeleteTree(treeId: string) {
+  const tree = await db.tree.findUnique({
+    where: { id: treeId },
+    include: {
+      accesses: {
+        where: { role: 'ADMIN' },
+        include: { user: { select: { email: true, name: true, language: true } } },
+      },
+      Picture: { select: { id: true, fileKey: true } },
+    },
+  })
+  if (!tree) return null
+
+  await db.$transaction(async (tx) => {
+    await tx.treeNode.updateMany({
+      where: { treeId },
+      data: { childOfUnionId: null },
+    })
+    await tx.union.deleteMany({ where: { treeId } })
+    await tx.treeEdge.deleteMany({ where: { treeId } })
+    await tx.pictureTag.deleteMany({
+      where: { pictureId: { in: tree.Picture.map((picture) => picture.id) } },
+    })
+    await tx.picture.deleteMany({ where: { treeId } })
+    await tx.treeNote.deleteMany({ where: { treeId } })
+    await tx.treeDeletionRequest.deleteMany({ where: { treeId } })
+    await tx.activityLog.deleteMany({ where: { treeId } })
+    await tx.treeAccess.deleteMany({ where: { treeId } })
+    await tx.treeNode.deleteMany({ where: { treeId } })
+    await tx.tree.delete({ where: { id: treeId } })
+  })
+
+  await Promise.all(
+    tree.Picture.map((picture) =>
+      deleteFileFromS3(picture.fileKey).catch((err) =>
+        Sentry.captureException(err, {
+          level: 'warning',
+          tags: { action: 'hardDeleteTree', step: 's3-cleanup' },
+          extra: { fileKey: picture.fileKey },
+        })
+      )
+    )
+  )
+
+  await sendDeletedEmails({ admins: tree.accesses, treeName: tree.name })
+
+  revalidatePath('/')
+  revalidatePath('/trees')
+  revalidatePath(`/trees/${tree.slug}`)
+  revalidatePath(`/trees/view/${tree.slug}`)
+  revalidatePath(`/trees/settings/${tree.slug}`)
+
+  return tree
 }
 
 /**
@@ -86,6 +241,7 @@ export const updateTree = async (
     CreateTreeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(id, userId)
+    await assertTreeWritable(id)
 
     const prevTree = await db.tree.findUnique({ where: { id } })
     if (!prevTree) return { error: true, message: 'error-tree-not-found' }
@@ -120,12 +276,202 @@ export const updateTree = async (
     }
 
     return { error: false, tree: updatedTree || undefined }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2002') return { error: true, message: 'error-tree-exists' }
     }
     Sentry.captureException(e, { tags: { action: 'updateTree' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+export const requestTreeDeletion = async (treeId: string): Promise<TreeDeletionResult> => {
+  try {
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId, ['ADMIN'])
+
+    const tree = await db.tree.findUnique({
+      where: { id: treeId },
+      include: {
+        deletionRequest: true,
+        _count: { select: { nodes: true } },
+        accesses: {
+          where: { role: 'ADMIN' },
+          include: { user: { select: { email: true, name: true, language: true } } },
+        },
+      },
+    })
+    if (!tree) return { error: true, message: 'error-tree-not-found' }
+    if (tree.deletionRequest) return { error: true, message: 'error-tree-pending-deletion' }
+
+    if (tree._count.nodes === 0) {
+      await hardDeleteTree(treeId)
+      return { error: false, deleted: true }
+    }
+
+    const requestedBy = await db.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true },
+    })
+    const request = await db.treeDeletionRequest.create({
+      data: { treeId, requestedById: userId },
+      include: {
+        requestedBy: { select: { id: true, name: true, email: true, image: true } },
+        approvedBy: { select: { id: true, name: true, email: true, image: true } },
+      },
+    })
+    const availableAt = getTreeDeletionAvailableAt(request.requestedAt)
+
+    await db.activityLog.create({
+      data: {
+        treeId,
+        createdBy: userId,
+        action: 'TREE_DELETION_REQUESTED',
+        entityId: request.id,
+        metadata: {
+          requestedAt: request.requestedAt.toISOString(),
+          availableAt: availableAt.toISOString(),
+        },
+      },
+    })
+
+    await sendDeletionRequestedEmails({
+      admins: tree.accesses,
+      treeName: tree.name,
+      treeSlug: tree.slug,
+      requestedByName: requestedBy?.name || requestedBy?.email || 'Unknown',
+      requestedAt: request.requestedAt,
+      availableAt,
+    })
+
+    const updatedTree = await db.tree.findUnique({
+      where: { id: treeId },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+        deletionRequest: {
+          include: {
+            requestedBy: { select: { id: true, name: true, email: true, image: true } },
+            approvedBy: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
+        _count: { select: { nodes: true } },
+      },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${tree.slug}`)
+    revalidatePath(`/trees/view/${tree.slug}`)
+    revalidatePath(`/trees/settings/${tree.slug}`)
+
+    return { error: false, tree: updatedTree ?? undefined, availableAt }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
+    Sentry.captureException(e, { tags: { action: 'requestTreeDeletion' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+export const cancelTreeDeletion = async (treeId: string): Promise<TreeDeletionResult> => {
+  try {
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId, ['ADMIN'])
+
+    const tree = await db.tree.findUnique({
+      where: { id: treeId },
+      include: { deletionRequest: true },
+    })
+    if (!tree) return { error: true, message: 'error-tree-not-found' }
+    if (!tree.deletionRequest)
+      return { error: true, message: 'error-tree-deletion-request-not-found' }
+
+    await db.treeDeletionRequest.delete({ where: { treeId } })
+
+    await db.activityLog.create({
+      data: {
+        treeId,
+        createdBy: userId,
+        action: 'TREE_DELETION_CANCELLED',
+        entityId: tree.deletionRequest.id,
+        metadata: { requestedAt: tree.deletionRequest.requestedAt.toISOString() },
+      },
+    })
+
+    const updatedTree = await db.tree.findUnique({
+      where: { id: treeId },
+      include: {
+        accesses: {
+          include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        },
+        deletionRequest: {
+          include: {
+            requestedBy: { select: { id: true, name: true, email: true, image: true } },
+            approvedBy: { select: { id: true, name: true, email: true, image: true } },
+          },
+        },
+        _count: { select: { nodes: true } },
+      },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${tree.slug}`)
+    revalidatePath(`/trees/view/${tree.slug}`)
+    revalidatePath(`/trees/settings/${tree.slug}`)
+
+    return { error: false, tree: updatedTree ?? undefined }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
+    Sentry.captureException(e, { tags: { action: 'cancelTreeDeletion' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+export const approveTreeDeletion = async (treeId: string): Promise<TreeDeletionResult> => {
+  try {
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId, ['ADMIN'])
+
+    const tree = await db.tree.findUnique({
+      where: { id: treeId },
+      include: { deletionRequest: true, _count: { select: { nodes: true } } },
+    })
+    if (!tree) return { error: true, message: 'error-tree-not-found' }
+    if (!tree.deletionRequest)
+      return { error: true, message: 'error-tree-deletion-request-not-found' }
+
+    const availableAt = getTreeDeletionAvailableAt(tree.deletionRequest.requestedAt)
+    if (tree._count.nodes > 0 && availableAt.getTime() > Date.now()) {
+      return { error: true, message: 'error-tree-deletion-not-ready', availableAt }
+    }
+
+    await db.treeDeletionRequest.update({
+      where: { treeId },
+      data: { approvedAt: new Date(), approvedById: userId },
+    })
+
+    await db.activityLog.create({
+      data: {
+        treeId,
+        createdBy: userId,
+        action: 'TREE_DELETION_APPROVED',
+        entityId: tree.deletionRequest.id,
+        metadata: {
+          requestedAt: tree.deletionRequest.requestedAt.toISOString(),
+          approvedAt: new Date().toISOString(),
+        },
+      },
+    })
+
+    await hardDeleteTree(treeId)
+
+    return { error: false, deleted: true }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
+    Sentry.captureException(e, { tags: { action: 'approveTreeDeletion' } })
     return { error: true, message: 'error' }
   }
 }
@@ -147,6 +493,7 @@ export const inviteMember = async (
   try {
     const inviterId = await assertAuthenticated()
     await assertRole(treeId, inviterId)
+    await assertTreeWritable(treeId)
 
     if (role === 'ADMIN') {
       const inviterAccess = await db.treeAccess.findFirst({ where: { treeId, userId: inviterId } })
@@ -192,8 +539,8 @@ export const inviteMember = async (
     revalidatePath('/trees')
 
     return { error: false, tree: tree || undefined }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'inviteMember' } })
     return { error: true, message: 'error' }
   }
@@ -214,6 +561,7 @@ export const updateMember = async (
   try {
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId, ['ADMIN'])
+    await assertTreeWritable(treeId)
 
     if (role !== 'ADMIN') {
       const remainingAdmins = await db.treeAccess.count({
@@ -240,8 +588,8 @@ export const updateMember = async (
     revalidatePath('/trees')
 
     return { error: false, tree: tree ?? undefined }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'updateMember' } })
     return { error: true, message: 'error' }
   }
@@ -259,6 +607,7 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
   try {
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId, ['ADMIN'])
+    await assertTreeWritable(treeId)
 
     const target = await db.treeAccess.findUnique({
       where: { treeId_userId: { treeId, userId: memberId } },
@@ -286,8 +635,8 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
     revalidatePath('/trees')
 
     return { error: false, tree: tree ?? undefined }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'removeMember' } })
     return { error: true, message: 'error' }
   }
@@ -306,6 +655,7 @@ export const createTreeNode = async (
     CreateTreeNodeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     const node = await db.treeNode.create({
       data: {
@@ -336,8 +686,8 @@ export const createTreeNode = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false, nodeId: node.id }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
@@ -359,6 +709,7 @@ export const updateTreeNode = async (
     UpdateTreeNodeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     const prevNode = await db.treeNode.findFirst({
       where: { id: values.id, treeId: values.treeId },
@@ -398,8 +749,8 @@ export const updateTreeNode = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-node-not-found' }
     }
@@ -421,6 +772,7 @@ export const createTreeEdge = async (
     CreateTreeEdgeSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     if (values.fromNodeId === values.toNodeId)
       return { error: true, message: 'error-cannot-connect-to-self' }
@@ -472,8 +824,8 @@ export const createTreeEdge = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-tree-not-found' }
     }
@@ -493,6 +845,7 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
   try {
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId)
+    await assertTreeWritable(treeId)
 
     const nodeToDelete = await db.treeNode.findFirst({ where: { id: nodeId, treeId: treeId } })
     if (!nodeToDelete) return { error: true, message: 'error-nodes-not-found' }
@@ -554,8 +907,8 @@ export const deleteTreeNode = async (nodeId: string, treeId: string): Promise<Tr
     revalidatePath(`/trees/${treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-nodes-not-found' }
     }
@@ -575,6 +928,7 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
   try {
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId)
+    await assertTreeWritable(treeId)
 
     const edgeToDelete = await db.treeEdge.findFirst({ where: { id: edgeId, treeId: treeId } })
     if (!edgeToDelete) return { error: true, message: 'error-edge-not-found' }
@@ -610,8 +964,8 @@ export const deleteTreeEdge = async (edgeId: string, treeId: string): Promise<Tr
     revalidatePath(`/trees/${treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === 'P2025') return { error: true, message: 'error-edge-not-found' }
     }
@@ -776,6 +1130,7 @@ export const generateShareToken = async (
 
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId)
+    await assertTreeWritable(treeId)
 
     const token = crypto.randomBytes(24).toString('base64url')
     const expiresAt = new Date(Date.now() + ttlDays * 86_400_000)
@@ -799,9 +1154,10 @@ export const generateShareToken = async (
     revalidatePath(`/trees/${tree.slug}`)
 
     return { error: false, token, expiresAt }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
-    if (e?.message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
+  } catch (e) {
+    const message = getActionErrorMessage(e)
+    if (isTreeWriteError(e)) return { error: true, message }
+    if (message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
     Sentry.captureException(e, { tags: { action: 'generateShareToken' } })
     return { error: true, message: 'error' }
   }
@@ -869,8 +1225,9 @@ export const joinTreeViaShareToken = async (token: string): Promise<JoinResult> 
     revalidatePath('/trees')
 
     return { error: false, slug: tree.slug, alreadyMember }
-  } catch (e: any) {
-    if (e?.message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
+  } catch (e) {
+    if (getActionErrorMessage(e) === 'unauthenticated')
+      return { error: true, message: 'unauthenticated' }
     Sentry.captureException(e, { tags: { action: 'joinTreeViaShareToken' } })
     return { error: true, message: 'error' }
   }
@@ -887,6 +1244,7 @@ export const createUnion = async (
     CreateUnionSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     if (values.spouseBId && values.spouseAId === values.spouseBId)
       return { error: true, message: 'error-cannot-connect-to-self' }
@@ -927,7 +1285,9 @@ export const createUnion = async (
     })
 
     const spouseAName = spouses.find((s) => s.id === spouseAId)?.fullName ?? null
-    const spouseBName = spouseBId ? (spouses.find((s) => s.id === spouseBId)?.fullName ?? null) : null
+    const spouseBName = spouseBId
+      ? (spouses.find((s) => s.id === spouseBId)?.fullName ?? null)
+      : null
 
     await db.activityLog.create({
       data: {
@@ -952,8 +1312,8 @@ export const createUnion = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false, unionId: union.id }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'createUnion' } })
     return { error: true, message: 'error' }
   }
@@ -969,6 +1329,7 @@ export const updateUnion = async (
     UpdateUnionSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     if (values.spouseBId && values.spouseAId === values.spouseBId)
       return { error: true, message: 'error-cannot-connect-to-self' }
@@ -1045,8 +1406,8 @@ export const updateUnion = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'updateUnion' } })
     return { error: true, message: 'error' }
   }
@@ -1060,6 +1421,7 @@ export const deleteUnion = async (id: string, treeId: string): Promise<TreeResul
   try {
     const userId = await assertAuthenticated()
     await assertRole(treeId, userId)
+    await assertTreeWritable(treeId)
 
     const union = await db.union.findFirst({
       where: { id, treeId },
@@ -1095,8 +1457,8 @@ export const deleteUnion = async (id: string, treeId: string): Promise<TreeResul
     revalidatePath(`/trees/${treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'deleteUnion' } })
     return { error: true, message: 'error' }
   }
@@ -1113,6 +1475,7 @@ export const attachChildToUnion = async (
     AttachChildToUnionSchema.parse(values)
     const userId = await assertAuthenticated()
     await assertRole(values.treeId, userId)
+    await assertTreeWritable(values.treeId)
 
     const child = await db.treeNode.findFirst({
       where: { id: values.childNodeId, treeId: values.treeId },
@@ -1136,8 +1499,8 @@ export const attachChildToUnion = async (
     revalidatePath(`/trees/${values.treeId}`)
 
     return { error: false }
-  } catch (e: any) {
-    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+  } catch (e) {
+    if (isTreeWriteError(e)) return { error: true, message: getActionErrorMessage(e) }
     Sentry.captureException(e, { tags: { action: 'attachChildToUnion' } })
     return { error: true, message: 'error' }
   }

@@ -39,7 +39,7 @@ function ToolButton({
         'text-ocean-300 hover:text-ocean-400 hover:bg-ocean-100/40',
         'flex h-8 w-8 cursor-pointer items-center justify-center rounded-full',
         'transition-[transform,color,background-color] duration-150 hover:scale-110',
-        'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200',
+        'focus-visible:ring-ocean-200 outline-none focus-visible:ring-2',
         className
       )}
     >
@@ -68,7 +68,7 @@ function ToolLink({
         'text-ocean-300 hover:text-ocean-400 hover:bg-ocean-100/40',
         'flex h-8 w-8 cursor-pointer items-center justify-center rounded-full',
         'transition-[transform,color,background-color] duration-150 hover:scale-110',
-        'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200',
+        'focus-visible:ring-ocean-200 outline-none focus-visible:ring-2',
         className
       )}
     >
@@ -86,6 +86,7 @@ export function TreeOverlay({
   onFocus,
 }: TreeOverlayProps) {
   const t_common = useTranslations('common')
+  const t_trees = useTranslations('trees')
 
   return (
     <>
@@ -104,17 +105,19 @@ export function TreeOverlay({
         <span
           className={cn(
             'text-ocean-400 px-2 text-sm font-bold sm:text-base',
-            'line-clamp-2 max-w-[14rem] sm:max-w-[20rem] leading-tight'
+            'line-clamp-2 max-w-[14rem] leading-tight sm:max-w-[20rem]'
           )}
           title={tree.name}
         >
           {tree.name}
         </span>
+        {tree.deletionRequest && (
+          <span className="bg-ocean-100/60 text-ocean-400 rounded-full px-2 py-0.5 text-xs font-bold">
+            {t_trees('tree-pending-deletion')}
+          </span>
+        )}
         <div className="bg-ocean-200/60 mx-1 h-5 w-px" />
-        <ToolLink
-          href={`/trees/notes/${tree?.slug}?from=view`}
-          label={t_common('notes')}
-        >
+        <ToolLink href={`/trees/notes/${tree?.slug}?from=view`} label={t_common('notes')}>
           <NotebookPen size={18} />
         </ToolLink>
         <ToolButton onClick={onResetView} label={t_common('reset-view')}>
@@ -139,7 +142,7 @@ export function TreeOverlay({
             'bg-ocean-300 hover:bg-ocean-400 text-pale-ocean',
             'shadow-center-lg cursor-pointer rounded-2xl',
             'transition-colors duration-150',
-            'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200'
+            'focus-visible:ring-ocean-200 outline-none focus-visible:ring-2'
           )}
         >
           <Plus size={20} strokeWidth={2.5} />

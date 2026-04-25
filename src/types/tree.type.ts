@@ -20,6 +20,19 @@ export interface Tree {
   nodes?: TreeNode[]
   edges?: TreeEdge[]
   accesses?: TreeAccess[]
+  deletionRequest?: TreeDeletionRequest | null
+  _count?: { nodes?: number }
+}
+
+export interface TreeDeletionRequest {
+  id: string
+  treeId: string
+  requestedById: string | null
+  requestedBy?: Pick<User, 'id' | 'name' | 'email' | 'image'> | null
+  requestedAt: Date
+  approvedById?: string | null
+  approvedBy?: Pick<User, 'id' | 'name' | 'email' | 'image'> | null
+  approvedAt?: Date | null
 }
 
 export interface TreeAccess {

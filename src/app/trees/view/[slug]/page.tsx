@@ -28,7 +28,7 @@ export default async function TreeViewPage({ params }: { params: Promise<{ slug:
 
   const { tree, nodes, edges, unions } = result
   const userAccess = tree?.accesses.find((a) => a.userId === session?.user?.id)
-  const readonly = userAccess?.role === 'VIEWER'
+  const readonly = userAccess?.role === 'VIEWER' || !!tree.deletionRequest
 
   return (
     <div className="h-full w-full text-center">

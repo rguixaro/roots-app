@@ -27,7 +27,6 @@ describe('<Bar>', () => {
 
   it('clamps width to 0% when total is 0 (no division by zero)', () => {
     const { container } = render(<Bar label="Empty" value={5} total={0} />)
-    // Find the fill div — it's the child of the track
     const fill = container.querySelector('.bg-ocean-300') as HTMLElement
     expect(fill).toBeTruthy()
     expect(fill.style.width).toBe('0%')

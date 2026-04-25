@@ -22,7 +22,12 @@ export function Section({
   children,
 }: SectionProps) {
   return (
-    <div className={cn('text-ocean-400 w-full p-4', className)}>
+    <div
+      className={cn(
+        'text-ocean-400 bg-pale-ocean shadow-center-sm w-full rounded-xl p-4',
+        className
+      )}
+    >
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <span className="flex items-center gap-2 font-bold">

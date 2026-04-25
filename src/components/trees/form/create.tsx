@@ -279,12 +279,13 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
   }
 
   return (
-    <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
+    <div className="text-ocean-400 z-0 flex w-full flex-col">
       <GoBack
+        variant="filled"
         text={currentTree ? 'tree' : 'trees'}
         to={currentTree ? `/trees/${currentTree.slug}` : '/'}
       />
-      <TypographyH4 className="mt-4">{t_trees('tree-create')}</TypographyH4>
+      <TypographyH4>{t_trees('tree-create')}</TypographyH4>
       <p className="mb-4">{t_trees('tree-create-description')} </p>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} onKeyDown={(e) => checkKeyDown(e)}>

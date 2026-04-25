@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 
-import { TypographyH5 } from '@/ui'
+import { TypographyH4 } from '@/ui'
 
 interface Author {
   id: string
@@ -13,8 +13,6 @@ interface TreeNotesHeaderProps {
   updatedBy: Author | null
 }
 
-/** Format a Date into a short relative string using the existing insights
- * `relative-*` i18n keys (today / yesterday / N days ago / N weeks ago / etc.). */
 function formatRelativeTime(
   date: Date,
   t: (key: string, values?: Record<string, number>) => string
@@ -39,8 +37,8 @@ export async function TreeNotesHeader({ updatedAt, updatedBy }: TreeNotesHeaderP
 
   return (
     <div className="mb-4">
-      <TypographyH5>{t_notes('title')}</TypographyH5>
-      <p className="text-ocean-300 mt-1 text-sm">{t_notes('description')}</p>
+      <TypographyH4>{t_notes('title')}</TypographyH4>
+      <p className="text-ocean-300">{t_notes('description')}</p>
 
       {updatedAt && updatedBy ? (
         <p className="text-ocean-300 mt-3 text-xs">

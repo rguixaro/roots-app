@@ -21,7 +21,7 @@ const mockLanguageToLocale = vi.mocked(languageToLocale)
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0)) // 2026-04-13
+  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0))
   vi.clearAllMocks()
   mockSendNewsletter.mockResolvedValue(true)
 })
@@ -63,10 +63,9 @@ describe('sendWeeklyNewsletters', () => {
         slug: 'quiet',
         newsletter: true,
         accesses: [{ user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } }],
-        nodes: [], // no recent additions
+        nodes: [],
       },
     ])
-    // All nodes have no upcoming birthdays/anniversaries
     mockDb.treeNode.findMany.mockResolvedValue([
       { id: 'n1', fullName: 'Bob', birthDate: new Date(1990, 8, 1), deathDate: null },
     ])
@@ -165,7 +164,6 @@ describe('sendWeeklyNewsletters', () => {
     ])
     mockDb.treeNode.findMany.mockResolvedValue([recentNode])
 
-    // First email succeeds, second throws
     mockSendNewsletter
       .mockResolvedValueOnce(true)
       .mockRejectedValueOnce(new Error('SMTP failure'))
@@ -209,7 +207,6 @@ describe('sendWeeklyNewsletters', () => {
     ])
     mockDb.treeNode.findMany.mockResolvedValue([recentNode])
 
-    // Tree A: u1 succeeds; Tree B: u2 fails, u3 succeeds
     mockSendNewsletter
       .mockResolvedValueOnce(true)
       .mockRejectedValueOnce(new Error('SMTP failure'))

@@ -100,6 +100,15 @@
   cursor: default;
 }
 
+.react-flow.tree-exporting [data-edge-menu-trigger='true'] {
+  display: none;
+}
+
+.react-flow.tree-exporting .react-flow__edgeupdater,
+.react-flow.tree-exporting .react-flow__handle {
+  display: none;
+}
+
 @font-face {
   font-family: 'Outfit';
   src: url('/src/app/fonts/outfit-variable.ttf') format('truetype');

@@ -48,12 +48,6 @@ export function CoupleBusEdge(props: EdgeProps) {
     })
   }
 
-  // Place the button directly above the child on the vertical drop
-  // segment of the path (~65 % of the way down). Don't use the
-  // source/target X midpoint — for multi-child unions the actual path
-  // bends out across the bus bar at the top and then drops straight
-  // down at `targetX`, so the linear midpoint is empty space when
-  // siblings span a wide horizontal range.
   const buttonX = targetX
   const buttonY = sourceY + (targetY - sourceY) * 0.65
 
@@ -87,8 +81,8 @@ export function CoupleBusEdge(props: EdgeProps) {
               aria-label="Detach child"
               className={cn(
                 'flex h-4 w-8 cursor-pointer items-center justify-center',
-                'text-ocean-300 border-ocean-200/60 bg-pale-ocean rounded-full border-2 opacity-70',
-                'transition-[transform,scale,opacity] duration-200 hover:scale-110 hover:opacity-100'
+                'text-ocean-300 border-ocean-200/60 bg-pale-ocean rounded-md border-2',
+                'transition-[transform,scale] duration-200 hover:scale-110'
               )}
             >
               <Unlink2 size={9} strokeWidth={2.5} />

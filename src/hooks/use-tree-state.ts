@@ -35,6 +35,18 @@ interface UseTreeStateOptions {
   enableProgressiveDisclosure?: boolean
 }
 
+const waitForFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+
+async function waitForRenderedPeople(
+  getPeopleCount: () => number,
+  expectedPeopleCount: number
+): Promise<void> {
+  for (let attempt = 0; attempt < 12; attempt++) {
+    if (getPeopleCount() >= expectedPeopleCount) return
+    await waitForFrame()
+  }
+}
+
 export function useTreeState(
   tree: Tree,
   allNodes: TreeNode[],
@@ -617,6 +629,47 @@ export function useTreeState(
     []
   )
 
+  const prepareExportView = useCallback(async () => {
+    const previousViewport = reactFlowInstance.getViewport()
+    const previousShowAllNodes = showAllNodes
+    const previousFocusOnNode = focusOnNode
+    const previousViewingOptionsShown = viewingOptionsShown
+    const previousExpandedNodes = expandedNodes
+
+    closeEdgeContextMenu()
+    setShowAllNodes(true)
+    setFocusOnNode(null)
+    setViewingOptionsShown(false)
+    setExpandedNodes(new Set())
+
+    await waitForFrame()
+    await waitForFrame()
+    await waitForRenderedPeople(
+      () => reactFlowInstance.getNodes().filter((node) => !isCoupleId(node.id)).length,
+      allNodes.length
+    )
+    reactFlowInstance.setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 0 })
+    await waitForFrame()
+    await waitForFrame()
+
+    return async () => {
+      setShowAllNodes(previousShowAllNodes)
+      setFocusOnNode(previousFocusOnNode)
+      setViewingOptionsShown(previousViewingOptionsShown)
+      setExpandedNodes(previousExpandedNodes)
+      await waitForFrame()
+      reactFlowInstance.setViewport(previousViewport, { duration: 0 })
+    }
+  }, [
+    closeEdgeContextMenu,
+    expandedNodes,
+    focusOnNode,
+    allNodes.length,
+    reactFlowInstance,
+    showAllNodes,
+    viewingOptionsShown,
+  ])
+
   /**
    * Show confirmation dialog for node deletion
    * @param nodeId - The id of the node to delete
@@ -711,6 +764,7 @@ export function useTreeState(
 
     withAsync,
     resetView,
+    prepareExportView,
 
     collapseAllNodes,
 

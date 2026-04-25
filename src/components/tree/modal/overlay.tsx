@@ -1,7 +1,15 @@
 'use client'
 
 import React from 'react'
-import { ChevronLeft, NotebookPen, Plus, Maximize, Crosshair } from 'lucide-react'
+import {
+  ChevronLeft,
+  NotebookPen,
+  Plus,
+  Maximize,
+  Crosshair,
+  ImageDown,
+  LoaderIcon,
+} from 'lucide-react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
@@ -16,6 +24,8 @@ interface TreeOverlayProps {
   onCreateNode: () => void
   onResetView: () => void
   onFocus: () => void
+  onExportImage: () => void
+  exportingImage: boolean
 }
 
 function ToolButton({
@@ -84,9 +94,12 @@ export function TreeOverlay({
   onCreateNode,
   onResetView,
   onFocus,
+  onExportImage,
+  exportingImage,
 }: TreeOverlayProps) {
   const t_common = useTranslations('common')
   const t_trees = useTranslations('trees')
+  const t_treeInfo = useTranslations('tree-info')
 
   return (
     <>
@@ -105,7 +118,7 @@ export function TreeOverlay({
         <span
           className={cn(
             'text-ocean-400 px-2 text-sm font-bold sm:text-base',
-            'line-clamp-2 max-w-[14rem] leading-tight sm:max-w-[20rem]'
+            'line-clamp-2 max-w-56 leading-tight sm:max-w-[20rem]'
           )}
           title={tree.name}
         >
@@ -122,6 +135,17 @@ export function TreeOverlay({
         </ToolLink>
         <ToolButton onClick={onResetView} label={t_common('reset-view')}>
           <Maximize size={18} />
+        </ToolButton>
+        <ToolButton
+          onClick={onExportImage}
+          label={t_treeInfo('action-export-image')}
+          className={exportingImage ? 'cursor-wait opacity-70' : undefined}
+        >
+          {exportingImage ? (
+            <LoaderIcon size={18} className="animate-spin" />
+          ) : (
+            <ImageDown size={18} />
+          )}
         </ToolButton>
         {viewingOptionsEnabled && (
           <ToolButton onClick={onFocus} label={t_common('focus-mode')}>
@@ -140,7 +164,7 @@ export function TreeOverlay({
             'animate-menu-in origin-bottom',
             'flex h-12 items-center gap-2 px-5',
             'bg-ocean-300 hover:bg-ocean-400 text-pale-ocean',
-            'shadow-center-lg cursor-pointer rounded-2xl',
+            'shadow-center cursor-pointer rounded-2xl',
             'transition-colors duration-150',
             'focus-visible:ring-ocean-200 outline-none focus-visible:ring-2'
           )}

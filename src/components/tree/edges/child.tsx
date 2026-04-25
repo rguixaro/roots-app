@@ -59,8 +59,8 @@ export function ChildEdge(props: EdgeProps) {
               aria-label="Detach relation"
               className={cn(
                 'flex h-4 w-8 cursor-pointer items-center justify-center',
-                'text-ocean-300 border-ocean-200/60 bg-pale-ocean rounded-full border-2 opacity-70',
-                'transition-[transform,scale,opacity] duration-200 hover:scale-110 hover:opacity-100'
+                'text-ocean-300 border-ocean-200/60 bg-pale-ocean rounded-md border-2',
+                'transition-[transform,scale] duration-200 hover:scale-110'
               )}
             >
               <Unlink2 size={9} strokeWidth={2.5} />

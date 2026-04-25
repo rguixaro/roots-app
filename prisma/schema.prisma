@@ -58,6 +58,10 @@ enum ActivityAction {
   MEMBER_JOINED_VIA_SHARE
 
   NOTE_UPDATED
+
+  UNION_CREATED
+  UNION_UPDATED
+  UNION_DELETED
 }
 
 model Tree {
@@ -77,6 +81,7 @@ model Tree {
   nodes       TreeNode[]
   accesses    TreeAccess[]
   TreeEdge    TreeEdge[]
+  Unions      Union[]
   Picture     Picture[]
   ActivityLog ActivityLog[]
   note        TreeNote?
@@ -100,12 +105,48 @@ model TreeNode {
   biography  String?
   alias      String?
 
+  childOfUnion   Union?  @relation("ChildOfUnion", fields: [childOfUnionId], references: [id], onDelete: SetNull)
+  childOfUnionId String? @db.ObjectId
+
+  unionsAsSpouseA Union[] @relation("UnionSpouseA")
+  unionsAsSpouseB Union[] @relation("UnionSpouseB")
+
   taggedIn  PictureTag[] @relation("taggedIn")
   edgesFrom TreeEdge[]   @relation("FromNode")
   edgesTo   TreeEdge[]   @relation("ToNode")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([childOfUnionId])
+}
+
+model Union {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  // onDelete must be NoAction here to avoid a referential-integrity cycle
+  // with TreeNode.childOfUnion. Spouse-delete cascade is handled in the
+  // deleteTreeNode action.
+  spouseA   TreeNode @relation("UnionSpouseA", fields: [spouseAId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spouseAId String   @db.ObjectId
+
+  spouseB   TreeNode? @relation("UnionSpouseB", fields: [spouseBId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spouseBId String?   @db.ObjectId
+
+  children TreeNode[] @relation("ChildOfUnion")
+
+  marriedAt  DateTime?
+  divorcedAt DateTime?
+  place      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([treeId])
+  @@index([spouseAId])
+  @@index([spouseBId])
 }
 
 model TreeEdge {

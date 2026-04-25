@@ -13,6 +13,9 @@ import {
   CreateTreeNodeSchema,
   CreateTreeEdgeSchema,
   UpdateTreeNodeSchema,
+  CreateUnionSchema,
+  UpdateUnionSchema,
+  AttachChildToUnionSchema,
 } from '@/server/schemas'
 import type { TreeAccessRole } from '@/server/schemas'
 import { slugify, assertRole, assertAuthenticated, getChanges } from '@/server/utils'
@@ -298,7 +301,7 @@ export const removeMember = async (treeId: string, memberId: string): Promise<Tr
  */
 export const createTreeNode = async (
   values: z.infer<typeof CreateTreeNodeSchema>
-): Promise<TreeResult> => {
+): Promise<TreeResult & { nodeId?: string }> => {
   try {
     CreateTreeNodeSchema.parse(values)
     const userId = await assertAuthenticated()
@@ -332,7 +335,7 @@ export const createTreeNode = async (
     revalidatePath('/trees')
     revalidatePath(`/trees/${values.treeId}`)
 
-    return { error: false }
+    return { error: false, nodeId: node.id }
   } catch (e: any) {
     if (e?.message === 'error-no-permission') return { error: true, message: e.message }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -664,6 +667,16 @@ export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> 
             },
           },
         },
+        Unions: {
+          select: {
+            id: true,
+            spouseAId: true,
+            spouseBId: true,
+            marriedAt: true,
+            divorcedAt: true,
+            place: true,
+          },
+        },
       },
     })
 
@@ -689,6 +702,33 @@ export const getTimelineEvents = async (slug: string): Promise<TimelineEvent[]> 
           name: node.fullName,
           place: node.deathPlace ?? undefined,
           picture: node.taggedIn.find((tag) => tag.isProfile)?.picture.fileKey,
+        })
+      }
+    })
+
+    const nameById = new Map(tree.nodes.map((n) => [n.id, n.fullName]))
+    ;(tree.Unions ?? []).forEach((u) => {
+      if (!u.spouseBId) return
+      const a = nameById.get(u.spouseAId)
+      const b = nameById.get(u.spouseBId)
+      if (!a || !b) return
+      const couple = `${a} & ${b}`
+
+      if (u.marriedAt) {
+        events.push({
+          type: 'marriage',
+          date: u.marriedAt,
+          name: couple,
+          place: u.place ?? undefined,
+        })
+      }
+
+      if (u.divorcedAt) {
+        events.push({
+          type: 'divorce',
+          date: u.divorcedAt,
+          name: couple,
+          place: u.place ?? undefined,
         })
       }
     })
@@ -767,10 +807,6 @@ export const generateShareToken = async (
   }
 }
 
-/**
- * Return the current active (unexpired) share link for a tree.
- * Auth required. ADMIN or EDITOR only — re-checked server-side.
- */
 export const getShareLink = async (treeId: string): Promise<ShareLink | null> => {
   try {
     const userId = await assertAuthenticated()
@@ -836,6 +872,273 @@ export const joinTreeViaShareToken = async (token: string): Promise<JoinResult> 
   } catch (e: any) {
     if (e?.message === 'unauthenticated') return { error: true, message: 'unauthenticated' }
     Sentry.captureException(e, { tags: { action: 'joinTreeViaShareToken' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Create a Union. Returns the union id (or the existing one if a matching
+ * union is already present).
+ */
+export const createUnion = async (
+  values: z.infer<typeof CreateUnionSchema>
+): Promise<TreeResult & { unionId?: string }> => {
+  try {
+    CreateUnionSchema.parse(values)
+    const userId = await assertAuthenticated()
+    await assertRole(values.treeId, userId)
+
+    if (values.spouseBId && values.spouseAId === values.spouseBId)
+      return { error: true, message: 'error-cannot-connect-to-self' }
+
+    const spouseIds = [values.spouseAId, values.spouseBId].filter(Boolean) as string[]
+    const spouses = await db.treeNode.findMany({
+      where: { id: { in: spouseIds }, treeId: values.treeId },
+    })
+    if (spouses.length !== spouseIds.length)
+      return { error: true, message: 'error-nodes-not-found' }
+
+    const [spouseAId, spouseBId] = values.spouseBId
+      ? [values.spouseAId, values.spouseBId].sort()
+      : [values.spouseAId, null]
+
+    const existing = await db.union.findFirst({
+      where: {
+        treeId: values.treeId,
+        OR: spouseBId
+          ? [
+              { spouseAId, spouseBId },
+              { spouseAId: spouseBId, spouseBId: spouseAId },
+            ]
+          : [{ spouseAId, spouseBId: null }],
+      },
+    })
+    if (existing) return { error: false, unionId: existing.id }
+
+    const union = await db.union.create({
+      data: {
+        treeId: values.treeId,
+        spouseAId,
+        spouseBId,
+        marriedAt: values.marriedAt ?? null,
+        divorcedAt: values.divorcedAt ?? null,
+        place: values.place ?? null,
+      },
+    })
+
+    const spouseAName = spouses.find((s) => s.id === spouseAId)?.fullName ?? null
+    const spouseBName = spouseBId ? (spouses.find((s) => s.id === spouseBId)?.fullName ?? null) : null
+
+    await db.activityLog.create({
+      data: {
+        treeId: values.treeId,
+        createdBy: userId,
+        action: 'UNION_CREATED',
+        entityId: union.id,
+        metadata: {
+          spouseAId,
+          spouseBId,
+          spouseAName,
+          spouseBName,
+          marriedAt: union.marriedAt?.toISOString() ?? null,
+          divorcedAt: union.divorcedAt?.toISOString() ?? null,
+          place: union.place ?? null,
+        },
+      },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${values.treeId}`)
+
+    return { error: false, unionId: union.id }
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'createUnion' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Update an existing Union's spouses and/or metadata.
+ */
+export const updateUnion = async (
+  values: z.infer<typeof UpdateUnionSchema>
+): Promise<TreeResult> => {
+  try {
+    UpdateUnionSchema.parse(values)
+    const userId = await assertAuthenticated()
+    await assertRole(values.treeId, userId)
+
+    if (values.spouseBId && values.spouseAId === values.spouseBId)
+      return { error: true, message: 'error-cannot-connect-to-self' }
+
+    const union = await db.union.findFirst({
+      where: { id: values.id, treeId: values.treeId },
+      include: {
+        spouseA: { select: { fullName: true } },
+        spouseB: { select: { fullName: true } },
+      },
+    })
+    if (!union) return { error: true, message: 'error-union-not-found' }
+
+    const [spouseAId, spouseBId] = values.spouseBId
+      ? [values.spouseAId, values.spouseBId].sort()
+      : [values.spouseAId, null]
+
+    await db.union.update({
+      where: { id: union.id },
+      data: {
+        spouseAId,
+        spouseBId,
+        marriedAt: values.marriedAt ?? null,
+        divorcedAt: values.divorcedAt ?? null,
+        place: values.place ?? null,
+      },
+    })
+
+    const newSpouseIds = [spouseAId, spouseBId].filter(Boolean) as string[]
+    const newSpouses = await db.treeNode.findMany({
+      where: { id: { in: newSpouseIds }, treeId: values.treeId },
+      select: { id: true, fullName: true },
+    })
+    const spouseAName = newSpouses.find((s) => s.id === spouseAId)?.fullName ?? null
+    const spouseBName = spouseBId
+      ? (newSpouses.find((s) => s.id === spouseBId)?.fullName ?? null)
+      : null
+
+    const prevData = {
+      spouseA: union.spouseA?.fullName ?? null,
+      spouseB: union.spouseB?.fullName ?? null,
+      marriedAt: union.marriedAt,
+      divorcedAt: union.divorcedAt,
+      place: union.place,
+    }
+    const newData = {
+      spouseA: spouseAName,
+      spouseB: spouseBName,
+      marriedAt: values.marriedAt ?? null,
+      divorcedAt: values.divorcedAt ?? null,
+      place: values.place ?? null,
+    }
+    const changes = getChanges(prevData, newData, [
+      'spouseA',
+      'spouseB',
+      'marriedAt',
+      'divorcedAt',
+      'place',
+    ])
+
+    if (changes)
+      await db.activityLog.create({
+        data: {
+          treeId: values.treeId,
+          createdBy: userId,
+          action: 'UNION_UPDATED',
+          entityId: union.id,
+          metadata: { spouseAId, spouseBId, spouseAName, spouseBName, changes },
+        },
+      })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${values.treeId}`)
+
+    return { error: false }
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'updateUnion' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Delete a Union. Children linked to it have their childOfUnionId cleared
+ * (SetNull is enforced at the Prisma level).
+ */
+export const deleteUnion = async (id: string, treeId: string): Promise<TreeResult> => {
+  try {
+    const userId = await assertAuthenticated()
+    await assertRole(treeId, userId)
+
+    const union = await db.union.findFirst({
+      where: { id, treeId },
+      include: {
+        spouseA: { select: { fullName: true } },
+        spouseB: { select: { fullName: true } },
+      },
+    })
+    if (!union) return { error: true, message: 'error-union-not-found' }
+
+    await db.union.delete({ where: { id } })
+
+    await db.activityLog.create({
+      data: {
+        treeId,
+        createdBy: userId,
+        action: 'UNION_DELETED',
+        entityId: id,
+        metadata: {
+          spouseAId: union.spouseAId,
+          spouseBId: union.spouseBId,
+          spouseAName: union.spouseA?.fullName ?? null,
+          spouseBName: union.spouseB?.fullName ?? null,
+          marriedAt: union.marriedAt?.toISOString() ?? null,
+          divorcedAt: union.divorcedAt?.toISOString() ?? null,
+          place: union.place ?? null,
+        },
+      },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${treeId}`)
+
+    return { error: false }
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'deleteUnion' } })
+    return { error: true, message: 'error' }
+  }
+}
+
+/**
+ * Set (or clear) a child's childOfUnionId. `unionId: null` detaches the
+ * child from any union (rendered via direct PARENT/CHILD edges).
+ */
+export const attachChildToUnion = async (
+  values: z.infer<typeof AttachChildToUnionSchema>
+): Promise<TreeResult> => {
+  try {
+    AttachChildToUnionSchema.parse(values)
+    const userId = await assertAuthenticated()
+    await assertRole(values.treeId, userId)
+
+    const child = await db.treeNode.findFirst({
+      where: { id: values.childNodeId, treeId: values.treeId },
+    })
+    if (!child) return { error: true, message: 'error-node-not-found' }
+
+    if (values.unionId) {
+      const union = await db.union.findFirst({
+        where: { id: values.unionId, treeId: values.treeId },
+      })
+      if (!union) return { error: true, message: 'error-union-not-found' }
+    }
+
+    await db.treeNode.update({
+      where: { id: child.id },
+      data: { childOfUnionId: values.unionId },
+    })
+
+    revalidatePath('/')
+    revalidatePath('/trees')
+    revalidatePath(`/trees/${values.treeId}`)
+
+    return { error: false }
+  } catch (e: any) {
+    if (e?.message === 'error-no-permission') return { error: true, message: e.message }
+    Sentry.captureException(e, { tags: { action: 'attachChildToUnion' } })
     return { error: true, message: 'error' }
   }
 }

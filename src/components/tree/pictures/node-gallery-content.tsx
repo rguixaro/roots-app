@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useLocale } from 'next-intl'
-import { LoaderIcon, Maximize, Menu, X } from 'lucide-react'
+import { Download, LoaderIcon, Maximize, Menu, X } from 'lucide-react'
 
 import { Icon } from '@/components/trees/icon'
 
@@ -20,6 +20,7 @@ interface NodeGalleryContentProps {
   pictures: Picture[]
   loadingPictures: boolean
   loading: boolean
+  canExportGallery: boolean
   errorGalleryPicture: { [key: string]: boolean }
   tappedImageId: string | null
   isMobile: boolean
@@ -29,6 +30,7 @@ interface NodeGalleryContentProps {
   onPictureMenuOpen: (e: React.MouseEvent, picture: Picture) => void
   onPictureFullscreen: (picture: Picture) => void
   onGalleryPictureError: (pictureId: string) => void
+  galleryExportHref?: string
   onClose?: () => void
   t_trees: (key: string) => string
 }
@@ -39,6 +41,7 @@ export function NodeGalleryContent({
   pictures,
   loadingPictures,
   loading,
+  canExportGallery,
   errorGalleryPicture,
   tappedImageId,
   isMobile,
@@ -48,6 +51,7 @@ export function NodeGalleryContent({
   onPictureMenuOpen,
   onPictureFullscreen,
   onGalleryPictureError,
+  galleryExportHref,
   onClose,
   t_trees,
 }: NodeGalleryContentProps) {
@@ -61,17 +65,31 @@ export function NodeGalleryContent({
         <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
           <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2 text-center">
             <p>{t_trees('node-gallery-description')} </p>
-            {!readonly && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-                className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-              >
-                <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-              </Button>
-            )}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 self-center">
+              {!readonly && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
+                  className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+                >
+                  <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+                </Button>
+              )}
+              {canExportGallery && galleryExportHref && pictures.length > 0 && (
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+                >
+                  <a href={galleryExportHref}>
+                    <Download size={16} />
+                    <span className="text-sm font-bold">{t_trees('node-gallery-download')}</span>
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
           {!readonly && (
             <input
@@ -181,17 +199,31 @@ export function NodeGalleryContent({
           </button>
         </div>
         <p>{t_trees('node-gallery-description')} </p>
-        {!readonly && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={loading}
-            className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-          >
-            <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-          </Button>
-        )}
+        <div className="mt-5 flex flex-wrap items-center gap-2 self-center">
+          {!readonly && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+            >
+              <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+            </Button>
+          )}
+          {canExportGallery && galleryExportHref && pictures.length > 0 && (
+            <Button
+              asChild
+              variant="ghost"
+              className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+            >
+              <a href={galleryExportHref}>
+                <Download size={16} />
+                <span className="text-sm font-bold">{t_trees('node-gallery-download')}</span>
+              </a>
+            </Button>
+          )}
+        </div>
       </div>
       {!readonly && (
         <input

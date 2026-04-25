@@ -29,6 +29,7 @@ export default async function TreeViewPage({ params }: { params: Promise<{ slug:
   const { tree, nodes, edges, unions } = result
   const userAccess = tree?.accesses.find((a) => a.userId === session?.user?.id)
   const readonly = userAccess?.role === 'VIEWER' || !!tree.deletionRequest
+  const canExportGallery = userAccess?.role === 'EDITOR' || userAccess?.role === 'ADMIN'
 
   return (
     <div className="h-full w-full text-center">
@@ -40,6 +41,7 @@ export default async function TreeViewPage({ params }: { params: Promise<{ slug:
         <div className="bg-ocean-200/15 h-full w-full shadow-inner">
           <TreeWrapper
             readonly={readonly}
+            canExportGallery={canExportGallery}
             tree={tree}
             nodes={nodes}
             edges={edges}

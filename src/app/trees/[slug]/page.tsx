@@ -49,7 +49,10 @@ export default async function TreePage({ params }: { params: Promise<{ slug: str
           <TreeInfoHeader info={info} />
           <TreeInfoShareDownload
             treeId={info.tree.id}
+            slug={info.tree.slug}
             canShare={role !== 'VIEWER' && !info.tree.deletionRequest}
+            canExportData={role === 'ADMIN'}
+            canExportGallery={role === 'EDITOR' || role === 'ADMIN'}
           />
           <TreeInfoDemographics info={info} />
           <TreeInfoGenerations info={info} />

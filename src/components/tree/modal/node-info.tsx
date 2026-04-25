@@ -27,7 +27,9 @@ import { TreeNode, TreeType, Union } from '@/types'
 
 interface NodeInfoModalProps {
   readonly: boolean
+  canExportGallery: boolean
   showModal: boolean
+  treeSlug: string
   treeType: TreeType
   node: TreeNode | null
   nodes: TreeNode[]
@@ -40,7 +42,9 @@ interface NodeInfoModalProps {
 
 export function NodeInfoModal({
   readonly,
+  canExportGallery,
   showModal,
+  treeSlug,
   treeType,
   node,
   nodes,
@@ -118,6 +122,9 @@ export function NodeInfoModal({
   }, [showModal])
 
   const loading = formLoading || pictureOps.loading
+  const galleryExportHref = node
+    ? `/api/trees/${encodeURIComponent(treeSlug)}/nodes/${encodeURIComponent(node.id)}/export/gallery`
+    : undefined
 
   return (
     <>
@@ -253,6 +260,7 @@ export function NodeInfoModal({
                         pictures={pictureOps.pictures}
                         loadingPictures={pictureOps.loadingPictures}
                         loading={loading}
+                        canExportGallery={canExportGallery}
                         errorGalleryPicture={pictureOps.errorGalleryPicture}
                         tappedImageId={pictureOps.tappedImageId}
                         isMobile={isMobile}
@@ -262,6 +270,7 @@ export function NodeInfoModal({
                         onPictureMenuOpen={pictureOps.onPictureMenuOpen}
                         onPictureFullscreen={pictureOps.onPictureExpand}
                         onGalleryPictureError={pictureOps.setGalleryPictureError}
+                        galleryExportHref={galleryExportHref}
                         t_trees={t_trees}
                       />
                     </Tabs.Content>
@@ -298,6 +307,7 @@ export function NodeInfoModal({
                 pictures={pictureOps.pictures}
                 loadingPictures={pictureOps.loadingPictures}
                 loading={loading}
+                canExportGallery={canExportGallery}
                 errorGalleryPicture={pictureOps.errorGalleryPicture}
                 tappedImageId={pictureOps.tappedImageId}
                 isMobile={isMobile}
@@ -307,6 +317,7 @@ export function NodeInfoModal({
                 onPictureMenuOpen={pictureOps.onPictureMenuOpen}
                 onPictureFullscreen={pictureOps.onPictureExpand}
                 onGalleryPictureError={pictureOps.setGalleryPictureError}
+                galleryExportHref={galleryExportHref}
                 onClose={handleClose}
                 t_trees={t_trees}
               />

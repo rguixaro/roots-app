@@ -42,12 +42,12 @@ export const GoBack = ({
   const t_common = useTranslations('common')
 
   return (
-    <div className={cn('flex w-full items-center justify-between', className)}>
+    <div className={cn('my-5 flex w-full items-center justify-between', className)}>
       <Link
         href={to}
         className={cn(
           'text-ocean-300 group flex w-fit items-center font-bold transition-all duration-300',
-          'hover:bg-ocean-200/15',
+          'hover:bg-ocean-200 hover:text-pale-ocean hover:stroke-pale-ocean',
           variantStyles[variant],
           classNameLink
         )}
@@ -61,7 +61,7 @@ export const GoBack = ({
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={cn('stroke-ocean-300', classNameSvg)}
+          className={cn('stroke-ocean-300 group-hover:stroke-pale-ocean', classNameSvg)}
         >
           <line
             x1="5"

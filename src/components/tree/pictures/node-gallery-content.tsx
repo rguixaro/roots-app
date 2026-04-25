@@ -59,7 +59,7 @@ export function NodeGalleryContent({
         className={cn('bg-ocean-400 text-pale-ocean shadow-center-sm h-full flex-col rounded-xl')}
       >
         <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
-          <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
+          <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2 text-center">
             <p>{t_trees('node-gallery-description')} </p>
             {!readonly && (
               <Button
@@ -150,7 +150,9 @@ export function NodeGalleryContent({
                       tappedImageId === picture.id ? 'opacity-100' : 'opacity-0'
                     )}
                   >
-                    <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
+                    <span>
+                      {picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}
+                    </span>
                     <div className="flex items-center space-x-1">
                       <Icon size={12} type={treeType} className="stroke-ocean-400" />
                       <span>{picture.tags?.length}</span>
@@ -263,7 +265,9 @@ export function NodeGalleryContent({
                   'shadow-center-sm transition-opacity duration-300 group-hover:opacity-100'
                 )}
               >
-                <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
+                <span>
+                  {picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}
+                </span>
                 <div className="flex items-center space-x-1">
                   <Icon size={12} type={treeType} className="stroke-ocean-400" />
                   <span>{picture.tags?.length}</span>

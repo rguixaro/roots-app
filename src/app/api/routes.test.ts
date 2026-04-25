@@ -1,10 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 import { NextRequest } from 'next/server'
 
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
-
 vi.mock('@/server/db', () => ({
   db: { $runCommandRaw: vi.fn() },
 }))
@@ -34,10 +30,6 @@ vi.mock('@/server/actions/newsletter', () => ({
   sendWeeklyNewsletters: vi.fn(),
 }))
 
-// ---------------------------------------------------------------------------
-// Imports (after mocks)
-// ---------------------------------------------------------------------------
-
 import { GET as healthGET } from './health/route'
 import { POST as logoutPOST } from './logout/route'
 import { POST as cookiesRefreshPOST } from './cookies/refresh/route'
@@ -50,10 +42,6 @@ import { setCloudFrontCookies } from '@/lib/cloudfront'
 import * as Sentry from '@sentry/nextjs'
 import { sendWeeklyNewsletters } from '@/server/actions/newsletter'
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const mockAuth = auth as Mock
 const mockDbPing = db.$runCommandRaw as Mock
 const mockSetCFCookies = setCloudFrontCookies as Mock
@@ -63,18 +51,11 @@ function authenticatedSession() {
   return { user: { id: 'user-1', name: 'Test', email: 'test@example.com' } }
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe('API Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  // -------------------------------------------------------------------------
-  // /api/health
-  // -------------------------------------------------------------------------
   describe('GET /api/health', () => {
     it('returns 200 with status ok when DB ping succeeds', async () => {
       mockDbPing.mockResolvedValue({ ok: 1 })
@@ -120,9 +101,6 @@ describe('API Routes', () => {
     })
   })
 
-  // -------------------------------------------------------------------------
-  // /api/logout
-  // -------------------------------------------------------------------------
   describe('POST /api/logout', () => {
     it('returns 401 when not authenticated', async () => {
       mockAuth.mockResolvedValue(null)
@@ -159,9 +137,6 @@ describe('API Routes', () => {
     })
   })
 
-  // -------------------------------------------------------------------------
-  // /api/cookies/refresh
-  // -------------------------------------------------------------------------
   describe('POST /api/cookies/refresh', () => {
     it('returns 401 when not authenticated', async () => {
       mockAuth.mockResolvedValue(null)
@@ -203,9 +178,6 @@ describe('API Routes', () => {
     })
   })
 
-  // -------------------------------------------------------------------------
-  // /api/cron/weekly-newsletter
-  // -------------------------------------------------------------------------
   describe('POST /api/cron/weekly-newsletter', () => {
     function cronRequest(secret?: string) {
       const headers: Record<string, string> = {}
@@ -268,9 +240,6 @@ describe('API Routes', () => {
     })
   })
 
-  // -------------------------------------------------------------------------
-  // /api/proxy
-  // -------------------------------------------------------------------------
   describe('GET /api/proxy', () => {
     const originalFetch = globalThis.fetch
 

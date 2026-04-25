@@ -41,13 +41,10 @@ export default async function TreeNotesPage({
 
   const { tree, note, canEdit } = result
 
-  // Back target depends on where the user arrived from. The tree-view overlay
-  // appends `?from=view`; the hub toolbar uses the plain link, which defaults
-  // back to the hub.
   const backTo = from === 'view' ? `/trees/view/${tree.slug}` : `/trees/${tree.slug}`
 
   return (
-    <div className="text-ocean-400 z-0 my-2 flex w-full flex-col pt-2">
+    <div className="text-ocean-400 z-0 flex w-full flex-col">
       <GoBack variant="filled" to={backTo} className="w-auto" />
       <TreeNotesHeader updatedAt={note.updatedAt} updatedBy={note.updatedBy} />
       <TreeNotesEditor treeId={tree.id} initialContent={note.content} canEdit={canEdit} />

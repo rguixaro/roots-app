@@ -185,22 +185,40 @@ export const getTreeNote = cache(async (slug: string) => {
 /**
  * Get the latest activity logs for the specified tree
  * Auth required.
- * @param treeId Tree ID
- * @returns Promise<{ logs: ActivityLog[]}>
+ * @param slug Tree slug
+ * @returns Promise<{ logs: ActivityLog[], pagination: { page: number, pageSize: number, total: number, totalPages: number }}>
  */
-export const getTreeActivityLogs = cache(async (slug: string) => {
+export const getTreeActivityLogs = cache(async (slug: string, page = 1, pageSize = 20) => {
   try {
     const userId = await assertAuthenticated()
+    const requestedPageSize = Number.isFinite(pageSize) ? Math.floor(pageSize) : 20
+    const safePageSize = Math.max(1, requestedPageSize)
+    const requestedPage = Number.isFinite(page) ? Math.floor(page) : 1
+    const where = { tree: { slug, accesses: { some: { userId } } } }
+
+    const total = await db.activityLog.count({ where })
+    const totalPages = Math.max(1, Math.ceil(total / safePageSize))
+    const currentPage = Math.min(Math.max(1, requestedPage), totalPages)
 
     const logs = await db.activityLog.findMany({
-      where: { tree: { slug, accesses: { some: { userId } } } },
+      where,
       include: {
         tree: true,
         user: { select: { id: true, name: true, image: true } },
       },
       orderBy: { createdAt: 'desc' },
+      skip: (currentPage - 1) * safePageSize,
+      take: safePageSize,
     })
-    return { logs: logs }
+    return {
+      logs,
+      pagination: {
+        page: currentPage,
+        pageSize: safePageSize,
+        total,
+        totalPages,
+      },
+    }
   } catch (error) {
     throw error
   }

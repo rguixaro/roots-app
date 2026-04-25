@@ -8,11 +8,20 @@ import { ActivityFeed } from '@/components/trees'
 
 import { TypographyH4 } from '@/ui'
 
-export default async function TreeLogsPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function TreeLogsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ page?: string | string[] }>
+}) {
   const session = await auth()
   if (!session) return null
 
   const { slug } = await params
+  const { page: pageParam } = await searchParams
+  const pageValue = Array.isArray(pageParam) ? pageParam[0] : pageParam
+  const page = Number.parseInt(pageValue ?? '1', 10)
 
   if (!slug) {
     const t_common = await getTranslations('common')
@@ -27,5 +36,5 @@ export default async function TreeLogsPage({ params }: { params: Promise<{ slug:
     )
   }
 
-  return await ActivityFeed(slug)
+  return await ActivityFeed(slug, Number.isNaN(page) ? 1 : page)
 }

@@ -57,6 +57,8 @@ interface NewsletterEmailParams {
   recentAdditions: Array<{
     name: string
     addedDate: Date
+    birthDate?: Date | null
+    deathDate?: Date | null
   }>
   events: Array<{
     name: string
@@ -98,6 +100,25 @@ function replacePlaceholders(str: string, values: Record<string, string | number
     (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)),
     str
   )
+}
+
+function formatMemberLifeYears(member: { birthDate?: Date | null; deathDate?: Date | null }) {
+  const birthYear = member.birthDate ? member.birthDate.getUTCFullYear() : null
+  const deathYear = member.deathDate ? member.deathDate.getUTCFullYear() : null
+
+  if (birthYear && deathYear) return `${birthYear} - ${deathYear}`
+  if (birthYear) return `${birthYear}`
+  if (deathYear) return `† ${deathYear}`
+  return null
+}
+
+function formatNewsletterMemberName(member: {
+  name: string
+  birthDate?: Date | null
+  deathDate?: Date | null
+}) {
+  const years = formatMemberLifeYears(member)
+  return years ? `${member.name}, ${years}` : member.name
 }
 
 /**
@@ -680,6 +701,8 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
   const appUrl = AUTH_URL
   const treeUrl = `${appUrl}/trees/${treeSlug}`
   const profileUrl = `${appUrl}/profile`
+  const birthdayEvents = events.filter((event) => event.eventType === 'birthday')
+  const anniversaryEvents = events.filter((event) => event.eventType === 'anniversary')
 
   const htmlBody = `
 <!DOCTYPE html>
@@ -714,11 +737,14 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
               </p>
               
               <p style="margin: 0 0 32px; color: ${ocean[400]}; font-size: 16px; line-height: 1.7;">
-                ${t.emails.newsletter['intro-1']}<strong>${treeName}</strong>${t.emails.newsletter['intro-2']}
+                ${replacePlaceholders(t.emails.newsletter['summary-intro'], { tree: `<strong>${treeName}</strong>` })}
               </p>
 
-              <!-- Stats -->
+              <!-- Summary -->
               <div style="background: ${ocean[50]}; border-radius: 0px 0px 16px 16px; border-top: 6px solid ${ocean[400]}; padding: 24px; margin-bottom: 32px;">
+                <h2 style="margin: 0 0 20px; color: ${ocean[400]}; font-size: 18px; font-weight: 700;">
+                  ${t.emails.newsletter['summary-title']}
+                </h2>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="text-align: center; padding: 8px;">
@@ -726,11 +752,18 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                       <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500;">${t.emails.newsletter['members-new']}</div>
                     </td>  
                     <td style="text-align: center; padding: 8px; border-left: 2px solid ${ocean[100]};">
-                      <div style="font-size: 32px; font-weight: 700; color: ${ocean[400]}; margin-bottom: 4px;">${totalMembers}</div>
-                      <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500;">${t.emails.newsletter['members-total']}</div>
+                      <div style="font-size: 32px; font-weight: 700; color: ${ocean[400]}; margin-bottom: 4px;">${birthdayEvents.length}</div>
+                      <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500;">${t.emails.newsletter['events-birthdays-title']}</div>
+                    </td>
+                    <td style="text-align: center; padding: 8px; border-left: 2px solid ${ocean[100]};">
+                      <div style="font-size: 32px; font-weight: 700; color: ${ocean[400]}; margin-bottom: 4px;">${anniversaryEvents.length}</div>
+                      <div style="font-size: 14px; color: ${ocean[300]}; font-weight: 500;">${t.emails.newsletter['events-anniversaries-title']}</div>
                     </td>
                   </tr>
                 </table>
+                <p style="margin: 18px 0 0; color: ${ocean[300]}; font-size: 13px; text-align: center;">
+                  ${replacePlaceholders(t.emails.newsletter['total-members'], { count: totalMembers })}
+                </p>
               </div>
 
               ${
@@ -746,7 +779,7 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                     (member) => `
                   <div style="background-color: ${ocean[50]}; border-left: 6px solid ${ocean[400]}; padding: 16px; margin-bottom: 12px; border-radius: 0px 16px 16px 0px;">
                     <p style="margin: 0; color: ${ocean[400]}; font-size: 16px; font-weight: 600;">
-                      ${member.name}
+                      ${formatNewsletterMemberName(member)}
                     </p>
                     <p style="margin: 4px 0 0; color: ${ocean[300]}; font-size: 14px;">
                       ${formatEmailDate(member.addedDate, locale, {
@@ -762,24 +795,24 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                   .join('')}
               </div>
               `
-                  : `
-              <div style="margin-bottom: 32px;">
-                <p style="color: ${ocean[300]}; font-size: 14px; font-style: italic;">
-                  ${t.emails.newsletter['new-members-empty']}
-                </p>
-              </div>
-              `
+                  : ''
               }
 
               ${
-                events.length > 0
+                birthdayEvents.length > 0 || anniversaryEvents.length > 0
                   ? `
               <!-- Events -->
               <div style="margin-bottom: 32px;">
                 <h2 style="margin: 0 0 20px; color: ${ocean[400]}; font-size: 20px; font-weight: 600; border-bottom: 2px solid ${ocean[200]}; padding-bottom: 12px;">
                   ${t.emails.newsletter['upcoming-events-title']}
                 </h2>
-                ${events
+                ${
+                  birthdayEvents.length > 0
+                    ? `
+                <h3 style="margin: 0 0 12px; color: ${ocean[300]}; font-size: 15px; font-weight: 700;">
+                  ${t.emails.newsletter['events-birthdays-title']}
+                </h3>
+                ${birthdayEvents
                   .map(
                     (event) => `
                   <div style="background-color: ${ocean[50]}; border-left: 6px solid ${ocean[400]}; padding: 16px; margin-bottom: 12px;border-radius: 0px 16px 16px 0px;">
@@ -787,22 +820,43 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                         ${event.name}
                     </p>
                     <p style="margin: 4px 0 0; color: ${ocean[300]}; font-size: 14px;">
-                      ${replacePlaceholders(t.emails.newsletter[event.eventType === 'birthday' ? 'event-birthday' : 'event-anniversary'], { years: event.yearsAgo || 0 })}
+                      ${replacePlaceholders(t.emails.newsletter['event-birthday'], { years: event.yearsAgo || 0 })}
                       - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}
                     </p>
                   </div>
                 `
                   )
                   .join('')}
+                `
+                    : ''
+                }
+                ${
+                  anniversaryEvents.length > 0
+                    ? `
+                <h3 style="margin: 20px 0 12px; color: ${ocean[300]}; font-size: 15px; font-weight: 700;">
+                  ${t.emails.newsletter['events-anniversaries-title']}
+                </h3>
+                ${anniversaryEvents
+                  .map(
+                    (event) => `
+                  <div style="background-color: ${ocean[50]}; border-left: 6px solid ${ocean[300]}; padding: 16px; margin-bottom: 12px;border-radius: 0px 16px 16px 0px;">
+                    <p style="margin: 0; color: ${ocean[400]}; font-size: 16px; font-weight: 600;">
+                        ${event.name}
+                    </p>
+                    <p style="margin: 4px 0 0; color: ${ocean[300]}; font-size: 14px;">
+                      ${replacePlaceholders(t.emails.newsletter['event-anniversary'], { years: event.yearsAgo || 0 })}
+                      - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
+                `
+                  )
+                  .join('')}
+                `
+                    : ''
+                }
               </div>
               `
-                  : `
-              <div style="margin-bottom: 32px;">
-                <p style="color: ${ocean[300]}; font-size: 14px; font-style: italic;">
-                  ${t.emails.newsletter['upcoming-events-empty']}
-                </p>
-              </div>
-              `
+                  : ''
               }
               
               <!-- CTA Button -->
@@ -810,7 +864,7 @@ export async function sendWeeklyNewsletter(params: NewsletterEmailParams): Promi
                 <tr>
                   <td align="center" style="padding: 24px 0;">
                     <a href="${treeUrl}" style="display: inline-block; padding: 16px 40px; background-color: ${ocean[400]}; color: ${ocean[0]}; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 16px; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);">
-                      ${t.emails.newsletter.cta}
+                      ${replacePlaceholders(t.emails.newsletter.cta, { tree: treeName })}
                     </a>
                   </td>
                 </tr>
@@ -848,10 +902,13 @@ ${treeName} - ${t.emails.newsletter.title}
 
 ${replacePlaceholders(t.emails.newsletter.greeting, { name: recipientName })}
 
-${t.emails.newsletter['intro-1']}${treeName}${t.emails.newsletter['intro-2']}
+${replacePlaceholders(t.emails.newsletter['summary-intro'], { tree: treeName })}
 
+${t.emails.newsletter['summary-title']}
 ${t.emails.newsletter['members-new']}: ${recentAdditions.length}
-${t.emails.newsletter['members-total']}: ${totalMembers}
+${t.emails.newsletter['events-birthdays-title']}: ${birthdayEvents.length}
+${t.emails.newsletter['events-anniversaries-title']}: ${anniversaryEvents.length}
+${replacePlaceholders(t.emails.newsletter['total-members'], { count: totalMembers })}
 
 ${
   recentAdditions.length > 0
@@ -860,7 +917,7 @@ ${t.emails.newsletter['new-members-title']}:
 ${recentAdditions
   .map(
     (member) =>
-      `• ${member.name} (${formatEmailDate(member.addedDate, locale, {
+      `• ${formatNewsletterMemberName(member)} (${formatEmailDate(member.addedDate, locale, {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -869,24 +926,38 @@ ${recentAdditions
   )
   .join('\n')}
 `
-    : `${t.emails.newsletter['new-members-empty']}`
+    : ''
 }
 
 ${
-  events.length > 0
+  birthdayEvents.length > 0 || anniversaryEvents.length > 0
     ? `
 ${t.emails.newsletter['upcoming-events-title']}:
-${events
-  .map(
-    (event) =>
-      `• ${event.name} - ${replacePlaceholders(t.emails.newsletter[event.eventType === 'birthday' ? 'event-birthday' : 'event-anniversary'], { years: event.yearsAgo || 0 })} - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}`
-  )
-  .join('\n')}
+${
+  birthdayEvents.length > 0
+    ? `${t.emails.newsletter['events-birthdays-title']}:\n${birthdayEvents
+        .map(
+          (event) =>
+            `• ${event.name} - ${replacePlaceholders(t.emails.newsletter['event-birthday'], { years: event.yearsAgo || 0 })} - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}`
+        )
+        .join('\n')}`
+    : ''
+}
+${
+  anniversaryEvents.length > 0
+    ? `${t.emails.newsletter['events-anniversaries-title']}:\n${anniversaryEvents
+        .map(
+          (event) =>
+            `• ${event.name} - ${replacePlaceholders(t.emails.newsletter['event-anniversary'], { years: event.yearsAgo || 0 })} - ${formatEmailDate(event.date, locale, { month: 'long', day: 'numeric' })}`
+        )
+        .join('\n')}`
+    : ''
+}
 `
-    : `${t.emails.newsletter['upcoming-events-empty']}`
+    : ''
 }
 
-${t.emails.newsletter.cta}: ${treeUrl}
+${replacePlaceholders(t.emails.newsletter.cta, { tree: treeName })}: ${treeUrl}
 
 ---
 ${t.emails.newsletter.footer}

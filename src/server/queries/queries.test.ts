@@ -8,7 +8,7 @@ vi.mock('@/server/db', () => ({
     treeNode: { findMany: vi.fn() },
     treeEdge: { findMany: vi.fn() },
     union: { findMany: vi.fn() },
-    activityLog: { findMany: vi.fn() },
+    activityLog: { count: vi.fn(), findMany: vi.fn() },
   },
 }))
 
@@ -151,10 +151,17 @@ describe('getTreeActivityLogs', () => {
         createdAt: new Date('2026-04-09'),
       },
     ]
+    mockDb.activityLog.count.mockResolvedValue(42)
     mockDb.activityLog.findMany.mockResolvedValue(logs)
 
-    const result = await getTreeActivityLogs('family')
-    expect(result).toEqual({ logs })
+    const result = await getTreeActivityLogs('family', 2)
+    expect(result).toEqual({
+      logs,
+      pagination: { page: 2, pageSize: 20, total: 42, totalPages: 3 },
+    })
+    expect(mockDb.activityLog.count).toHaveBeenCalledWith({
+      where: { tree: { slug: 'family', accesses: { some: { userId: 'user-1' } } } },
+    })
     expect(mockDb.activityLog.findMany).toHaveBeenCalledWith({
       where: { tree: { slug: 'family', accesses: { some: { userId: 'user-1' } } } },
       include: {
@@ -162,7 +169,21 @@ describe('getTreeActivityLogs', () => {
         user: { select: { id: true, name: true, image: true } },
       },
       orderBy: { createdAt: 'desc' },
+      skip: 20,
+      take: 20,
     })
+  })
+
+  it('clamps invalid and out-of-range activity log pages', async () => {
+    mockDb.activityLog.count.mockResolvedValue(21)
+    mockDb.activityLog.findMany.mockResolvedValue([])
+
+    const result = await getTreeActivityLogs('family', 999, 10)
+
+    expect(result.pagination).toEqual({ page: 3, pageSize: 10, total: 21, totalPages: 3 })
+    expect(mockDb.activityLog.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 10 })
+    )
   })
 
   it('throws on auth failure', async () => {

@@ -116,6 +116,8 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             recentAdditions: tree.nodes.map((node) => ({
               name: node.fullName,
               addedDate: node.createdAt,
+              birthDate: node.birthDate,
+              deathDate: node.deathDate,
             })),
             events,
             totalMembers: allNodes.length,

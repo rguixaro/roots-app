@@ -20,6 +20,8 @@ interface StyledNodeProps {
   collapseKey?: number
   isHighlighted?: boolean
   isExpanded?: boolean
+  hasUnionChildren?: boolean
+  hasUnionParents?: boolean
 }
 
 /**
@@ -110,7 +112,12 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isMobile, setIsMobile] = useState(false)
 
   const { fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
-  const { isHighlighted, isExpanded = false } = data
+  const {
+    isHighlighted,
+    isExpanded = false,
+    hasUnionChildren = false,
+    hasUnionParents = false,
+  } = data
 
   const profilePicture = getProfilePicture(data.node)
   const isLargeText = fullName.length >= 15
@@ -139,8 +146,10 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
   /**
    * Utility booleans to determine which handles have connections
    */
-  const hasTopConnection = edgesTo?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
-  const hasBottomConnection = edgesFrom?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
+  const hasTopConnection =
+    hasUnionParents || edgesTo?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
+  const hasBottomConnection =
+    hasUnionChildren || edgesFrom?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
   const hasLeftConnection = edgesTo?.some((e) => e.type === 'SPOUSE')
   const hasRightConnection = edgesFrom?.some((e) => e.type === 'SPOUSE')
 
@@ -277,10 +286,13 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       <motion.div variants={pictureContentVariants} className="px-2">
         <Picture
           fileKey={profilePicture?.fileKey}
-          classNameContainer="relative h-12 w-12 cursor-pointer overflow-hidden rounded-lg"
+          classNameContainer={cn(
+            'relative h-12 w-12 cursor-pointer overflow-hidden rounded-lg group-hover:border-ocean-200',
+            (isExpanded || isHighlighted) && 'border-ocean-200'
+          )}
           classNamePicture={cn(
-            'group-hover:bg-ocean-100',
-            (isExpanded || isHighlighted) && 'bg-ocean-100 stroke-ocean-50'
+            'group-hover:bg-ocean-200 ',
+            (isExpanded || isHighlighted) && 'bg-ocean-200 text-ocean-50'
           )}
         />
       </motion.div>

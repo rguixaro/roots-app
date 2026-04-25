@@ -1,111 +1,79 @@
 'use client'
 
 import { useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import * as Sentry from '@sentry/nextjs'
 import { toast } from 'sonner'
 import { Connection, Edge, addEdge } from 'reactflow'
 
-import { createTreeEdge, deleteTreeEdge } from '@/server/actions'
+import {
+  createTreeEdge,
+  deleteTreeEdge,
+  createUnion,
+  deleteUnion,
+  attachChildToUnion,
+} from '@/server/actions'
 
-import { TreeEdge, TreeEdgeType, Tree } from '@/types'
+import { decideChildAttachment } from '@/hooks/child-attach-decision'
+
+import { isCoupleId } from '@/components/tree/layout'
+
+import { TreeEdge, TreeEdgeType, Tree, TreeNode, Union } from '@/types'
 
 import { ocean } from '@/styles/colors'
+
+export interface UnionPickRequest {
+  parentId: string
+  childId: string
+  candidates: Union[]
+}
 
 export function useEdgeOperations(
   tree: Tree,
   edges: TreeEdge[],
+  unions: Union[],
+  nodes: TreeNode[],
   treeEdges: Edge[],
-  setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void
+  setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void,
+  onUnionPickNeeded?: (req: {
+    parentId: string
+    childId: string
+    candidates: Union[]
+  }) => void,
+  onSpouseUnionConfirmNeeded?: (req: { spouseAId: string; spouseBId: string }) => void
 ) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
-  /**
-   * Find the spouse/partner of a given node id
-   * @param nodeId - The id of the node whose spouse to find
-   * @returns The spouse's node id, or null if not found
-   */
-  const findSpouse = useCallback(
-    (nodeId: string) => {
-      const spouseEdge = edges.find(
-        (edge) => edge.type === 'SPOUSE' && (edge.fromNodeId === nodeId || edge.toNodeId === nodeId)
-      )
+  const router = useRouter()
 
-      if (!spouseEdge) return null
-      return spouseEdge.fromNodeId === nodeId ? spouseEdge.toNodeId : spouseEdge.fromNodeId
-    },
-    [edges]
-  )
-
-  /**
-   * Validate a proposed connection between two nodes
-   * @param conn - The connection object containing source and target node ids
-   * @param edgeType - The type of relationship being created
-   * @returns An error message string if invalid, or null if valid
-   */
   const validateConnection = useCallback(
     (conn: Connection, edgeType: TreeEdgeType): string | null => {
       if (!conn.source || !conn.target) return 'error'
-
       if (conn.source === conn.target) return 'error-cannot-connect-to-self'
 
-      const existingEdge = treeEdges.find(
-        (edge) =>
-          (edge.source === conn.source && edge.target === conn.target) ||
-          (edge.source === conn.target && edge.target === conn.source)
+      const existing = treeEdges.find(
+        (e) =>
+          (e.source === conn.source && e.target === conn.target) ||
+          (e.source === conn.target && e.target === conn.source)
       )
-
-      if (existingEdge) return 'error-relationship-already-exists'
+      if (existing) return 'error-relationship-already-exists'
 
       if (edgeType === 'PARENT' || edgeType === 'CHILD') {
-        const checkForCycle = (
-          startNode: string,
-          targetNode: string,
-          visited = new Set<string>()
-        ): boolean => {
-          if (startNode === targetNode) return true
-          if (visited.has(startNode)) return false
-
-          visited.add(startNode)
-
-          for (const e of treeEdges) {
-            if (e.data?.type === 'SPOUSE') continue
-
-            if (edgeType === 'PARENT' ? e.source === startNode : e.target === startNode) {
-              const nextNode = edgeType === 'PARENT' ? e.target : e.source
-              if (checkForCycle(nextNode, targetNode, new Set(visited))) return true
-            }
-          }
-
-          return false
-        }
-
-        const wouldCreateCycle =
-          edgeType === 'PARENT'
-            ? checkForCycle(conn.target, conn.source)
-            : checkForCycle(conn.source, conn.target)
-
-        if (wouldCreateCycle) return 'error-would-create-cycle'
-
-        const getParents = (nodeId: string): string[] => {
-          return edges
+        const getParents = (nodeId: string): string[] =>
+          edges
             .filter((e) => e.toNodeId === nodeId && (e.type === 'PARENT' || e.type === 'CHILD'))
             .map((e) => e.fromNodeId)
-        }
 
         const sourceParents = getParents(conn.source)
         const targetParents = getParents(conn.target)
+        const shared = sourceParents.filter((p) => targetParents.includes(p))
+        if (shared.length > 0) return 'error-cannot-connect-siblings'
 
-        const sharedParents = sourceParents.filter((parent) => targetParents.includes(parent))
-        if (sharedParents.length > 0) return 'error-cannot-connect-siblings'
-
-        if (edgeType === 'PARENT') {
-          const childParents = getParents(conn.target)
-          if (childParents.length >= 2) return 'error-child-has-max-parents'
-        } else if (edgeType === 'CHILD') {
-          const childParents = getParents(conn.source)
-          if (childParents.length >= 2) return 'error-child-has-max-parents'
-        }
+        if (edgeType === 'PARENT' && getParents(conn.target).length >= 2)
+          return 'error-child-has-max-parents'
+        if (edgeType === 'CHILD' && getParents(conn.source).length >= 2)
+          return 'error-child-has-max-parents'
       }
 
       return null
@@ -113,17 +81,44 @@ export function useEdgeOperations(
     [treeEdges, edges]
   )
 
-  /**
-   * Handle new edge connections between nodes
-   * @param conn - The connection object containing source and target node ids
-   * @return {Promise<void>}
-   */
+  const attachChildToBestUnion = useCallback(
+    async (parentId: string, childId: string) => {
+      const decision = decideChildAttachment(parentId, childId, nodes, unions, edges)
+
+      if (decision.kind === 'noop') return
+
+      if (decision.kind === 'create-single-parent-union') {
+        const { error, unionId } = await createUnion({
+          treeId: tree.id,
+          spouseAId: parentId,
+          spouseBId: null,
+        })
+        if (error || !unionId) return
+        await attachChildToUnion({ treeId: tree.id, unionId, childNodeId: childId })
+        return
+      }
+
+      if (decision.kind === 'attach-to-existing-union') {
+        await attachChildToUnion({
+          treeId: tree.id,
+          unionId: decision.unionId,
+          childNodeId: childId,
+        })
+        return
+      }
+
+      if (decision.kind === 'prompt' && onUnionPickNeeded) {
+        onUnionPickNeeded({ parentId, childId, candidates: decision.candidates })
+      }
+    },
+    [nodes, unions, edges, tree.id, onUnionPickNeeded]
+  )
+
   const onConnect = useCallback(
     async (conn: Connection) => {
       if (!conn.source || !conn.target) return
 
       let edgeType: TreeEdgeType = 'PARENT'
-
       if (
         (conn.sourceHandle === 'right' || conn.sourceHandle === 'left') &&
         (conn.targetHandle === 'left' || conn.targetHandle === 'right')
@@ -145,207 +140,137 @@ export function useEdgeOperations(
       }
 
       try {
+        if (edgeType === 'SPOUSE') {
+          if (onSpouseUnionConfirmNeeded) {
+            onSpouseUnionConfirmNeeded({ spouseAId: conn.source, spouseBId: conn.target })
+            return
+          }
+
+          // fallback path for callers that don't pass the confirm callback
+          const { error, message } = await createTreeEdge({
+            treeId: tree.id,
+            fromNodeId: conn.source,
+            toNodeId: conn.target,
+            type: 'SPOUSE',
+          })
+          if (error) {
+            toast.error(t_errors(message || 'error'))
+            return
+          }
+          await createUnion({
+            treeId: tree.id,
+            spouseAId: conn.source,
+            spouseBId: conn.target,
+          })
+          toast.success(t_toasts('edge-created'))
+          router.refresh()
+          return
+        }
+
         if (edgeType === 'PARENT' || edgeType === 'CHILD') {
           const parentNodeId = edgeType === 'PARENT' ? conn.source : conn.target
           const childNodeId = edgeType === 'PARENT' ? conn.target : conn.source
 
-          const parentSpouse = findSpouse(parentNodeId)
-
-          const { error: primaryError, message: primaryMessage } = await createTreeEdge({
-            treeId: tree.id,
-            fromNodeId: conn.source,
-            toNodeId: conn.target,
-            type: edgeType,
-          })
-
-          if (primaryError) {
-            toast.error(t_errors(primaryMessage || 'error'))
-            return
-          }
-
-          if (parentSpouse) {
-            const existingSpouseChildEdge = edges.find(
-              (e) =>
-                (e.type === 'PARENT' || e.type === 'CHILD') &&
-                ((e.fromNodeId === parentSpouse && e.toNodeId === childNodeId) ||
-                  (e.fromNodeId === childNodeId && e.toNodeId === parentSpouse))
-            )
-
-            if (!existingSpouseChildEdge) {
-              const { error: spouseError } = await createTreeEdge({
-                treeId: tree.id,
-                fromNodeId: parentSpouse,
-                toNodeId: childNodeId,
-                type: edgeType,
-              })
-
-              if (spouseError) {
-                Sentry.captureMessage('Failed to create spouse-child relationship', {
-                  level: 'warning',
-                  tags: { action: 'createTreeEdge', step: 'spouse-child' },
-                })
-              }
-            }
-          }
-
-          setEdges((i) => addEdge(newEdge, i))
-          toast.success(t_toasts('edge-created'))
-        } else {
           const { error, message } = await createTreeEdge({
             treeId: tree.id,
             fromNodeId: conn.source,
             toNodeId: conn.target,
             type: edgeType,
           })
-
           if (error) {
             toast.error(t_errors(message || 'error'))
-          } else {
-            if (edgeType !== 'SPOUSE') setEdges((i) => addEdge(newEdge, i))
-            toast.success(t_toasts('edge-created'))
-          }
-        }
-      } catch (error) {
-        toast.error(t_errors('error'))
-      }
-    },
-    [setEdges, tree.id, t_errors, t_toasts, validateConnection, findSpouse]
-  )
-
-  /**
-   * Delete an edge (relationship) by its id
-   * @param edgeId - The id of the edge to delete
-   * @param closeContextMenu - Function to close the context menu after deletion
-   * @return {Promise<void>}
-   */
-  const deleteEdge = useCallback(
-    async (edgeId: string, closeContextMenu: () => void) => {
-      try {
-        const edgeIdToDelete = edgeId
-
-        const clickedEdge = treeEdges.find((e) => e.id === edgeId)
-
-        if (
-          clickedEdge &&
-          (clickedEdge.source.startsWith('couple-') || clickedEdge.target.startsWith('couple-'))
-        ) {
-          let coupleNodeId: string
-          let spouseNodeId: string | null = null
-          let childNodeId: string | null = null
-
-          if (clickedEdge.target.startsWith('couple-')) {
-            coupleNodeId = clickedEdge.target
-            spouseNodeId = clickedEdge.source
-          } else {
-            coupleNodeId = clickedEdge.source
-            childNodeId = clickedEdge.target
-          }
-
-          const pairId = coupleNodeId.replace('couple-', '')
-          const [spouse1, spouse2] = pairId.split('-')
-
-          if (spouseNodeId) {
-            const spouseEdge = edges.find(
-              (e) =>
-                e.type === 'SPOUSE' &&
-                ((e.fromNodeId === spouse1 && e.toNodeId === spouse2) ||
-                  (e.fromNodeId === spouse2 && e.toNodeId === spouse1))
-            )
-
-            if (spouseEdge) {
-              try {
-                const { error, message } = await deleteTreeEdge(spouseEdge.id, tree.id)
-                if (error) {
-                  toast.error(t_errors(message || 'error'))
-                } else {
-                  toast.success(t_toasts('edge-deleted'))
-                }
-                closeContextMenu()
-                return
-              } catch (error) {
-                toast.error(t_errors('error'))
-                closeContextMenu()
-                return
-              }
-            }
-          } else if (childNodeId) {
-            const edgesToDelete = edges.filter(
-              (e) =>
-                (e.type === 'PARENT' || e.type === 'CHILD') &&
-                e.toNodeId === childNodeId &&
-                (e.fromNodeId === spouse1 || e.fromNodeId === spouse2)
-            )
-
-            if (edgesToDelete.length > 0) {
-              try {
-                for (const edgeToDelete of edgesToDelete) {
-                  const { error } = await deleteTreeEdge(edgeToDelete.id, tree.id)
-                  if (error) {
-                    toast.error(t_errors('error'))
-                    closeContextMenu()
-                    return
-                  }
-                }
-                toast.success(t_toasts('edge-deleted'))
-                closeContextMenu()
-                return
-              } catch (error) {
-                toast.error(t_errors('error'))
-                closeContextMenu()
-                return
-              }
-            }
-          }
-
-          toast.error(t_errors('error-edge-not-found'))
-          closeContextMenu()
-          return
-        }
-
-        const clickedEdgeInFlow = treeEdges.find((e) => e.id === edgeIdToDelete)
-
-        if (!clickedEdgeInFlow) {
-          toast.error(t_errors('error-edge-not-found'))
-          closeContextMenu()
-          return
-        }
-
-        let dbEdgeId = edgeIdToDelete
-
-        if (edgeIdToDelete.startsWith('edge-')) {
-          const sourceNodeId = clickedEdgeInFlow.source
-          const targetNodeId = clickedEdgeInFlow.target
-
-          const dbEdge = edges.find(
-            (e) =>
-              (e.fromNodeId === sourceNodeId && e.toNodeId === targetNodeId) ||
-              (e.fromNodeId === targetNodeId && e.toNodeId === sourceNodeId)
-          )
-
-          if (!dbEdge) {
-            toast.error(t_errors('error-edge-not-found'))
-            closeContextMenu()
             return
           }
 
-          dbEdgeId = dbEdge.id
-        }
+          await attachChildToBestUnion(parentNodeId, childNodeId)
 
-        const { error, message } = await deleteTreeEdge(dbEdgeId, tree.id)
-
-        if (error) {
-          toast.error(t_errors(message || 'error'))
-        } else {
-          toast.success(t_toasts('edge-deleted'))
+          setEdges((i) => addEdge(newEdge, i))
+          toast.success(t_toasts('edge-created'))
+          router.refresh()
+          return
         }
-      } catch (error) {
+      } catch (_error) {
         toast.error(t_errors('error'))
       }
-
-      closeContextMenu()
     },
-    [treeEdges, edges, tree.id, t_errors, t_toasts]
+    [
+      setEdges,
+      tree.id,
+      t_errors,
+      t_toasts,
+      validateConnection,
+      attachChildToBestUnion,
+      router,
+      onSpouseUnionConfirmNeeded,
+    ]
   )
 
-  return { onConnect, deleteEdge }
+  const deleteEdge = useCallback(
+    async (edgeId: string, closeContextMenu: () => void) => {
+      try {
+        // synthetic couple-bus edge ids: `ue:<unionId>:a|b|c:<childId>`
+        if (edgeId.startsWith('ue:')) {
+          const parts = edgeId.split(':')
+          const unionId = parts[1]
+          const kind = parts[2]
+
+          if (kind === 'a' || kind === 'b') {
+            const { error, message } = await deleteUnion(unionId, tree.id)
+            if (error) toast.error(t_errors(message || 'error'))
+            else {
+              toast.success(t_toasts('edge-deleted'))
+              router.refresh()
+            }
+          } else if (kind === 'c') {
+            const childId = parts.slice(3).join(':')
+            const { error, message } = await attachChildToUnion({
+              treeId: tree.id,
+              unionId: null,
+              childNodeId: childId,
+            })
+            if (error) toast.error(t_errors(message || 'error'))
+            else {
+              toast.success(t_toasts('edge-deleted'))
+              router.refresh()
+            }
+          }
+          closeContextMenu()
+          return
+        }
+
+        const dbEdge = edges.find((e) => e.id === edgeId)
+        if (!dbEdge) {
+          toast.error(t_errors('error-edge-not-found'))
+          closeContextMenu()
+          return
+        }
+
+        const { error, message } = await deleteTreeEdge(dbEdge.id, tree.id)
+        if (error) toast.error(t_errors(message || 'error'))
+        else {
+          toast.success(t_toasts('edge-deleted'))
+
+          if (dbEdge.type === 'SPOUSE') {
+            const union = unions.find(
+              (u) =>
+                (u.spouseAId === dbEdge.fromNodeId && u.spouseBId === dbEdge.toNodeId) ||
+                (u.spouseAId === dbEdge.toNodeId && u.spouseBId === dbEdge.fromNodeId)
+            )
+            if (union) await deleteUnion(union.id, tree.id)
+          }
+
+          router.refresh()
+        }
+      } catch (e) {
+        Sentry.captureException(e, { tags: { action: 'deleteEdge' } })
+        toast.error(t_errors('error'))
+      }
+      closeContextMenu()
+    },
+    [edges, unions, tree.id, t_errors, t_toasts, router]
+  )
+
+  void isCoupleId
+
+  return { onConnect, deleteEdge, attachChildToBestUnion }
 }

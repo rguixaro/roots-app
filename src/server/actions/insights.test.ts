@@ -61,7 +61,7 @@ const mockAssertAuth = assertAuthenticated as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0)) // 2026-04-13 Monday
+  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0))
   vi.clearAllMocks()
   mockAssertAuth.mockResolvedValue('user-1')
 })
@@ -70,7 +70,6 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-// ─── getMilestones ───────────────────────────────────────
 describe('getMilestones', () => {
   it('returns empty arrays on auth failure', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -85,8 +84,7 @@ describe('getMilestones', () => {
   })
 
   it('includes birthdays within 30 days with correct age', async () => {
-    // Birthday on May 1 = 18 days away from April 13
-    const birthDate = new Date(1990, 4, 1) // May 1, 1990
+    const birthDate = new Date(1990, 4, 1)
     mockDb.tree.findMany.mockResolvedValue([
       {
         name: 'Family',
@@ -107,13 +105,13 @@ describe('getMilestones', () => {
     const result = await getMilestones()
     expect(result.birthdays).toHaveLength(1)
     expect(result.birthdays[0].name).toBe('Alice')
-    expect(result.birthdays[0].age).toBe(36) // 2026 - 1990
+    expect(result.birthdays[0].age).toBe(36)
     expect(result.birthdays[0].daysUntil).toBe(18)
   })
 
   it('does not include birthdays for deceased members', async () => {
-    const birthDate = new Date(1950, 4, 1) // May 1
-    const deathDate = new Date(2020, 0, 1) // Jan 1, 2020
+    const birthDate = new Date(1950, 4, 1)
+    const deathDate = new Date(2020, 0, 1)
     mockDb.tree.findMany.mockResolvedValue([
       {
         name: 'Family',
@@ -132,19 +130,14 @@ describe('getMilestones', () => {
     ])
 
     const result = await getMilestones()
-    // Deceased: no birthday, but should still produce anniversaries
     expect(result.birthdays).toHaveLength(0)
     expect(result.anniversaries.length).toBeGreaterThanOrEqual(0)
   })
 
   it('handles Feb 29 birthday in non-leap year', async () => {
-    // 2026 is not a leap year; system time is 2026-04-13
-    // Feb 29 should clamp to Feb 28 in 2026, which is already past
-    // So next occurrence is Feb 28, 2027 => ~321 days away, outside 30-day window
-    // Shift to a time where Feb 28 is within 30 days instead
-    vi.setSystemTime(new Date(2027, 1, 1, 0, 0, 0)) // 2027-02-01
+    vi.setSystemTime(new Date(2027, 1, 1, 0, 0, 0))
 
-    const birthDate = new Date(1992, 1, 29) // Feb 29, 1992 (leap year)
+    const birthDate = new Date(1992, 1, 29)
     mockDb.tree.findMany.mockResolvedValue([
       {
         name: 'Family',
@@ -165,14 +158,12 @@ describe('getMilestones', () => {
     const result = await getMilestones()
     expect(result.birthdays).toHaveLength(1)
     expect(result.birthdays[0].name).toBe('LeapBaby')
-    // In non-leap year 2027, Feb 29 birthday should show on Feb 28
-    expect(result.birthdays[0].daysUntil).toBe(27) // Feb 28 - Feb 1 = 27 days
+    expect(result.birthdays[0].daysUntil).toBe(27)
   })
 
   it('returns death anniversaries within 30 days', async () => {
-    // System time: 2026-04-13
-    const birthDate = new Date(1950, 0, 1) // Jan 1, 1950
-    const deathDate = new Date(2020, 4, 5) // May 5, 2020 => 22 days from Apr 13
+    const birthDate = new Date(1950, 0, 1)
+    const deathDate = new Date(2020, 4, 5)
     mockDb.tree.findMany.mockResolvedValue([
       {
         name: 'Family',
@@ -194,13 +185,11 @@ describe('getMilestones', () => {
     const deathAnniversaries = result.anniversaries.filter((a) => a.type === 'death')
     expect(deathAnniversaries).toHaveLength(1)
     expect(deathAnniversaries[0].name).toBe('Grandpa')
-    expect(deathAnniversaries[0].yearsAgo).toBe(6) // 2026 - 2020
+    expect(deathAnniversaries[0].yearsAgo).toBe(6)
   })
 
   it('returns weekly memories matching current week', async () => {
-    // System time: 2026-04-13 (Monday)
-    // A picture taken on the same week in a prior year should match
-    const picDate = new Date(2023, 3, 14) // April 14, 2023 — same week of year as Apr 13 2026
+    const picDate = new Date(2023, 3, 14)
     mockDb.tree.findMany.mockResolvedValue([
       {
         name: 'Family',
@@ -230,11 +219,10 @@ describe('getMilestones', () => {
     const result = await getMilestones()
     expect(result.memories).toHaveLength(1)
     expect(result.memories[0].picture).toBe('memory.jpg')
-    expect(result.memories[0].yearsAgo).toBe(3) // 2026 - 2023
+    expect(result.memories[0].yearsAgo).toBe(3)
   })
 })
 
-// ─── getHighlights ───────────────────────────────────────
 describe('getHighlights', () => {
   it('returns all null on auth failure', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -284,37 +272,25 @@ describe('getHighlights', () => {
 
     const result = await getHighlights()
 
-    // Oldest by birthDate
     expect(result.oldest?.name).toBe('Grandpa')
     expect(result.oldest?.birthYear).toBe(1930)
 
-    // Youngest by birthDate
     expect(result.youngest?.name).toBe('Baby')
     expect(result.youngest?.birthYear).toBe(2025)
 
-    // Largest branch by PARENT edgesFrom count
     expect(result.largest?.name).toBe('Grandpa')
     expect(result.largest?.childrenCount).toBe(3)
 
-    // Most photos by taggedIn count
     expect(result.mostPhotos?.name).toBe('Baby')
     expect(result.mostPhotos?.photoCount).toBe(4)
 
-    // Most members tree
     expect(result.mostMembers?.name).toBe('Family')
     expect(result.mostMembers?.memberCount).toBe(2)
   })
 })
 
-// ─── getTreeInfo ─────────────────────────────────────────
-
-/**
- * Narrow the TreeInfoResult union from the error branch so tests can access
- * the TreeInfo shape directly.
- */
 type TreeInfoSuccess = Exclude<Awaited<ReturnType<typeof getTreeInfo>>, { error: true }>
 
-// Minimal node shape matching what getTreeInfo's Prisma `select` returns.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const makeNode = (overrides: Partial<any> = {}) => ({
   id: overrides.id ?? 'n',
@@ -348,7 +324,6 @@ const emptyTree = {
   }>,
 }
 
-/** Defaults for secondary queries (pictures + activity). */
 const stubSecondaryQueries = () => {
   mockDb.picture.findMany.mockResolvedValue([])
   mockDb.activityLog.count.mockResolvedValue(0)
@@ -410,9 +385,9 @@ describe('getTreeInfo', () => {
       OTHER: 1,
       UNSPECIFIED: 1,
     })
-    expect(info.demographics.livingCount).toBe(2) // MALE + OTHER
-    expect(info.demographics.deceasedCount).toBe(2) // FEMALE + UNSPECIFIED
-    expect(info.demographics.withGender).toBe(3) // excluding UNSPECIFIED
+    expect(info.demographics.livingCount).toBe(2)
+    expect(info.demographics.deceasedCount).toBe(2)
+    expect(info.demographics.withGender).toBe(3)
   })
 
   it('computes generation depth via longest PARENT chain', async () => {
@@ -441,20 +416,18 @@ describe('getTreeInfo', () => {
       nodes: [makeNode({ id: 'a' }), makeNode({ id: 'b' })],
       TreeEdge: [
         { id: 'e1', fromNodeId: 'a', toNodeId: 'b', type: 'PARENT' },
-        { id: 'e2', fromNodeId: 'b', toNodeId: 'a', type: 'PARENT' }, // cycle
+        { id: 'e2', fromNodeId: 'b', toNodeId: 'a', type: 'PARENT' },
       ],
     })
     stubSecondaryQueries()
 
     const result = await getTreeInfo('family')
     const info = result as TreeInfoSuccess
-    // Completes without hanging + returns a finite depth
     expect(Number.isFinite(info.generations.depth)).toBe(true)
     expect(info.generations.depth).toBeGreaterThan(0)
   })
 
   it('returns topFamilies sorted by children count desc, capped at 5', async () => {
-    // 6 parents, each with i+1 kids (1..6)
     const parents = [1, 2, 3, 4, 5, 6].map((i) =>
       makeNode({ id: `p${i}`, fullName: `Parent${i}` })
     )
@@ -497,8 +470,6 @@ describe('getTreeInfo', () => {
   })
 
   it('returns topLongestLived sorted by ageAtDeath desc, capped at 5', async () => {
-    // 6 deceased members. Ages are computed via YEAR_MS=365.25, so exact
-    // calendar-year gaps floor to `age - 1` due to leap-year drift.
     const nodes = [90, 85, 80, 75, 70, 65].map((yearsApart, i) =>
       makeNode({
         id: `n${i}`,
@@ -515,11 +486,10 @@ describe('getTreeInfo', () => {
     const info = result as TreeInfoSuccess
 
     expect(info.lifeStats.topLongestLived).toHaveLength(5)
-    // Descending order preserved; exact ages drift by ~1 due to 365.25 divisor
     const ages = info.lifeStats.topLongestLived.map((m) => m.ageAtDeath)
     expect(ages).toEqual([...ages].sort((a, b) => b - a))
-    expect(ages[0]).toBeGreaterThanOrEqual(88) // ≈ 90
-    expect(ages[4]).toBeGreaterThanOrEqual(68) // ≈ 70
+    expect(ages[0]).toBeGreaterThanOrEqual(88)
+    expect(ages[4]).toBeGreaterThanOrEqual(68)
     expect(info.lifeStats.longestLived?.ageAtDeath).toBe(ages[0])
   })
 
@@ -592,7 +562,7 @@ describe('getTreeInfo', () => {
     expect(info.pictures.mostPhotographed).toHaveLength(2)
     expect(info.pictures.mostPhotographed[0].name).toBe('A')
     expect(info.pictures.mostPhotographed[0].photoCount).toBe(3)
-    expect(info.pictures.untaggedPeople).toBe(1) // n3 has no tags
+    expect(info.pictures.untaggedPeople).toBe(1)
   })
 
   it('counts pictures with GPS metadata', async () => {
@@ -634,7 +604,6 @@ describe('getTreeInfo', () => {
   })
 
   it('includes upcoming birthdays within 30 days', async () => {
-    // System time is 2026-04-13; birthday May 1 1990 = 18 days out
     mockDb.tree.findFirst.mockResolvedValue({
       ...emptyTree,
       nodes: [
@@ -741,18 +710,14 @@ describe('getTreeInfo', () => {
     mockDb.tree.findFirst.mockResolvedValue({
       ...emptyTree,
       nodes: [
-        // Living: born 1986-01-01 → ~40 years old at 2026-04-13
         makeNode({ id: 'l1', fullName: 'L1', birthDate: new Date(1986, 0, 1) }),
-        // Living: born 1996-01-01 → ~30 years old
         makeNode({ id: 'l2', fullName: 'L2', birthDate: new Date(1996, 0, 1) }),
-        // Deceased: 1900–1980 ≈ 80 years
         makeNode({
           id: 'd1',
           fullName: 'D1',
           birthDate: new Date(1900, 0, 1),
           deathDate: new Date(1980, 0, 1),
         }),
-        // Deceased: 1920–1990 ≈ 70 years
         makeNode({
           id: 'd2',
           fullName: 'D2',
@@ -766,12 +731,10 @@ describe('getTreeInfo', () => {
     const result = await getTreeInfo('family')
     const info = result as TreeInfoSuccess
 
-    // Avg living ≈ (40 + 30) / 2 = 35 (±1 for YEAR_MS drift)
     expect(info.demographics.avgAgeLiving).not.toBeNull()
     expect(info.demographics.avgAgeLiving!).toBeGreaterThan(33)
     expect(info.demographics.avgAgeLiving!).toBeLessThan(37)
 
-    // Avg age at death ≈ (80 + 70) / 2 = 75 (±1)
     expect(info.demographics.avgAgeAtDeath).not.toBeNull()
     expect(info.demographics.avgAgeAtDeath!).toBeGreaterThan(73)
     expect(info.demographics.avgAgeAtDeath!).toBeLessThan(77)
@@ -791,7 +754,7 @@ describe('getTreeInfo', () => {
     const result = await getTreeInfo('family')
     const info = result as TreeInfoSuccess
 
-    expect(info.generations.spanYears).toBe(85) // 2005 − 1920
+    expect(info.generations.spanYears).toBe(85)
     expect(info.generations.oldestMember?.name).toBeDefined()
     expect(info.generations.youngestMember?.name).toBeDefined()
   })
@@ -812,8 +775,8 @@ describe('getTreeInfo', () => {
           id: 'n2',
           gender: 'UNSPECIFIED',
           birthDate: null,
-          birthPlace: '   ', // whitespace-only ≠ populated
-          biography: '',     // empty ≠ populated
+          birthPlace: '   ',
+          biography: '',
           deathDate: new Date(2020, 0, 1),
         }),
         makeNode({
@@ -830,12 +793,12 @@ describe('getTreeInfo', () => {
     const info = result as TreeInfoSuccess
     const d = info.demographics
 
-    expect(d.withBirthDate).toBe(2) // n1, n3
-    expect(d.withDeathDate).toBe(1) // n2
-    expect(d.withBiography).toBe(1) // n1 only (non-empty)
-    expect(d.withBirthPlace).toBe(2) // n1, n3 (whitespace excluded)
-    expect(d.withProfilePicture).toBe(1) // n1
-    expect(d.withGender).toBe(2) // n1, n3 (UNSPECIFIED excluded)
+    expect(d.withBirthDate).toBe(2)
+    expect(d.withDeathDate).toBe(1)
+    expect(d.withBiography).toBe(1)
+    expect(d.withBirthPlace).toBe(2)
+    expect(d.withProfilePicture).toBe(1)
+    expect(d.withGender).toBe(2)
   })
 
   it('counts isolated nodes (members with no edges)', async () => {
@@ -867,7 +830,6 @@ describe('getTreeInfo', () => {
     mockDb.tree.findFirst.mockResolvedValue({
       ...emptyTree,
       nodes: [
-        // One node with no dates at all
         makeNode({ id: 'n1', gender: 'MALE' }),
       ],
     })
@@ -888,7 +850,6 @@ describe('getTreeInfo', () => {
   })
 
   it('computes avgChildrenPerParent from PARENT edges', async () => {
-    // 3 parents with 2, 4, 6 children → avg = 4
     const parents = ['p1', 'p2', 'p3'].map((id) =>
       makeNode({ id, fullName: id.toUpperCase() })
     )

@@ -6,6 +6,8 @@ import { type z } from 'zod'
 
 import { UpdateTreeNodeSchema } from '@/server/schemas'
 
+import { NodeRelations } from '@/components/tree/modal/node-relations'
+
 import {
   Button,
   Form,
@@ -25,12 +27,14 @@ import {
   TypographyH5,
 } from '@/ui'
 
-import { TreeNode, TreeType } from '@/types'
+import { TreeNode, TreeType, Union } from '@/types'
 
 interface NodeInfoTabGeneralProps {
   readonly: boolean
   treeType: TreeType
   node: TreeNode | null
+  nodes: TreeNode[]
+  unions: Union[]
   form: UseFormReturn<z.infer<typeof UpdateTreeNodeSchema>>
   loading: boolean
   editMode: boolean
@@ -46,6 +50,8 @@ export function NodeInfoTabGeneral({
   readonly,
   treeType,
   node,
+  nodes,
+  unions,
   form,
   loading,
   editMode,
@@ -65,10 +71,57 @@ export function NodeInfoTabGeneral({
   const gender = form.watch('gender')
   const biography = form.watch('biography')
 
+  const isDirty =
+    fullName !== node?.fullName ||
+    (birthDate ? new Date(birthDate).toISOString() : '') !==
+      (node?.birthDate ? new Date(node.birthDate).toISOString() : '') ||
+    (deathDate ? new Date(deathDate).toISOString() : '') !==
+      (node?.deathDate ? new Date(node.deathDate).toISOString() : '') ||
+    gender !== node?.gender ||
+    birthPlace !== node?.birthPlace ||
+    deathPlace !== node?.deathPlace ||
+    biography !== node?.biography ||
+    alias !== node?.alias
+
+  const actionButtons = (
+    <div className="flex gap-2">
+      {!editMode && !readonly && (
+        <Button type="button" onClick={() => onEditModeChange(true)} disabled={loading}>
+          <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
+        </Button>
+      )}
+      {editMode && (
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => onEditModeChange(false)}
+          disabled={loading}
+        >
+          <span className="text-sm font-bold">{t_common('cancel')}</span>
+        </Button>
+      )}
+      {editMode && (
+        <Button type="submit" disabled={loading || !isDirty}>
+          <div className="flex items-center space-x-3">
+            {loading && <LoaderIcon size={16} className="animate-spin" />}
+            <span className="text-sm font-bold">
+              {loading ? t_common('updating') : t_common('update')}
+            </span>
+          </div>
+        </Button>
+      )}
+    </div>
+  )
+
   return (
     <>
-      {!isMobile && <TypographyH5>{t_trees('node-general-info')}</TypographyH5>}
-      <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-2 flex-col items-start rounded-xl border-2 px-3 py-2 text-left">
+      {!isMobile && (
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <TypographyH5>{t_trees('node-general-info')}</TypographyH5>
+          {actionButtons}
+        </div>
+      )}
+      <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean mb-5 flex-col items-start rounded-xl border-2 px-3 py-2 text-left">
         <FormField
           control={form.control}
           name="fullName"
@@ -267,48 +320,16 @@ export function NodeInfoTabGeneral({
           )}
         />
       </div>
-      <div className="my-6 flex gap-3">
-        {!editMode && !readonly && (
-          <Button type="button" onClick={() => onEditModeChange(true)} disabled={loading}>
-            <span className="text-sm font-bold">{t_trees('node-info-edit')}</span>
-          </Button>
-        )}
-        {editMode && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => onEditModeChange(false)}
-            disabled={loading}
-          >
-            <span className="text-sm font-bold">{t_common('cancel')}</span>
-          </Button>
-        )}
-        {editMode && (
-          <Button
-            type="submit"
-            disabled={
-              loading ||
-              (fullName === node?.fullName &&
-                (birthDate ? new Date(birthDate).toISOString() : '') ===
-                  (node?.birthDate ? new Date(node.birthDate).toISOString() : '') &&
-                (deathDate ? new Date(deathDate).toISOString() : '') ===
-                  (node?.deathDate ? new Date(node.deathDate).toISOString() : '') &&
-                gender === node?.gender &&
-                birthPlace === node?.birthPlace &&
-                deathPlace === node?.deathPlace &&
-                biography === node?.biography &&
-                alias === node?.alias)
-            }
-          >
-            <div className="flex items-center space-x-3">
-              {loading && <LoaderIcon size={16} className="animate-spin" />}
-              <span className="text-sm font-bold">
-                {loading ? t_common('updating') : t_common('update')}
-              </span>
-            </div>
-          </Button>
-        )}
-      </div>
+      {!isMobile && (
+        <NodeRelations
+          node={node}
+          nodes={nodes}
+          unions={unions}
+          isMobile={false}
+          t_trees={t_trees}
+        />
+      )}
+      {isMobile && <div className="my-6">{actionButtons}</div>}
       {editMode && (
         <div className="mt-auto self-start">
           <Button type="button" variant="ghost" onClick={onDelete} disabled={loading}>

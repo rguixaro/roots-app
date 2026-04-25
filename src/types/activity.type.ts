@@ -23,6 +23,10 @@ export const ActivityAction = [
   'MEMBER_JOINED_VIA_SHARE',
 
   'NOTE_UPDATED',
+
+  'UNION_CREATED',
+  'UNION_UPDATED',
+  'UNION_DELETED',
 ] as const
 export type ActivityAction = (typeof ActivityAction)[number]
 

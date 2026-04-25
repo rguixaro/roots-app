@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { Plus, Minimize2, ChevronLeft, ScanSearch, NotebookPen } from 'lucide-react'
+import { ChevronLeft, NotebookPen, Plus, Maximize, Crosshair } from 'lucide-react'
 import Link from 'next/link'
-import { motion, Variants } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/utils'
 
@@ -18,103 +18,62 @@ interface TreeOverlayProps {
   onFocus: () => void
 }
 
-/**
- * Animation variants for overlay panels sliding in from edges
- */
-const slideFromLeft: Variants = {
-  hidden: { x: -50, opacity: 0 },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 25, delay: 0.2 },
-  },
-}
-
-const slideFromTop: Variants = {
-  hidden: { y: -50, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 25, delay: 0.2 },
-  },
-}
-
-const slideFromBottom: Variants = {
-  hidden: { y: 50, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { type: 'spring', stiffness: 300, damping: 25, delay: 0.2 },
-  },
-}
-
-/**
- * Icon button hover animation
- */
-const iconButtonVariants: Variants = {
-  idle: { scale: 1 },
-  hover: { scale: 1.1, transition: { type: 'spring', stiffness: 400, damping: 15 } },
-  tap: { scale: 0.95 },
-}
-
-/**
- * Reusable icon button wrapper with animation
- */
-function IconButton({
-  children,
+function ToolButton({
+  label,
   onClick,
+  children,
   className,
 }: {
+  label: string
+  onClick: () => void
   children: React.ReactNode
-  onClick?: () => void
   className?: string
 }) {
   return (
-    <motion.button
+    <button
       type="button"
-      variants={iconButtonVariants}
-      initial="idle"
-      whileHover="hover"
-      whileTap="tap"
       onClick={onClick}
+      title={label}
+      aria-label={label}
       className={cn(
-        'bg-ocean-300 cursor-pointer rounded p-1',
-        'group transition-colors duration-300',
-        'outline-none focus:outline-none focus-visible:outline-none',
+        'text-ocean-300 hover:text-ocean-400 hover:bg-ocean-100/40',
+        'flex h-8 w-8 cursor-pointer items-center justify-center rounded-full',
+        'transition-[transform,color,background-color] duration-150 hover:scale-110',
+        'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200',
         className
       )}
     >
       {children}
-    </motion.button>
+    </button>
   )
 }
 
-/**
- * Reusable icon link wrapper with animation
- */
-function IconLink({
-  children,
+function ToolLink({
+  label,
   href,
+  children,
   className,
 }: {
-  children: React.ReactNode
+  label: string
   href: string
+  children: React.ReactNode
   className?: string
 }) {
   return (
-    <motion.div variants={iconButtonVariants} initial="idle" whileHover="hover" whileTap="tap">
-      <Link
-        href={href}
-        className={cn(
-          'bg-ocean-300 block cursor-pointer rounded p-1',
-          'group transition-colors duration-300',
-          'outline-none focus:outline-none focus-visible:outline-none',
-          className
-        )}
-      >
-        {children}
-      </Link>
-    </motion.div>
+    <Link
+      href={href}
+      title={label}
+      aria-label={label}
+      className={cn(
+        'text-ocean-300 hover:text-ocean-400 hover:bg-ocean-100/40',
+        'flex h-8 w-8 cursor-pointer items-center justify-center rounded-full',
+        'transition-[transform,color,background-color] duration-150 hover:scale-110',
+        'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200',
+        className
+      )}
+    >
+      {children}
+    </Link>
   )
 }
 
@@ -126,83 +85,67 @@ export function TreeOverlay({
   onResetView,
   onFocus,
 }: TreeOverlayProps) {
-  const iconClassName = 'text-ocean-50 group-hover:text-pale-ocean transition-colors duration-300'
+  const t_common = useTranslations('common')
 
   return (
-    <div>
-      <motion.div
-        variants={slideFromLeft}
-        initial="hidden"
-        animate="visible"
+    <>
+      <div
         className={cn(
-          'shadow-center-lg absolute top-0 left-0 z-10',
-          'bg-ocean-400 rounded-lg rounded-t-none rounded-l-none ps-1 pe-3 pt-2 pb-4'
+          'absolute top-3 left-1/2 z-10 -translate-x-1/2',
+          'animate-menu-in origin-top',
+          'flex max-w-[calc(100vw-1rem)] items-center gap-1',
+          'border-ocean-200/60 bg-pale-ocean/95 shadow-center rounded-full border px-2 py-1.5',
+          'backdrop-blur-sm'
         )}
       >
-        <IconLink href={`/trees/${tree?.slug}`}>
-          <ChevronLeft size={20} className={iconClassName} />
-        </IconLink>
-      </motion.div>
-      <motion.div
-        variants={slideFromTop}
-        initial="hidden"
-        animate="visible"
-        className={cn(
-          'bg-ocean-400 absolute top-0 right-0 z-10 flex gap-4 px-4 pt-1 pb-3 sm:right-auto sm:left-1/2 sm:-translate-x-1/2',
-          'shadow-center-lg items-center rounded-lg rounded-t-none rounded-br-none sm:rounded-br-lg',
-          'max-w-[70vw] sm:max-w-none'
-        )}
-      >
-        <Link
-          href={`/trees/${tree?.slug}`}
-          className="text-ocean-50 hover:text-pale-ocean text-lg font-extrabold transition-colors md:text-xl"
+        <ToolLink href={`/trees/${tree?.slug}`} label={t_common('return')}>
+          <ChevronLeft size={18} />
+        </ToolLink>
+        <span
+          className={cn(
+            'text-ocean-400 px-2 text-sm font-bold sm:text-base',
+            'line-clamp-2 max-w-[14rem] sm:max-w-[20rem] leading-tight'
+          )}
+          title={tree.name}
         >
           {tree.name}
-        </Link>
-        <div className="bg-ocean-300 hidden h-4 w-0.5 sm:block" />
-        <IconLink href={`/trees/notes/${tree?.slug}?from=view`} className="hidden sm:block">
-          <NotebookPen size={20} className={iconClassName} />
-        </IconLink>
-        {!readonly && (
-          <IconButton onClick={onCreateNode} className="hidden sm:block">
-            <Plus size={20} className={iconClassName} />
-          </IconButton>
-        )}
-        <IconButton onClick={onResetView} className="hidden sm:block">
-          <Minimize2 size={20} className={iconClassName} />
-        </IconButton>
+        </span>
+        <div className="bg-ocean-200/60 mx-1 h-5 w-px" />
+        <ToolLink
+          href={`/trees/notes/${tree?.slug}?from=view`}
+          label={t_common('notes')}
+        >
+          <NotebookPen size={18} />
+        </ToolLink>
+        <ToolButton onClick={onResetView} label={t_common('reset-view')}>
+          <Maximize size={18} />
+        </ToolButton>
         {viewingOptionsEnabled && (
-          <IconButton onClick={onFocus} className="hidden sm:block">
-            <ScanSearch size={20} className={iconClassName} />
-          </IconButton>
+          <ToolButton onClick={onFocus} label={t_common('focus-mode')}>
+            <Crosshair size={18} />
+          </ToolButton>
         )}
-      </motion.div>
-      <motion.div
-        variants={slideFromBottom}
-        initial="hidden"
-        animate="visible"
-        className={cn(
-          'bg-ocean-400 absolute right-0 bottom-0 left-0 z-10 flex gap-4 px-4 pt-3 pb-1 sm:hidden',
-          'shadow-center-lg items-center justify-center gap-8'
-        )}
-      >
-        <IconLink href={`/trees/notes/${tree?.slug}?from=view`}>
-          <NotebookPen size={20} className={iconClassName} />
-        </IconLink>
-        {!readonly && (
-          <IconButton onClick={onCreateNode}>
-            <Plus size={20} className={iconClassName} />
-          </IconButton>
-        )}
-        <IconButton onClick={onResetView}>
-          <Minimize2 size={20} className={iconClassName} />
-        </IconButton>
-        {viewingOptionsEnabled && (
-          <IconButton onClick={onFocus}>
-            <ScanSearch size={20} className={iconClassName} />
-          </IconButton>
-        )}
-      </motion.div>
-    </div>
+      </div>
+
+      {!readonly && (
+        <button
+          type="button"
+          onClick={onCreateNode}
+          aria-label={t_common('add-member')}
+          className={cn(
+            'absolute bottom-6 left-1/2 z-10 -translate-x-1/2',
+            'animate-menu-in origin-bottom',
+            'flex h-12 items-center gap-2 px-5',
+            'bg-ocean-300 hover:bg-ocean-400 text-pale-ocean',
+            'shadow-center-lg cursor-pointer rounded-2xl',
+            'transition-colors duration-150',
+            'outline-none focus-visible:ring-2 focus-visible:ring-ocean-200'
+          )}
+        >
+          <Plus size={20} strokeWidth={2.5} />
+          <span className="text-sm font-bold">{t_common('add-member')}</span>
+        </button>
+      )}
+    </>
   )
 }

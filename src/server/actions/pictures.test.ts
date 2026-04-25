@@ -56,7 +56,6 @@ beforeEach(() => {
   mockDb.$transaction.mockImplementation(async (fn: any) => fn(mockDb))
 })
 
-// ─── getPictures ─────────────────────────────────────────
 describe('getPictures', () => {
   it('returns empty on auth failure', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -102,7 +101,6 @@ describe('getPictures', () => {
   })
 })
 
-// ─── createPicture ───────────────────────────────────────
 describe('createPicture', () => {
   const mockFile = new File(['content'], 'photo.jpg', { type: 'image/jpeg' })
 
@@ -166,7 +164,6 @@ describe('createPicture', () => {
   })
 })
 
-// ─── deletePicture ───────────────────────────────────────
 describe('deletePicture', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -215,7 +212,6 @@ describe('deletePicture', () => {
   })
 })
 
-// ─── createPictureTag ────────────────────────────────────
 describe('createPictureTag', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -258,7 +254,6 @@ describe('createPictureTag', () => {
   })
 })
 
-// ─── deletePictureTag ────────────────────────────────────
 describe('deletePictureTag', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -296,7 +291,6 @@ describe('deletePictureTag', () => {
   })
 })
 
-// ─── setProfilePictureTag ────────────────────────────────
 describe('setProfilePictureTag', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))

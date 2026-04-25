@@ -15,10 +15,16 @@ import {
   TreeOverlay,
   NodeInfoModal,
   NodeCreateModal,
+  UnionPickModal,
+  UnionEditModal,
   ViewingOptions,
 } from '@/components/tree/modal'
 import { EdgeContextMenu } from '@/components/tree/context'
-import { StyledEdge } from '@/components/tree/edges'
+import { EdgeMenuProvider, StyledEdge } from '@/components/tree/edges'
+import {
+  REACT_FLOW_NODE_TYPES,
+  REACT_FLOW_EDGE_TYPES,
+} from '@/components/tree/react-flow-types'
 
 import {
   Dialog,
@@ -30,7 +36,7 @@ import {
   Button,
 } from '@/ui'
 
-import { Tree, TreeEdge, TreeNode } from '@/types'
+import { Tree, TreeEdge, TreeNode, Union } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
@@ -39,25 +45,36 @@ interface StyledTreeProps {
   tree: Tree
   nodes: TreeNode[]
   edges: TreeEdge[]
+  unions: Union[]
 }
 
-export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeProps) {
+export default function StyledTree({ readonly, tree, nodes, edges, unions }: StyledTreeProps) {
   const t_common = useTranslations('common')
   const t_toasts = useTranslations('toasts')
 
-  const treeState = useTreeState(tree, nodes, edges, {
+  const treeState = useTreeState(tree, nodes, edges, unions, {
     initialGenerationsUp: 2,
     initialGenerationsDown: 2,
     enableProgressiveDisclosure: true,
   })
 
-  const nodeCreateForm = useNodeCreateForm(tree, treeState.dismissModal)
+  const nodeCreateForm = useNodeCreateForm(tree, treeState.handleNodeCreated)
   const nodeUpdateForm = useNodeUpdateForm(tree, treeState.selectedNode, treeState.dismissModal)
 
-  const edgeOperations = useEdgeOperations(tree, edges, treeState.treeEdges, treeState.setTreeEdges)
+  const edgeOperations = useEdgeOperations(
+    tree,
+    edges,
+    unions,
+    nodes,
+    treeState.treeEdges,
+    treeState.setTreeEdges,
+    treeState.onUnionPickNeeded,
+    treeState.onSpouseUnionConfirmNeeded
+  )
   const nodeOperations = useNodeOperations(tree, nodes)
 
   return (
+    <EdgeMenuProvider value={treeState.toggleEdgeMenu}>
     <div className="relative h-full w-full overflow-hidden">
       <TreeOverlay
         readonly={readonly}
@@ -85,6 +102,8 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         showModal={treeState.displayInfo}
         treeType={tree.type}
         node={treeState.selectedNode}
+        nodes={nodes}
+        unions={unions}
         form={nodeUpdateForm.form}
         onUpdate={nodeUpdateForm.onSubmit}
         onClose={treeState.dismissModal}
@@ -106,10 +125,15 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         edges={treeState.treeEdges}
         onNodesChange={treeState.onTreeNodesChange}
         onEdgesChange={treeState.onTreeEdgesChange}
-        nodeTypes={treeState.nodeTypes}
+        nodeTypes={REACT_FLOW_NODE_TYPES}
+        edgeTypes={REACT_FLOW_EDGE_TYPES}
+        // suppress React Flow's 002 dev-warning; HMR swaps the module exports
+        onError={(code, message) => {
+          if (code === '002') return
+          // eslint-disable-next-line no-console
+          console.warn(`[React Flow]: ${message}`)
+        }}
         onConnect={edgeOperations.onConnect}
-        onEdgeClick={treeState.onEdgeClick}
-        onEdgeContextMenu={treeState.onEdgeContextMenu}
         onPaneClick={treeState.collapseAllNodes}
         connectionLineType={ConnectionLineType.SmoothStep}
         connectionLineComponent={StyledEdge}
@@ -117,6 +141,7 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         zoomOnScroll
         deleteKeyCode={null}
         nodesDraggable={false}
+        edgesFocusable={false}
         className={'bg-ocean-50 h-full w-full shadow-inner'}
         onlyRenderVisibleElements={false}
         proOptions={{ hideAttribution: true }}
@@ -132,15 +157,184 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         x={treeState.edgeContextMenu.x}
         y={treeState.edgeContextMenu.y}
         edgeId={treeState.edgeContextMenu.edgeId}
-        onDelete={() =>
-          treeState.edgeContextMenu.edgeId &&
-          edgeOperations.deleteEdge(
-            treeState.edgeContextMenu.edgeId,
-            treeState.closeEdgeContextMenu
+        onDelete={() => {
+          if (treeState.edgeContextMenu.edgeId) {
+            const edgeId = treeState.edgeContextMenu.edgeId
+            treeState.closeEdgeContextMenu()
+            treeState.showEdgeDeleteConfirmation(edgeId)
+          }
+        }}
+        onAddChild={(() => {
+          const edgeId = treeState.edgeContextMenu.edgeId
+          if (!edgeId) return undefined
+          if (edgeId.startsWith('ue:')) {
+            const parts = edgeId.split(':')
+            const kind = parts[2]
+            if (kind === 'a' || kind === 'b') {
+              const unionId = parts[1]
+              return () => {
+                treeState.closeEdgeContextMenu()
+                treeState.createChildForUnion(unionId)
+              }
+            }
+            return undefined
+          }
+          const spouseEdge = edges.find((e) => e.id === edgeId && e.type === 'SPOUSE')
+          if (!spouseEdge) return undefined
+          const union = unions.find(
+            (u) =>
+              (u.spouseAId === spouseEdge.fromNodeId && u.spouseBId === spouseEdge.toNodeId) ||
+              (u.spouseAId === spouseEdge.toNodeId && u.spouseBId === spouseEdge.fromNodeId)
           )
-        }
+          if (!union) return undefined
+          return () => {
+            treeState.closeEdgeContextMenu()
+            treeState.createChildForUnion(union.id)
+          }
+        })()}
+        onEditUnion={(() => {
+          const edgeId = treeState.edgeContextMenu.edgeId
+          if (!edgeId) return undefined
+          if (edgeId.startsWith('ue:')) {
+            const parts = edgeId.split(':')
+            const kind = parts[2]
+            if (kind !== 'a' && kind !== 'b') return undefined
+            const unionId = parts[1]
+            return () => {
+              treeState.closeEdgeContextMenu()
+              treeState.openEditUnion(unionId)
+            }
+          }
+          const spouseEdge = edges.find((e) => e.id === edgeId && e.type === 'SPOUSE')
+          if (!spouseEdge) return undefined
+          const union = unions.find(
+            (u) =>
+              (u.spouseAId === spouseEdge.fromNodeId && u.spouseBId === spouseEdge.toNodeId) ||
+              (u.spouseAId === spouseEdge.toNodeId && u.spouseBId === spouseEdge.fromNodeId)
+          )
+          if (!union) return undefined
+          return () => {
+            treeState.closeEdgeContextMenu()
+            treeState.openEditUnion(union.id)
+          }
+        })()}
         onClose={treeState.closeEdgeContextMenu}
       />
+      <UnionEditModal
+        open={treeState.editingUnion !== null}
+        union={treeState.editingUnion}
+        nodes={nodes}
+        onSave={treeState.applyEditUnion}
+        onCancel={treeState.dismissEditUnion}
+      />
+      <UnionEditModal
+        open={treeState.pendingSpouseUnion !== null}
+        mode="create"
+        union={null}
+        createSeed={treeState.pendingSpouseUnion}
+        nodes={nodes}
+        onSave={treeState.applySpouseUnionConfirm}
+        onCancel={treeState.dismissSpouseUnionConfirm}
+      />
+      <UnionPickModal
+        open={treeState.unionPick !== null}
+        parentId={treeState.unionPick?.parentId ?? null}
+        childId={treeState.unionPick?.childId ?? null}
+        candidates={treeState.unionPick?.candidates ?? []}
+        nodes={nodes}
+        onPick={(unionId) => treeState.applyUnionPick(unionId)}
+        onCancel={treeState.dismissUnionPick}
+      />
+      {(() => {
+        const edgeId = treeState.confirmEdgeDelete.edgeId
+        if (!edgeId) {
+          return (
+            <Dialog
+              open={treeState.confirmEdgeDelete.open}
+              onOpenChange={treeState.closeEdgeDeleteConfirmation}
+            >
+              <DialogContent className="text-ocean-400" />
+            </Dialog>
+          )
+        }
+
+        const isCoupleLeg = edgeId.startsWith('ue:')
+        const parts = edgeId.split(':')
+        const dbEdge = edges.find((e) => e.id === edgeId)
+
+        const isUnion =
+          (isCoupleLeg && (parts[2] === 'a' || parts[2] === 'b')) ||
+          dbEdge?.type === 'SPOUSE'
+
+        const unionId = isCoupleLeg
+          ? parts[1]
+          : isUnion && dbEdge
+            ? unions.find(
+                (u) =>
+                  (u.spouseAId === dbEdge.fromNodeId &&
+                    u.spouseBId === dbEdge.toNodeId) ||
+                  (u.spouseAId === dbEdge.toNodeId &&
+                    u.spouseBId === dbEdge.fromNodeId)
+              )?.id
+            : undefined
+
+        const childrenCount = unionId
+          ? nodes.filter((n) => n.childOfUnionId === unionId).length
+          : 0
+
+        return (
+          <Dialog
+            open={treeState.confirmEdgeDelete.open}
+            onOpenChange={treeState.closeEdgeDeleteConfirmation}
+          >
+            <DialogContent className="text-ocean-400">
+              <DialogHeader>
+                <DialogTitle>
+                  {isUnion
+                    ? t_toasts('union-delete-title')
+                    : t_toasts('child-detach-title')}
+                </DialogTitle>
+                <DialogDescription className="my-2">
+                  {isUnion
+                    ? t_toasts('union-delete-description')
+                    : t_toasts('child-detach-description')}
+                </DialogDescription>
+                {isUnion && childrenCount > 0 && (
+                  <DialogDescription className="my-2">
+                    {t_toasts('union-delete-children-warning', { count: childrenCount })}
+                  </DialogDescription>
+                )}
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="ghost"
+                  onClick={() => treeState.closeEdgeDeleteConfirmation()}
+                  disabled={treeState.loading}
+                >
+                  {t_common('cancel')}
+                </Button>
+                <Button
+                  variant="default"
+                  className="font-bold"
+                  onClick={() => {
+                    if (treeState.confirmEdgeDelete.edgeId) {
+                      treeState.withAsync(() =>
+                        edgeOperations.deleteEdge(
+                          treeState.confirmEdgeDelete.edgeId!,
+                          treeState.closeEdgeDeleteConfirmation
+                        )
+                      )
+                    }
+                  }}
+                  disabled={treeState.loading}
+                >
+                  {treeState.loading ? t_common('deleting') : t_common('confirm')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )
+      })()}
       <Dialog open={treeState.confirmDelete.open} onOpenChange={treeState.closeDeleteConfirmation}>
         <DialogContent className="text-ocean-400">
           <DialogHeader>
@@ -181,5 +375,6 @@ export default function StyledTree({ readonly, tree, nodes, edges }: StyledTreeP
         </DialogContent>
       </Dialog>
     </div>
+    </EdgeMenuProvider>
   )
 }

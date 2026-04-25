@@ -85,7 +85,6 @@ beforeEach(() => {
   mockDb.$transaction.mockImplementation(async (fn: any) => fn(mockDb))
 })
 
-// ─── createTree ──────────────────────────────────────────
 describe('createTree', () => {
   const values = { name: 'My Tree', type: 'HUMAN' as const }
 
@@ -112,7 +111,6 @@ describe('createTree', () => {
   })
 })
 
-// ─── updateTree ──────────────────────────────────────────
 describe('updateTree', () => {
   const values = { name: 'Updated', type: 'HUMAN' as const }
 
@@ -158,7 +156,6 @@ describe('updateTree', () => {
   })
 })
 
-// ─── inviteMember ────────────────────────────────────────
 describe('inviteMember', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -179,7 +176,7 @@ describe('inviteMember', () => {
   })
 
   it('returns error when user not found', async () => {
-    mockDb.treeAccess.findFirst.mockResolvedValue(null) // no role check needed for EDITOR
+    mockDb.treeAccess.findFirst.mockResolvedValue(null)
     mockDb.user.findUnique.mockResolvedValue(null)
     const result = await inviteMember('t1', 'bob@example.com', 'EDITOR')
     expect(result).toEqual({ error: true, message: 'error-user-not-found' })
@@ -193,12 +190,10 @@ describe('inviteMember', () => {
   })
 
   it('creates access and sends invitation email', async () => {
-    // First findFirst call is in assertRole (already mocked as resolved)
-    // Second findFirst for role check won't happen for EDITOR role
     mockDb.user.findUnique
-      .mockResolvedValueOnce({ id: 'user-2', email: 'bob@example.com', name: 'Bob' }) // invited user
-      .mockResolvedValueOnce({ id: 'user-1', email: 'alice@example.com', name: 'Alice' }) // inviter
-    mockDb.treeAccess.findFirst.mockResolvedValue(null) // existing check
+      .mockResolvedValueOnce({ id: 'user-2', email: 'bob@example.com', name: 'Bob' })
+      .mockResolvedValueOnce({ id: 'user-1', email: 'alice@example.com', name: 'Alice' })
+    mockDb.treeAccess.findFirst.mockResolvedValue(null)
     mockDb.treeAccess.create.mockResolvedValue({})
     const tree = { id: 't1', name: 'My Tree', slug: 'my-tree', accesses: [] }
     mockDb.tree.findUnique.mockResolvedValue(tree)
@@ -227,7 +222,6 @@ describe('inviteMember', () => {
   })
 })
 
-// ─── updateMember ────────────────────────────────────────
 describe('updateMember', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -269,7 +263,6 @@ describe('updateMember', () => {
   })
 })
 
-// ─── removeMember ────────────────────────────────────────
 describe('removeMember', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -313,7 +306,6 @@ describe('removeMember', () => {
   })
 })
 
-// ─── createTreeNode ──────────────────────────────────────
 describe('createTreeNode', () => {
   const values = { treeId: 't1', fullName: 'John Doe', gender: 'MALE' as const }
 
@@ -344,7 +336,6 @@ describe('createTreeNode', () => {
   })
 })
 
-// ─── updateTreeNode ──────────────────────────────────────
 describe('updateTreeNode', () => {
   const values = { id: 'n1', treeId: 't1', fullName: 'Jane Doe', gender: 'FEMALE' as const }
 
@@ -372,7 +363,6 @@ describe('updateTreeNode', () => {
   })
 })
 
-// ─── createTreeEdge ──────────────────────────────────────
 describe('createTreeEdge', () => {
   const values = { treeId: 't1', fromNodeId: 'n1', toNodeId: 'n2', type: 'PARENT' as const }
 
@@ -418,7 +408,6 @@ describe('createTreeEdge', () => {
   })
 })
 
-// ─── deleteTreeNode ──────────────────────────────────────
 describe('deleteTreeNode', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -474,7 +463,6 @@ describe('deleteTreeNode', () => {
   })
 })
 
-// ─── deleteTreeEdge ──────────────────────────────────────
 describe('deleteTreeEdge', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -507,7 +495,6 @@ describe('deleteTreeEdge', () => {
   })
 })
 
-// ─── getTreeNodes ────────────────────────────────────────
 describe('getTreeNodes', () => {
   it('returns empty on auth failure', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -530,7 +517,6 @@ describe('getTreeNodes', () => {
   })
 })
 
-// ─── getTimelineEvents ──────────────────────────────────
 describe('getTimelineEvents', () => {
   it('returns empty on auth failure', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -569,7 +555,6 @@ describe('getTimelineEvents', () => {
   })
 })
 
-// ─── generateShareToken ──────────────────────────────────
 describe('generateShareToken', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -622,7 +607,6 @@ describe('generateShareToken', () => {
   })
 })
 
-// ─── getShareLink ────────────────────────────────────────
 describe('getShareLink', () => {
   it('returns null when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))
@@ -659,7 +643,6 @@ describe('getShareLink', () => {
   })
 })
 
-// ─── joinTreeViaShareToken ───────────────────────────────
 describe('joinTreeViaShareToken', () => {
   it('returns error when not authenticated', async () => {
     mockAssertAuth.mockRejectedValue(new Error('unauthenticated'))

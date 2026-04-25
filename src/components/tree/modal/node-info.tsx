@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { UseFormReturn } from 'react-hook-form'
@@ -12,7 +12,7 @@ import { UpdateTreeNodeSchema } from '@/server/schemas'
 import { useMobileDrag, usePictureOperations } from '@/hooks'
 
 import { PictureContextMenu } from '@/components/tree/context'
-import { NodeInfoTabGeneral, ModalBackdrop } from '@/components/tree/modal'
+import { NodeInfoTabGeneral, NodeRelations, ModalBackdrop } from '@/components/tree/modal'
 import {
   NodeGalleryContent,
   PictureTagsModal,
@@ -23,13 +23,15 @@ import { ConfirmDialog, Form, Picture, TypographyH4 } from '@/ui'
 
 import { checkKeyDown, cn } from '@/utils'
 
-import { TreeNode, TreeType } from '@/types'
+import { TreeNode, TreeType, Union } from '@/types'
 
 interface NodeInfoModalProps {
   readonly: boolean
   showModal: boolean
   treeType: TreeType
   node: TreeNode | null
+  nodes: TreeNode[]
+  unions: Union[]
   form: UseFormReturn<z.infer<typeof UpdateTreeNodeSchema>>
   onUpdate: (values: z.infer<typeof UpdateTreeNodeSchema>) => Promise<void>
   onClose: () => void
@@ -41,6 +43,8 @@ export function NodeInfoModal({
   showModal,
   treeType,
   node,
+  nodes,
+  unions,
   form,
   onUpdate,
   onClose,
@@ -53,7 +57,7 @@ export function NodeInfoModal({
 
   const [formLoading, setFormLoading] = useState(false)
   const [editMode, setEditMode] = useState(false)
-  const [currentTab, setCurrentTab] = useState<'general' | 'gallery'>('general')
+  const [currentTab, setCurrentTab] = useState<'general' | 'relations' | 'gallery'>('general')
   const [displayNode, setDisplayNode] = useState<TreeNode | null>(null)
 
   const { modalHeight, isDragging, isMobile, handleDragStart } = useMobileDrag()
@@ -72,7 +76,18 @@ export function NodeInfoModal({
     setFormLoading(true)
     await onUpdate(values)
     setFormLoading(false)
+    setEditMode(false)
   })
+
+  const handleClose = useCallback(() => {
+    setEditMode(false)
+    setFormLoading(false)
+    onClose()
+  }, [onClose])
+
+  if (showModal && node && node !== displayNode) {
+    setDisplayNode(node)
+  }
 
   /**
    * Effect to disable background scrolling when modal is open
@@ -95,36 +110,21 @@ export function NodeInfoModal({
     }
   }, [showModal])
 
-  /**
-   * Effect to store node data when modal opens (keeps it visible during close animation)
-   */
+  // clear the cached node after the close animation finishes
   useEffect(() => {
-    if (showModal && node) {
-      setDisplayNode(node)
-    }
-  }, [showModal, node])
-
-  /**
-   * Effect to reset form when modal is closed
-   */
-  useEffect(() => {
-    if (!showModal) {
-      form.reset()
-      setEditMode(false)
-      setFormLoading(false)
-      const timeout = setTimeout(() => setDisplayNode(null), 500)
-      return () => clearTimeout(timeout)
-    }
-  }, [showModal, form])
+    if (showModal) return
+    const timeout = setTimeout(() => setDisplayNode(null), 500)
+    return () => clearTimeout(timeout)
+  }, [showModal])
 
   const loading = formLoading || pictureOps.loading
 
   return (
     <>
-      <ModalBackdrop show={showModal} onClick={onClose} />
+      <ModalBackdrop show={showModal} onClick={handleClose} />
       <Tabs.Root
         value={currentTab}
-        onValueChange={(value) => setCurrentTab(value as 'general' | 'gallery')}
+        onValueChange={(value) => setCurrentTab(value as 'general' | 'relations' | 'gallery')}
       >
         <div
           className={cn(
@@ -204,6 +204,12 @@ export function NodeInfoModal({
                       {t_trees('node-general-info')}
                     </Tabs.Trigger>
                     <Tabs.Trigger
+                      value="relations"
+                      className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
+                    >
+                      {t_trees('node-relations')}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger
                       value="gallery"
                       className="border-ocean-100 text-ocean-300 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 data-[state=active]:border-b-2 data-[state=active]:font-bold"
                     >
@@ -215,6 +221,8 @@ export function NodeInfoModal({
                       readonly={readonly}
                       treeType={treeType}
                       node={node}
+                      nodes={nodes}
+                      unions={unions}
                       form={form}
                       loading={loading}
                       editMode={editMode}
@@ -226,6 +234,17 @@ export function NodeInfoModal({
                       t_toasts={t_toasts}
                     />
                   </Tabs.Content>
+                  {isMobile && (
+                    <Tabs.Content value="relations">
+                      <NodeRelations
+                        node={node}
+                        nodes={nodes}
+                        unions={unions}
+                        isMobile={true}
+                        t_trees={t_trees}
+                      />
+                    </Tabs.Content>
+                  )}
                   {isMobile && (
                     <Tabs.Content value="gallery">
                       <NodeGalleryContent
@@ -288,7 +307,7 @@ export function NodeInfoModal({
                 onPictureMenuOpen={pictureOps.onPictureMenuOpen}
                 onPictureFullscreen={pictureOps.onPictureExpand}
                 onGalleryPictureError={pictureOps.setGalleryPictureError}
-                onClose={onClose}
+                onClose={handleClose}
                 t_trees={t_trees}
               />
             </div>

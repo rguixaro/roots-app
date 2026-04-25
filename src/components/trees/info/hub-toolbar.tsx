@@ -58,7 +58,7 @@ export async function TreeInfoHubToolbar({ slug, role }: HubToolbarProps) {
   return (
     <div>
       <GoBack variant="filled" to="/" className="w-auto" />
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <HubActionCard
           href={`/trees/view/${slug}`}
           icon={TreePine}

@@ -11,7 +11,10 @@ import { createTreeNode } from '@/server/actions'
 
 import { Tree } from '@/types'
 
-export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
+export function useNodeCreateForm(
+  tree: Tree,
+  onSuccess?: (nodeId?: string) => void | Promise<void>
+) {
   const t_toasts = useTranslations('toasts')
   const t_errors = useTranslations('errors')
 
@@ -26,13 +29,8 @@ export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
     },
   })
 
-  /**
-   * Handle form creation submission
-   * @param values {z.infer<typeof CreateTreeNodeSchema>}
-   * @returns {Promise<void>}
-   */
   const onSubmit = async (values: z.infer<typeof CreateTreeNodeSchema>): Promise<void> => {
-    const { error, message } = await createTreeNode(values)
+    const { error, message, nodeId } = await createTreeNode(values)
     if (error) {
       toast.error(t_errors(message || 'error'))
       return
@@ -40,7 +38,7 @@ export function useNodeCreateForm(tree: Tree, onSuccess?: () => void) {
 
     toast.success(t_toasts('node-created'))
     form.reset()
-    onSuccess?.()
+    await onSuccess?.(nodeId)
   }
 
   return { form, onSubmit }

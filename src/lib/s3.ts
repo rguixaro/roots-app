@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3'
 import { randomUUID } from 'crypto'
 import exifr from 'exifr'
 import * as Sentry from '@sentry/nextjs'
@@ -14,7 +20,7 @@ const s3 = new S3Client({ region: AMAZON_REGION })
 
 const S3_KEY_PREFIX = 'roots/'
 
-const toS3Key = (fileKey: string) => `${S3_KEY_PREFIX}${fileKey}`
+export const toS3Key = (fileKey: string) => `${S3_KEY_PREFIX}${fileKey}`
 
 /**
  * Uploads a file to S3
@@ -94,6 +100,24 @@ export async function uploadFileToS3(
 export async function deleteFileFromS3(fileKey: string): Promise<void> {
   await s3.send(
     new DeleteObjectCommand({
+      Bucket: AMAZON_S3_BUCKET_NAME,
+      Key: toS3Key(fileKey),
+    })
+  )
+}
+
+export async function getFileFromS3(fileKey: string) {
+  return s3.send(
+    new GetObjectCommand({
+      Bucket: AMAZON_S3_BUCKET_NAME,
+      Key: toS3Key(fileKey),
+    })
+  )
+}
+
+export async function getFileInfoFromS3(fileKey: string) {
+  return s3.send(
+    new HeadObjectCommand({
       Bucket: AMAZON_S3_BUCKET_NAME,
       Key: toS3Key(fileKey),
     })

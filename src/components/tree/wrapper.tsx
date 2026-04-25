@@ -8,12 +8,14 @@ import StyledTree from './tree'
 
 export const TreeWrapper = ({
   readonly,
+  canExportGallery,
   tree,
   nodes,
   edges,
   unions,
 }: {
   readonly: boolean
+  canExportGallery: boolean
   tree: Tree
   nodes: TreeNode[]
   edges: TreeEdge[]
@@ -32,7 +34,14 @@ export const TreeWrapper = ({
 
   return (
     <ReactFlowProvider>
-      <StyledTree readonly={readonly} tree={tree} nodes={nodes} edges={edges} unions={unions} />
+      <StyledTree
+        readonly={readonly}
+        canExportGallery={canExportGallery}
+        tree={tree}
+        nodes={nodes}
+        edges={edges}
+        unions={unions}
+      />
     </ReactFlowProvider>
   )
 }

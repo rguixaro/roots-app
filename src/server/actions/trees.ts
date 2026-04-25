@@ -34,7 +34,7 @@ import {
 
 import { languageToLocale } from '@/utils/language'
 
-import { Tree, TreeNode, TimelineEvent } from '@/types'
+import { PictureMetadata, Tree, TreeEdge, TreeNode, TimelineEvent, Union } from '@/types'
 
 interface TreeResult {
   error: boolean
@@ -46,6 +46,10 @@ interface TreeDeletionResult extends TreeResult {
   deleted?: boolean
   availableAt?: Date
 }
+
+export type TreeExportResult =
+  | { error: false; tree: Tree; nodes: TreeNode[]; edges: TreeEdge[]; unions: Union[] }
+  | { error: true; message?: string }
 
 const TREE_DELETION_GRACE_PERIOD_DAYS = 7
 const MS_PER_DAY = 86_400_000

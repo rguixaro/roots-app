@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, UseFormReturn, FieldArrayWithId } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Tabs from '@radix-ui/react-tabs'
 import { LoaderIcon } from 'lucide-react'
@@ -35,18 +35,20 @@ import { Tree, TreeAccessRole } from '@/types'
 
 import { checkKeyDown, isValidEmail } from '@/utils'
 
+type FormValues = z.infer<typeof CreateTreeSchema>
+
 interface CreateTreeProps {
   userId: string
 }
 
 interface MemberItemProps {
-  field: any
+  field: FieldArrayWithId<FormValues, 'members', 'id'>
   index: number
-  form: any
+  form: UseFormReturn<FormValues>
   loading: boolean
   currentUserId: string
-  t_trees: any
-  t_errors: any
+  t_trees: ReturnType<typeof useTranslations>
+  t_errors: ReturnType<typeof useTranslations>
   inviteUser: (email: string, role: TreeAccessRole) => void
   remove: (index: number) => void
   setDialogOpen: (open: boolean) => void
@@ -138,7 +140,7 @@ const MemberItem = ({
                 disabled={currentUserId === field.userId}
                 setValue={(value) => {
                   if (memberRole === 'ADMIN' && value !== 'ADMIN') {
-                    const admins = form.getValues('members')?.filter((m: any) => m.role === 'ADMIN')
+                    const admins = form.getValues('members')?.filter((m) => m.role === 'ADMIN')
                     if (admins && admins.length <= 1)
                       return toast.error(t_errors('error-tree-admin-required'))
                   }
@@ -195,7 +197,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [currMember, setCurrMember] = useState<{ index: number; memberId?: string } | null>(null)
 
-  const form = useForm<z.infer<typeof CreateTreeSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(CreateTreeSchema),
     defaultValues: { name: '', newsletter: true, members: [] },
   })
@@ -219,7 +221,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
    * onSubmit form handler
    * @param values {z.infer<typeof CreateTreeSchema>}
    */
-  const onSubmit = async (values: z.infer<typeof CreateTreeSchema>) =>
+  const onSubmit = async (values: FormValues) =>
     withAsync(async () => {
       const { error, message, tree } = await createTree(values)
       if (error) return toast.error(t_errors(message || 'error'))
@@ -402,7 +404,7 @@ export const CreateTree = ({ userId: currentUserId }: CreateTreeProps) => {
             </Tabs.Content>
             <Tabs.Content value="members" className="space-y-4">
               <TypographyH5 className="mt-2">{t_trees('tree-members-tab')}</TypographyH5>
-              <div className="border-ocean-200/50 shadow-center-sm bg-ocean-200 flex-col items-start rounded-xl border-2 p-3">
+              <div className="border-ocean-200/50 shadow-center-sm bg-pale-ocean flex-col items-start rounded-xl border-2 p-3">
                 <FormLabel>{t_trees('tree-members')}</FormLabel>
                 <FormDescription className="mb-2 text-sm opacity-70">
                   {t_trees('tree-members-info')}

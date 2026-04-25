@@ -47,7 +47,10 @@ export default async function TreePage({ params }: { params: Promise<{ slug: str
         <TreeInfoHubToolbar slug={info.tree.slug} role={role} />
         <div className="mt-6 space-y-6">
           <TreeInfoHeader info={info} />
-          <TreeInfoShareDownload treeId={info.tree.id} canShare={role !== 'VIEWER'} />
+          <TreeInfoShareDownload
+            treeId={info.tree.id}
+            canShare={role !== 'VIEWER' && !info.tree.deletionRequest}
+          />
           <TreeInfoDemographics info={info} />
           <TreeInfoGenerations info={info} />
           <TreeInfoRelationships info={info} />

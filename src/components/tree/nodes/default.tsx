@@ -106,10 +106,11 @@ const handleVariants = {
  * @param param0 {NodeProps<StyledNodeProps>}
  * @returns {JSX.Element}
  */
-export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
+export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isHovered, setIsHovered] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const canConnect = isConnectable !== false
 
   const { fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
   const {
@@ -319,10 +320,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="source"
         id="right"
         position={Position.Right}
+        isConnectable={canConnect}
         className={cn(
           'relative h-px! w-px! border-0! opacity-0!',
           'right-0! translate-x-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -331,10 +333,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="target"
         id="left"
         position={Position.Left}
+        isConnectable={canConnect}
         className={cn(
           'relative h-px! w-px! border-0! opacity-0!',
           'left-0! -translate-x-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -343,10 +346,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="target"
         id="top"
         position={Position.Top}
+        isConnectable={canConnect}
         className={cn(
           'relative h-px! w-px! border-0! opacity-0!',
           'top-0! -translate-y-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -355,10 +359,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="source"
         id="bottom"
         position={Position.Bottom}
+        isConnectable={canConnect}
         className={cn(
           'relative h-px! w-px! border-0! opacity-0!',
           'bottom-0! translate-y-1/2!',
-          isHovered && !isExpanded
+          canConnect && isHovered && !isExpanded
             ? "pointer-events-auto! before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none!'
         )}

@@ -87,7 +87,7 @@ export const getTree = cache(async (slug: string) => {
  * Get a tree tree by its slug.
  * Auth required.
  * @param slug Tree slug
- * @returns Promise<{ tree: Tree; nodes: TreeNode[]; edges: TreeEdge[] } | { error: true; message: string } >
+ * @returns Promise<{ tree: Tree; nodes: TreeNode[]; edges: TreeEdge[]; unions: Union[] } | { error: true; message: string }>
  */
 export const getTreeRoots = cache(async (slug: string) => {
   try {
@@ -120,20 +120,17 @@ export const getTreeRoots = cache(async (slug: string) => {
         },
       })),
     }))
-    const edges = await db.treeEdge.findMany({ where: { treeId: tree.id } })
+    const [edges, unions] = await Promise.all([
+      db.treeEdge.findMany({ where: { treeId: tree.id } }),
+      db.union.findMany({ where: { treeId: tree.id } }),
+    ])
 
-    return { tree, nodes: typedNodes, edges }
+    return { tree, nodes: typedNodes, edges, unions }
   } catch (error) {
     throw error
   }
 })
 
-/**
- * Get the shared note for a tree (singleton per tree).
- * Returns the note content, last-edit metadata, and whether the current user
- * can edit. Note row does not have to exist yet — returns empty content when
- * missing. Auth required.
- */
 export const getTreeNote = cache(async (slug: string) => {
   try {
     const userId = await assertAuthenticated()

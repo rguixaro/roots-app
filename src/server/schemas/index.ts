@@ -32,6 +32,10 @@ export const ActivityAction = [
   'MEMBER_JOINED_VIA_SHARE',
 
   'NOTE_UPDATED',
+
+  'UNION_CREATED',
+  'UNION_UPDATED',
+  'UNION_DELETED',
 ] as const
 export type ActivityAction = (typeof ActivityAction)[number]
 
@@ -164,3 +168,52 @@ export const CreateTreeEdgeSchema = z.object({
 })
 
 export type CreateTreeEdgeInput = z.TypeOf<typeof CreateTreeEdgeSchema>
+
+const divorceAfterMarriage = (
+  data: { marriedAt?: Date | null; divorcedAt?: Date | null },
+  ctx: z.RefinementCtx
+) => {
+  if (
+    data.marriedAt &&
+    data.divorcedAt &&
+    data.divorcedAt.getTime() < data.marriedAt.getTime()
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'error-divorced-before-married',
+      path: ['divorcedAt'],
+    })
+  }
+}
+
+export const CreateUnionSchema = z
+  .object({
+    treeId: z.string().min(1),
+    spouseAId: z.string().min(1, { message: 'spouse-a-required' }),
+    spouseBId: z.string().min(1).nullable().optional(),
+    marriedAt: z.coerce.date().nullable().optional(),
+    divorcedAt: z.coerce.date().nullable().optional(),
+    place: z.string().max(120).nullable().optional(),
+  })
+  .superRefine(divorceAfterMarriage)
+export type CreateUnionInput = z.TypeOf<typeof CreateUnionSchema>
+
+export const UpdateUnionSchema = z
+  .object({
+    id: z.string().min(1),
+    treeId: z.string().min(1),
+    spouseAId: z.string().min(1, { message: 'spouse-a-required' }),
+    spouseBId: z.string().min(1).nullable().optional(),
+    marriedAt: z.coerce.date().nullable().optional(),
+    divorcedAt: z.coerce.date().nullable().optional(),
+    place: z.string().max(120).nullable().optional(),
+  })
+  .superRefine(divorceAfterMarriage)
+export type UpdateUnionInput = z.TypeOf<typeof UpdateUnionSchema>
+
+export const AttachChildToUnionSchema = z.object({
+  treeId: z.string().min(1),
+  unionId: z.string().min(1).nullable(),
+  childNodeId: z.string().min(1),
+})
+export type AttachChildToUnionInput = z.TypeOf<typeof AttachChildToUnionSchema>

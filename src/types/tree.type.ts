@@ -52,10 +52,31 @@ export interface TreeNode {
   createdAt: Date
   updatedAt: Date
 
+  childOfUnionId?: string | null
+
   taggedIn?: PictureTag[]
 
   edgesFrom?: TreeEdge[]
   edgesTo?: TreeEdge[]
+}
+
+export interface Union {
+  id: string
+  treeId: string
+
+  spouseAId: string
+  spouseBId: string | null
+
+  marriedAt: Date | null
+  divorcedAt: Date | null
+  place: string | null
+
+  createdAt: Date
+  updatedAt: Date
+
+  spouseA?: TreeNode
+  spouseB?: TreeNode | null
+  children?: TreeNode[]
 }
 
 export interface TreeEdge {
@@ -73,7 +94,7 @@ export interface TreeEdge {
 }
 
 export interface TimelineEvent {
-  type: 'birth' | 'death'
+  type: 'birth' | 'death' | 'marriage' | 'divorce'
   date: Date
   name: string
   place?: string

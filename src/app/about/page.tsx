@@ -31,13 +31,12 @@ export default async function AboutPage() {
 
   return (
     <main className="flex flex-col items-start justify-center">
-      <div className="mx-auto w-11/12 max-w-4xl self-center space-y-12 py-10">
-        {/* Hero */}
+      <div className="mx-auto w-11/12 max-w-4xl space-y-12 self-center py-10">
         <section className="text-center">
-          <h1 className="text-ocean-400 text-4xl font-extrabold tracking-tight sm:text-5xl">
+          <h1 className="text-ocean-300 text-4xl font-extrabold tracking-tight sm:text-5xl">
             {t_about.rich('title', {
               appName,
-              app: (chunks) => <span className="text-ocean-500">{chunks}</span>,
+              app: (chunks) => <span className="text-ocean-400">{chunks}</span>,
             })}
           </h1>
           <p className="text-ocean-300 mx-auto mt-4 max-w-xl text-base sm:text-lg">
@@ -45,7 +44,6 @@ export default async function AboutPage() {
           </p>
         </section>
 
-        {/* Features — solid surface cards for contrast */}
         <section>
           <h2 className="text-ocean-400 mb-4 text-xl font-extrabold tracking-tight">
             {t_about('features-title')}
@@ -66,7 +64,6 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Feedback / GitHub — solid darker CTA banner */}
         <section className="bg-ocean-200 shadow-center-sm rounded-xl px-6 py-8 text-center sm:px-10 sm:py-10">
           <h2 className="text-pale-ocean text-2xl font-extrabold tracking-tight sm:text-3xl">
             {t_about('feedback-title')}
@@ -74,9 +71,7 @@ export default async function AboutPage() {
           <p className="text-pale-ocean/80 mx-auto mt-3 max-w-lg text-sm sm:text-base">
             {t_about.rich('feedback-description', {
               appName,
-              app: (chunks) => (
-                <span className="text-pale-ocean font-extrabold">{chunks}</span>
-              ),
+              app: (chunks) => <span className="text-pale-ocean font-extrabold">{chunks}</span>,
             })}
           </p>
           <Link
@@ -84,7 +79,7 @@ export default async function AboutPage() {
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              'bg-pale-ocean hover:bg-neutral-50 text-ocean-400',
+              'bg-pale-ocean text-ocean-400 hover:bg-neutral-50',
               'mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5',
               'text-sm font-bold transition-colors duration-200'
             )}
@@ -94,11 +89,10 @@ export default async function AboutPage() {
           </Link>
         </section>
 
-        {/* Beta notice — subtle single line */}
         <section className="text-ocean-300 text-center text-sm">
           <p>
             <b className="text-ocean-400">{appName}</b> {t_common('app-status')}{' '}
-            <b className="text-ocean-400">{t_common('app-beta')}</b>.
+            <b className="text-ocean-400">{t_common('app-beta')}</b>
           </p>
         </section>
       </div>

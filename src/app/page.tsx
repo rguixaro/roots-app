@@ -1,49 +1,22 @@
-import { getTranslations } from 'next-intl/server'
+import { auth } from '@/auth'
+import { getTrees } from '@/server/queries'
 
-import { TreesFeed, Milestones, Highlights } from '@/components/trees'
-import { Settings } from '@/components/layout'
-
-import { TypographyH4, TypographyH5 } from '@/ui'
+import { TreesFeed, Milestones, Greeting, LastActive } from '@/components/trees'
 
 export default async function TreesPage() {
-  const t_common = await getTranslations('common')
-  const t_insights = await getTranslations('insights')
+  const session = await auth()
+  const username = session?.user?.name ?? ''
+
+  const trees = (await getTrees())?.trees ?? []
+  const hasTrees = trees.length > 0
 
   return (
     <main className="flex flex-col items-start justify-center">
-      <div className="w-3/4 self-center sm:w-3/4">
-        <div className="text-ocean-400 flex h-full items-center justify-center">
-          <div className="mb-5 h-full w-full sm:w-4/5 md:w-3/5">
-            <div className="mt-5 flex w-full items-center justify-between">
-              <TypographyH4>{t_common('trees')}</TypographyH4>
-              <Settings />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="flex w-full items-center justify-center self-center">
+      <div className="mx-auto w-11/12 max-w-6xl space-y-6 self-center py-6">
+        <Greeting username={username} />
+        {hasTrees && <LastActive />}
         <TreesFeed />
-      </div>
-      <div className="w-3/4 self-center sm:w-3/4">
-        <div className="text-ocean-400 flex h-full items-center justify-center">
-          <div className="mb-4 h-full w-full sm:w-4/5 md:w-3/5">
-            <div className="mx-auto my-6 w-5/6 items-center justify-center">
-              <div className="bg-ocean-100 shadow-center-sm h-1 rounded" />
-            </div>
-            <Milestones />
-          </div>
-        </div>
-      </div>
-      <div className="w-3/4 self-center sm:w-3/4">
-        <div className="text-ocean-400 flex h-full items-center justify-center">
-          <div className="mb-5 h-full w-full sm:w-4/5 md:w-3/5">
-            <TypographyH5>{t_insights('highlights')}</TypographyH5>
-            <p className="mt-2">{t_insights('highlights-description')} </p>
-          </div>
-        </div>
-      </div>
-      <div className="mb-20 flex w-full items-center justify-center self-center">
-        <Highlights />
+        {hasTrees && <Milestones />}
       </div>
     </main>
   )

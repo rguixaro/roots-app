@@ -28,3 +28,17 @@ export const assertRole = async (
   const access = await checkTreeAccess(treeId, userId, roles)
   if (!access) throw new Error('error-no-permission')
 }
+
+/**
+ * Assert that a tree is not pending deletion before allowing mutations.
+ * Read actions and deletion-request cancel/approval intentionally bypass this.
+ * @param treeId
+ * @returns Promise<void>
+ */
+export const assertTreeWritable = async (treeId: string) => {
+  const request = await db.treeDeletionRequest.findUnique({
+    where: { treeId },
+    select: { id: true },
+  })
+  if (request) throw new Error('error-tree-pending-deletion')
+}

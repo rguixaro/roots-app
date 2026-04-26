@@ -12,14 +12,19 @@ vi.mock('@/utils/language', () => ({ languageToLocale: vi.fn(() => 'en') }))
 
 import { db } from '@/server/db'
 import { sendWeeklyNewsletter } from '@/lib/email'
+import { languageToLocale } from '@/utils/language'
 import { sendWeeklyNewsletters } from './newsletter'
 
-const mockDb = db as any
-const mockSendNewsletter = sendWeeklyNewsletter as ReturnType<typeof vi.fn>
+const mockDb = db as unknown as {
+  tree: { findMany: ReturnType<typeof vi.fn> }
+  treeNode: { findMany: ReturnType<typeof vi.fn> }
+}
+const mockSendNewsletter = vi.mocked(sendWeeklyNewsletter)
+const mockLanguageToLocale = vi.mocked(languageToLocale)
 
 beforeEach(() => {
   vi.useFakeTimers()
-  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0)) // 2026-04-13
+  vi.setSystemTime(new Date(2026, 3, 13, 0, 0, 0))
   vi.clearAllMocks()
   mockSendNewsletter.mockResolvedValue(true)
 })
@@ -61,10 +66,9 @@ describe('sendWeeklyNewsletters', () => {
         slug: 'quiet',
         newsletter: true,
         accesses: [{ user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } }],
-        nodes: [], // no recent additions
+        nodes: [],
       },
     ])
-    // All nodes have no upcoming birthdays/anniversaries
     mockDb.treeNode.findMany.mockResolvedValue([
       { id: 'n1', fullName: 'Bob', birthDate: new Date(1990, 8, 1), deathDate: null },
     ])
@@ -105,6 +109,41 @@ describe('sendWeeklyNewsletters', () => {
     expect(mockSendNewsletter).toHaveBeenCalledTimes(2)
   })
 
+  it('formats each newsletter using the recipient language', async () => {
+    const recentNode = {
+      id: 'n1',
+      fullName: 'NewKid',
+      birthDate: null,
+      deathDate: null,
+      createdAt: new Date(2026, 3, 12),
+    }
+
+    mockLanguageToLocale.mockReturnValueOnce('es')
+    mockDb.tree.findMany.mockResolvedValue([
+      {
+        id: 't1',
+        name: 'Family',
+        slug: 'family',
+        newsletter: true,
+        accesses: [
+          { user: { id: 'u1', email: 'alice@example.com', name: 'Alice', language: 'ES' } },
+        ],
+        nodes: [recentNode],
+      },
+    ])
+    mockDb.treeNode.findMany.mockResolvedValue([recentNode])
+
+    const result = await sendWeeklyNewsletters()
+
+    expect(result.success).toBe(true)
+    expect(mockLanguageToLocale).toHaveBeenCalledWith('ES')
+    expect(mockSendNewsletter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locale: 'es',
+      })
+    )
+  })
+
   it('handles individual email failures gracefully', async () => {
     const recentNode = {
       id: 'n1',
@@ -128,10 +167,7 @@ describe('sendWeeklyNewsletters', () => {
     ])
     mockDb.treeNode.findMany.mockResolvedValue([recentNode])
 
-    // First email succeeds, second throws
-    mockSendNewsletter
-      .mockResolvedValueOnce(true)
-      .mockRejectedValueOnce(new Error('SMTP failure'))
+    mockSendNewsletter.mockResolvedValueOnce(true).mockRejectedValueOnce(new Error('SMTP failure'))
 
     const result = await sendWeeklyNewsletters()
     expect(result.success).toBe(true)
@@ -153,9 +189,7 @@ describe('sendWeeklyNewsletters', () => {
         name: 'Family A',
         slug: 'family-a',
         newsletter: true,
-        accesses: [
-          { user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } },
-        ],
+        accesses: [{ user: { id: 'u1', email: 'alice@example.com', name: 'Alice' } }],
         nodes: [recentNode],
       },
       {
@@ -172,7 +206,6 @@ describe('sendWeeklyNewsletters', () => {
     ])
     mockDb.treeNode.findMany.mockResolvedValue([recentNode])
 
-    // Tree A: u1 succeeds; Tree B: u2 fails, u3 succeeds
     mockSendNewsletter
       .mockResolvedValueOnce(true)
       .mockRejectedValueOnce(new Error('SMTP failure'))

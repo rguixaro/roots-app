@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { motion, Variants } from 'framer-motion'
 
@@ -9,70 +10,57 @@ import { TreeSchema } from '@/server/schemas'
 import { cn } from '@/utils'
 
 import { Icon } from '../icon'
-import { Plus } from 'lucide-react'
 
-export function ItemTree({ tree, index }: { tree: TreeSchema | null; index: number }) {
+export type TreeFeedItem = TreeSchema & { memberCount?: number; pendingDeletion?: boolean }
+
+export function ItemTree({ tree, index }: { tree: TreeFeedItem; index: number }) {
   const t_trees = useTranslations('trees')
+  const t_enums = useTranslations('enums')
 
   const motions: Variants = {
-    hover: { scale: 1.02, transition: { type: 'spring', stiffness: 400, damping: 15 } },
-    hidden: { opacity: 0, x: 150, scale: 1 },
+    hidden: { opacity: 0, y: 8 },
     visible: {
       opacity: 1,
-      x: 0,
-      transition: { type: 'spring', bounce: 0.2, duration: 0.8, delay: index * 0.15 },
+      y: 0,
+      transition: { duration: 0.35, delay: index * 0.04 },
     },
   }
 
-  const className = cn(
-    'group transition-all duration-300 shadow-center-sm',
-    'rounded-lg px-3 py-2 sm:px-5 sm:py-3',
-    'flex h-full w-full flex-col items-center justify-center',
-    'hover:bg-ocean-200 bg-pale-ocean text-ocean-400 hover:text-pale-ocean'
-  )
-
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      whileHover="hover"
-      variants={motions}
-      className={cn('aspect-square h-32 w-24 p-2', tree && 'w-48')}
-    >
-      {tree ? (
-        <Link href={`/trees/${tree.slug}`} className="block h-full w-full">
-          <div className={className}>
-            <div className="flex flex-col items-center justify-center text-center">
-              <Icon
-                type={tree.type}
-                size={24}
-                className="stroke-ocean-400 group-hover:stroke-pale-ocean transition-colors duration-300"
-              />
-              <span className="mt-1 text-base leading-5 font-extrabold transition-colors duration-300 md:text-lg">
-                {tree.name}
-              </span>
-            </div>
-          </div>
-        </Link>
-      ) : (
-        <Link href="/trees/new">
-          <div
-            className={cn(
-              className,
-              'flex cursor-pointer flex-col items-center justify-center',
-              'hover:text-ocean-400 hover:bg-pale-ocean bg-ocean-200 text-pale-ocean'
+    <motion.div initial="hidden" animate="visible" variants={motions}>
+      <Link
+        href={`/trees/${tree.slug}`}
+        className="text-ocean-400 group bg-pale-ocean flex items-center gap-4 px-4 py-4"
+      >
+        <div className="bg-ocean-100/60 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+          <Icon type={tree.type} size={18} className="stroke-ocean-300" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-base font-extrabold">{tree.name}</div>
+          <div className="flex items-center gap-2 text-xs opacity-70">
+            <span>{t_enums(tree.type.toLowerCase())}</span>
+            {typeof tree.memberCount === 'number' && (
+              <>
+                <span>·</span>
+                <span>{t_trees('tree-member-count', { count: tree.memberCount })}</span>
+              </>
             )}
-          >
-            <Plus
-              size={24}
-              className="group-hover:stroke-ocean-400 stroke-pale-ocean transition-colors duration-300"
-            />
-            <span className="text-center leading-5 font-medium transition-colors duration-300 md:text-lg">
-              {t_trees('tree-new')}
-            </span>
+            {tree.pendingDeletion && (
+              <>
+                <span>·</span>
+                <span className="font-bold">{t_trees('tree-pending-deletion')}</span>
+              </>
+            )}
           </div>
-        </Link>
-      )}
+        </div>
+        <ChevronRight
+          size={18}
+          className={cn(
+            'text-ocean-300 opacity-50',
+            'transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100'
+          )}
+        />
+      </Link>
     </motion.div>
   )
 }

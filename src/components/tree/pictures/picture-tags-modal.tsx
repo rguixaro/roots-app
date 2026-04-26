@@ -27,14 +27,14 @@ export function PictureTagsModal({
 }: PictureTagsModalProps) {
   const [searchTerm, setSearchTerm] = useState('')
 
-  if (!show) return null
-
   const filteredNodes = useMemo(() => {
     if (!searchTerm) return availableNodes
     return availableNodes.filter((node) =>
       `${node.fullName} ${node.alias ?? ''}`.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [availableNodes, searchTerm])
+
+  if (!show) return null
 
   return (
     <>

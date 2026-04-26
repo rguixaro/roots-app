@@ -5,19 +5,22 @@ import { Position, Handle, NodeProps } from 'reactflow'
 
 import { TreeNode } from '@/types'
 
+import { cn } from '@/utils'
+
 interface StyledNodeProps {
   node: TreeNode
   onClick?: (label: string) => void
+  hasChildren?: boolean
 }
 
 /**
- * A minimal node used as a spacer in the tree layout.
- * @param param0 {NodeProps<StyledNodeProps>}
- * @returns {JSX.Element}
+ * Couple spacer node where spouse legs and child edges converge.
+ * Childless unions render fully invisible.
  */
-export function VoidNode({}: NodeProps<StyledNodeProps>): JSX.Element {
+export function VoidNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
+  const hasChildren = !!data?.hasChildren
   return (
-    <div className="bg-ocean-100 h-2 w-1">
+    <div className={cn('h-2 w-1', hasChildren && 'bg-ocean-100')}>
       <Handle
         type="target"
         id="top"

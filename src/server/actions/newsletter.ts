@@ -54,7 +54,7 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
       const events: Array<{
         name: string
         eventType: 'birthday' | 'anniversary'
-        date: string
+        date: Date
         yearsAgo?: number
       }> = []
 
@@ -73,7 +73,7 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             events.push({
               name: node.fullName,
               eventType: 'birthday',
-              date: thisYearBirthday.toISOString(),
+              date: thisYearBirthday,
               yearsAgo,
             })
           }
@@ -93,12 +93,14 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             events.push({
               name: node.fullName,
               eventType: 'anniversary',
-              date: thisYearAnniversary.toISOString(),
+              date: thisYearAnniversary,
               yearsAgo,
             })
           }
         }
       })
+
+      events.sort((a, b) => a.date.getTime() - b.date.getTime())
 
       if (tree.nodes.length === 0 && events.length === 0) continue
 
@@ -113,7 +115,9 @@ export async function sendWeeklyNewsletters(): Promise<NewsletterResult> {
             treeSlug: tree.slug,
             recentAdditions: tree.nodes.map((node) => ({
               name: node.fullName,
-              addedDate: node.createdAt.toISOString(),
+              addedDate: node.createdAt,
+              birthDate: node.birthDate,
+              deathDate: node.deathDate,
             })),
             events,
             totalMembers: allNodes.length,

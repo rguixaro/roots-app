@@ -20,6 +20,19 @@ export interface Tree {
   nodes?: TreeNode[]
   edges?: TreeEdge[]
   accesses?: TreeAccess[]
+  deletionRequest?: TreeDeletionRequest | null
+  _count?: { nodes?: number }
+}
+
+export interface TreeDeletionRequest {
+  id: string
+  treeId: string
+  requestedById: string | null
+  requestedBy?: Pick<User, 'id' | 'name' | 'email' | 'image'> | null
+  requestedAt: Date
+  approvedById?: string | null
+  approvedBy?: Pick<User, 'id' | 'name' | 'email' | 'image'> | null
+  approvedAt?: Date | null
 }
 
 export interface TreeAccess {
@@ -52,10 +65,31 @@ export interface TreeNode {
   createdAt: Date
   updatedAt: Date
 
+  childOfUnionId?: string | null
+
   taggedIn?: PictureTag[]
 
   edgesFrom?: TreeEdge[]
   edgesTo?: TreeEdge[]
+}
+
+export interface Union {
+  id: string
+  treeId: string
+
+  spouseAId: string
+  spouseBId: string | null
+
+  marriedAt: Date | null
+  divorcedAt: Date | null
+  place: string | null
+
+  createdAt: Date
+  updatedAt: Date
+
+  spouseA?: TreeNode
+  spouseB?: TreeNode | null
+  children?: TreeNode[]
 }
 
 export interface TreeEdge {
@@ -73,7 +107,7 @@ export interface TreeEdge {
 }
 
 export interface TimelineEvent {
-  type: 'birth' | 'death'
+  type: 'birth' | 'death' | 'marriage' | 'divorce'
   date: Date
   name: string
   place?: string

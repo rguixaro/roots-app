@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages, getTranslations } from 'next-intl/server'
@@ -13,6 +13,8 @@ import { Header, Footer } from '@/components/layout'
 
 import '@/styles/globals.css'
 
+import { DEFAULT_SITE_URL } from '@/lib/seo'
+
 import { cn } from '@/utils'
 
 const outfit = localFont({
@@ -21,9 +23,70 @@ const outfit = localFont({
   weight: '100 900',
 })
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f0f9ff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c4a6e' },
+  ],
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const t_common = await getTranslations('common')
-  return { title: t_common('app-name'), description: t_common('app-description') }
+  const locale = await getLocale()
+  const name = t_common('app-name')
+  const description = t_common('app-description')
+
+  const ogLocaleMap: Record<string, string> = { ca: 'ca_ES', en: 'en_US', es: 'es_ES' }
+
+  return {
+    metadataBase: new URL(DEFAULT_SITE_URL),
+    title: { default: name, template: `%s | ${name}` },
+    description,
+    applicationName: name,
+    authors: [{ name: 'Ricard Guixaró', url: 'https://rguixaro.dev' }],
+    creator: 'Ricard Guixaró',
+    robots: {
+      index: false,
+      follow: false,
+      nocache: true,
+      googleBot: {
+        index: false,
+        follow: false,
+        noimageindex: true,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      siteName: name,
+      title: name,
+      description,
+      locale: ogLocaleMap[locale] ?? 'en_US',
+      alternateLocale: Object.values(ogLocaleMap).filter((l) => l !== ogLocaleMap[locale]),
+      images: [
+        {
+          url: '/favicon.svg',
+          width: 512,
+          height: 512,
+          alt: name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: name,
+      description,
+      images: ['/favicon.svg'],
+    },
+    icons: {
+      icon: [
+        { url: '/favicon.svg', type: 'image/svg+xml' },
+        { url: '/favicon.png', type: 'image/png' },
+      ],
+    },
+    manifest: '/manifest.webmanifest',
+  }
 }
 
 export default async function RootLayout({
@@ -36,13 +99,10 @@ export default async function RootLayout({
 
   const session = await auth()
   const userName = session?.user.name
+  const userImage = session?.user.image ?? null
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="alternate icon" href="/favicon.png" />
-      </head>
       <body
         className={cn(
           `font-sans ${outfit.variable} antialiased`,
@@ -53,7 +113,7 @@ export default async function RootLayout({
           <SessionProvider>
             <NextIntlClientProvider messages={messages}>
               <CookiesProvider />
-              <Header username={userName || ''} />
+              <Header username={userName || ''} userImage={userImage} />
               <main className="flex-1">{children}</main>
               <Footer />
               <ToasterProvider />

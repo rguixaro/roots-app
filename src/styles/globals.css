@@ -88,6 +88,27 @@
   }
 }
 
+/* Edges are non-interactive: every action goes through the buttons
+   rendered by the edge components inside `EdgeLabelRenderer`. Disabling
+   pointer events on the SVG edge layer makes mouse events fall through
+   to the pane underneath, so click + drag on a line pans the canvas
+   exactly like dragging the background — no fake-clickable cursor, no
+   stray click handlers. The buttons live in a separate React Flow
+   portal with their own `pointer-events: auto`, so they stay clickable. */
+.react-flow__edge {
+  pointer-events: none;
+  cursor: default;
+}
+
+.react-flow.tree-exporting [data-edge-menu-trigger='true'] {
+  display: none;
+}
+
+.react-flow.tree-exporting .react-flow__edgeupdater,
+.react-flow.tree-exporting .react-flow__handle {
+  display: none;
+}
+
 @font-face {
   font-family: 'Outfit';
   src: url('/src/app/fonts/outfit-variable.ttf') format('truetype');
@@ -140,10 +161,34 @@
     }
   }
 
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes menu-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.95);
+    }
+  }
+
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-background-shine: background-shine 2s linear infinite;
+  --animate-menu-in: menu-in 250ms ease-out;
+  --animate-menu-out: menu-out 250ms ease-in;
 }
 
 /* Form number input normalization */

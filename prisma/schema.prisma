@@ -53,6 +53,19 @@ enum ActivityAction {
   PICTURE_TAG_DELETED
 
   TREE_UPDATED
+
+  SHARE_TOKEN_GENERATED
+  MEMBER_JOINED_VIA_SHARE
+
+  NOTE_UPDATED
+
+  UNION_CREATED
+  UNION_UPDATED
+  UNION_DELETED
+
+  TREE_DELETION_REQUESTED
+  TREE_DELETION_CANCELLED
+  TREE_DELETION_APPROVED
 }
 
 model Tree {
@@ -66,13 +79,20 @@ model Tree {
 
   newsletter Boolean @default(true)
 
-  nodes       TreeNode[]
-  accesses    TreeAccess[]
-  TreeEdge    TreeEdge[]
-  Picture     Picture[]
-  ActivityLog ActivityLog[]
+  shareToken          String?
+  shareTokenExpiresAt DateTime?
+
+  nodes           TreeNode[]
+  accesses        TreeAccess[]
+  TreeEdge        TreeEdge[]
+  Unions          Union[]
+  Picture         Picture[]
+  ActivityLog     ActivityLog[]
+  note            TreeNote?
+  deletionRequest TreeDeletionRequest?
 
   @@unique([slug])
+  @@index([shareToken])
 }
 
 model TreeNode {
@@ -90,12 +110,48 @@ model TreeNode {
   biography  String?
   alias      String?
 
+  childOfUnion   Union?  @relation("ChildOfUnion", fields: [childOfUnionId], references: [id], onDelete: SetNull)
+  childOfUnionId String? @db.ObjectId
+
+  unionsAsSpouseA Union[] @relation("UnionSpouseA")
+  unionsAsSpouseB Union[] @relation("UnionSpouseB")
+
   taggedIn  PictureTag[] @relation("taggedIn")
   edgesFrom TreeEdge[]   @relation("FromNode")
   edgesTo   TreeEdge[]   @relation("ToNode")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([childOfUnionId])
+}
+
+model Union {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @db.ObjectId
+
+  // onDelete must be NoAction here to avoid a referential-integrity cycle
+  // with TreeNode.childOfUnion. Spouse-delete cascade is handled in the
+  // deleteTreeNode action.
+  spouseA   TreeNode @relation("UnionSpouseA", fields: [spouseAId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spouseAId String   @db.ObjectId
+
+  spouseB   TreeNode? @relation("UnionSpouseB", fields: [spouseBId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spouseBId String?   @db.ObjectId
+
+  children TreeNode[] @relation("ChildOfUnion")
+
+  marriedAt  DateTime?
+  divorcedAt DateTime?
+  place      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([treeId])
+  @@index([spouseAId])
+  @@index([spouseBId])
 }
 
 model TreeEdge {
@@ -165,21 +221,42 @@ model Session {
 model User {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   image         String
   name          String
-  email         String       @unique
+  email         String    @unique
   emailVerified DateTime?
   password      String?
-  newsletter    Boolean      @default(true)
-  language      Language @default(EN)
+  newsletter    Boolean   @default(true)
+  language      Language  @default(EN)
 
   accounts Account[]
   sessions Session[]
 
-  TreeAccess  TreeAccess[]
-  ActivityLog ActivityLog[]
+  TreeAccess             TreeAccess[]
+  ActivityLog            ActivityLog[]
+  TreeNote               TreeNote[]
+  requestedTreeDeletions TreeDeletionRequest[] @relation("TreeDeletionRequestedBy")
+  approvedTreeDeletions  TreeDeletionRequest[] @relation("TreeDeletionApprovedBy")
+}
+
+model TreeDeletionRequest {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @unique @db.ObjectId
+
+  requestedBy   User?    @relation("TreeDeletionRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  requestedById String?  @db.ObjectId
+  requestedAt   DateTime @default(now())
+
+  approvedBy   User?     @relation("TreeDeletionApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedById String?   @db.ObjectId
+  approvedAt   DateTime?
+
+  @@index([requestedById])
+  @@index([approvedById])
 }
 
 model Picture {
@@ -227,4 +304,18 @@ model ActivityLog {
   createdBy String? @db.ObjectId
 
   createdAt DateTime @default(now())
+}
+
+model TreeNote {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  tree   Tree   @relation(fields: [treeId], references: [id], onDelete: Cascade)
+  treeId String @unique @db.ObjectId
+
+  content String @default("")
+
+  updatedBy   User?   @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedById String? @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

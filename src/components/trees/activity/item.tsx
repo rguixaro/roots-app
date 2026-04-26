@@ -19,11 +19,16 @@ export function ActivityItem({ log, index }: { log: ActivityLog; index: number }
   const hasChanges = display.details && display.details.length > 0
 
   const motions: Variants = {
-    offscreen: { opacity: 0, y: 75 },
+    offscreen: { opacity: 0, y: 50 },
     onscreen: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring', bounce: 0.2, duration: 0.8, delay: index * 0.15 },
+      transition: {
+        type: 'spring',
+        bounce: 0.18,
+        duration: 0.45,
+        delay: Math.min(index * 0.05, 0.5),
+      },
     },
   }
 

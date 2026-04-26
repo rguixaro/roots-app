@@ -1,4 +1,4 @@
-# <img src="public/logo.svg" alt="Roots" height="28"> Roots
+# <img src="public/favicon.svg" alt="Roots" height="28"> Roots
 
 A web application to build, visualize, and share family trees in a collaborative
 and intuitive way.
@@ -80,7 +80,7 @@ and intuitive way.
 
 ## Testing
 
-Unit and server tests run automatically on every push and PR to `main`/`dev`
+Unit and server tests run automatically on every push and PR to `main`/`stage`
 via [GitHub Actions](.github/workflows/test.yml).
 
 ```bash

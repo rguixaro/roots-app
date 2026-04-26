@@ -20,6 +20,8 @@ interface StyledNodeProps {
   collapseKey?: number
   isHighlighted?: boolean
   isExpanded?: boolean
+  hasUnionChildren?: boolean
+  hasUnionParents?: boolean
 }
 
 /**
@@ -104,16 +106,21 @@ const handleVariants = {
  * @param param0 {NodeProps<StyledNodeProps>}
  * @returns {JSX.Element}
  */
-export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
+export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>): JSX.Element {
   const [isHovered, setIsHovered] = useState(false)
   const [hasMounted, setHasMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const canConnect = isConnectable !== false
 
   const { fullName, alias, birthDate, deathDate, edgesFrom, edgesTo } = data.node
-  const { isHighlighted, isExpanded = false } = data
+  const {
+    isHighlighted,
+    isExpanded = false,
+    hasUnionChildren = false,
+    hasUnionParents = false,
+  } = data
 
   const profilePicture = getProfilePicture(data.node)
-  const isLargeText = fullName.length >= 15
 
   /**
    * Trigger mount animation for connected handles
@@ -135,12 +142,21 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
 
   const birthYear = birthDate ? birthDate.getUTCFullYear() : null
   const deathYear = deathDate ? deathDate.getUTCFullYear() : null
+  const dateRange = birthYear
+    ? deathYear
+      ? `${birthYear} - ${deathYear}`
+      : `${birthYear}`
+    : deathYear
+      ? `${deathYear}`
+      : null
 
   /**
    * Utility booleans to determine which handles have connections
    */
-  const hasTopConnection = edgesTo?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
-  const hasBottomConnection = edgesFrom?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
+  const hasTopConnection =
+    hasUnionParents || edgesTo?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
+  const hasBottomConnection =
+    hasUnionChildren || edgesFrom?.some((e) => e.type === 'PARENT' || e.type === 'CHILD')
   const hasLeftConnection = edgesTo?.some((e) => e.type === 'SPOUSE')
   const hasRightConnection = edgesFrom?.some((e) => e.type === 'SPOUSE')
 
@@ -221,43 +237,6 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
     })
   }
 
-  /**
-   * Render date range if available
-   * @returns JSX.Element | null
-   */
-  function renderDateRange(): JSX.Element | null {
-    return birthYear || deathDate ? (
-      <div
-        className={cn(
-          'relative z-10 mt-1 flex space-x-1 text-xs font-medium',
-          'opacity-70 group-hover:opacity-100'
-        )}
-      >
-        {birthYear && <p>{birthYear}</p>}
-        {deathYear && birthYear && <span>-</span>}
-        {deathYear && <p>{deathYear}</p>}
-      </div>
-    ) : null
-  }
-
-  /**
-   * Render alias if available
-   * @returns JSX.Element | null
-   */
-  function renderAlias(): JSX.Element | null {
-    return alias ? (
-      <span
-        className={cn(
-          'relative z-10 mt-1 mr-1 text-xs font-medium',
-          'opacity-70 group-hover:opacity-100'
-        )}
-      >
-        {alias}
-        {isLargeText && (birthDate || deathDate) ? <span>,&nbsp;</span> : null}
-      </span>
-    ) : null
-  }
-
   return (
     <motion.div
       onClick={onClick}
@@ -268,49 +247,61 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
       whileHover="hover"
       whileTap="tap"
       className={cn(
-        'text-ocean-400 group relative flex h-20 w-56 max-w-48 cursor-pointer items-center justify-start rounded-lg',
+        'text-ocean-400 group relative flex h-20 w-52 cursor-pointer items-center justify-start rounded-lg',
         'shadow-center-sm hover:bg-ocean-100 hover:text-pale-ocean bg-pale-ocean cursor-pointer p-2 outline-none select-none focus:outline-none',
         isExpanded && 'bg-ocean-100 text-pale-ocean rounded-b-none',
         isHighlighted && !isExpanded && 'bg-ocean-100 text-pale-ocean'
       )}
     >
-      <motion.div variants={pictureContentVariants} className="px-2">
+      <motion.div variants={pictureContentVariants} className="flex w-16 shrink-0 justify-center">
         <Picture
           fileKey={profilePicture?.fileKey}
-          classNameContainer="relative h-12 w-12 cursor-pointer overflow-hidden rounded-lg"
-          classNamePicture={cn(
-            'group-hover:bg-ocean-100',
-            (isExpanded || isHighlighted) && 'bg-ocean-100 stroke-ocean-50'
+          classNameContainer={cn(
+            'relative h-12 w-12 cursor-pointer overflow-hidden rounded-lg group-hover:border-ocean-200',
+            (isExpanded || isHighlighted) && 'border-ocean-200'
           )}
+          classNamePicture={cn(
+            'group-hover:bg-ocean-200 ',
+            (isExpanded || isHighlighted) && 'bg-ocean-200 text-ocean-50'
+          )}
+          sizes="48px"
+          quality={96}
         />
       </motion.div>
-      {isLargeText ? (
-        <div className="justify-star flex w-full flex-col items-start px-2">
+      <div className="flex min-w-0 flex-1 flex-col items-start px-2">
+        <span className="relative z-10 line-clamp-2 w-full min-w-0 pr-1 text-left text-sm leading-tight font-bold">
+          {fullName}
+        </span>
+        {alias && (
           <span
-            className={cn('relative z-10 line-clamp-3 text-left text-xs leading-tight font-bold')}
+            className={cn(
+              'relative z-10 mt-0.5 w-full min-w-0 truncate text-left text-xs leading-[1.15] font-medium',
+              'opacity-70 group-hover:opacity-100'
+            )}
           >
-            {fullName}
+            {alias}
           </span>
-          <div className="flex w-full">
-            {renderAlias()}
-            {renderDateRange()}
-          </div>
-        </div>
-      ) : (
-        <div className="justify-star flex w-full flex-col items-start px-2">
-          <span className="relative z-10 text-left leading-tight font-bold">{fullName}</span>
-          {renderAlias()}
-          {renderDateRange()}
-        </div>
-      )}
+        )}
+        {dateRange && (
+          <span
+            className={cn(
+              'relative z-10 mt-0.5 w-full text-left text-xs leading-[1.15] font-medium whitespace-nowrap',
+              'opacity-70 group-hover:opacity-100'
+            )}
+          >
+            {dateRange}
+          </span>
+        )}
+      </div>
       <Handle
         type="source"
         id="right"
         position={Position.Right}
+        isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'right-0! translate-x-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -319,10 +310,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="target"
         id="left"
         position={Position.Left}
+        isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'left-0! -translate-x-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -331,10 +323,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="target"
         id="top"
         position={Position.Top}
+        isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'top-0! -translate-y-1/2!',
-          isExpanded || isHighlighted || isHovered
+          canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none'
         )}
@@ -343,10 +336,11 @@ export function StyledNode({ data }: NodeProps<StyledNodeProps>): JSX.Element {
         type="source"
         id="bottom"
         position={Position.Bottom}
+        isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'bottom-0! translate-y-1/2!',
-          isHovered && !isExpanded
+          canConnect && isHovered && !isExpanded
             ? "pointer-events-auto! before:absolute before:-inset-6 before:bg-transparent before:content-['']"
             : 'pointer-events-none!'
         )}

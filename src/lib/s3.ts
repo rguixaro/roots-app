@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3'
 import { randomUUID } from 'crypto'
 import exifr from 'exifr'
 import * as Sentry from '@sentry/nextjs'
@@ -8,9 +14,32 @@ import { env } from '@/env.mjs'
 
 import { PictureMetadata } from '@/types'
 
-const { AMAZON_REGION, AMAZON_S3_BUCKET_NAME } = env
+const { AMAZON_S3_BUCKET_NAME } = env
 
-const s3 = new S3Client({ region: AMAZON_REGION })
+let s3: S3Client | null = null
+
+const S3_KEY_PREFIX = 'roots/'
+
+export const toS3Key = (fileKey: string) => `${S3_KEY_PREFIX}${fileKey}`
+
+function getImageStorageConfig() {
+  if (!env.IMAGES_ENABLED) throw new Error('Image support is disabled')
+  if (!env.AMAZON_REGION) throw new Error('AMAZON_REGION is required for image storage')
+  if (!AMAZON_S3_BUCKET_NAME) throw new Error('AMAZON_S3_BUCKET_NAME is required for image storage')
+
+  s3 ??= new S3Client({ region: env.AMAZON_REGION })
+
+  return { bucket: AMAZON_S3_BUCKET_NAME, client: s3 }
+}
+
+function getImageDeleteConfig() {
+  if (!env.IMAGES_ENABLED || !AMAZON_S3_BUCKET_NAME) return null
+  if (!env.AMAZON_REGION) return null
+
+  s3 ??= new S3Client({ region: env.AMAZON_REGION })
+
+  return { bucket: AMAZON_S3_BUCKET_NAME, client: s3 }
+}
 
 /**
  * Uploads a file to S3
@@ -22,6 +51,7 @@ export async function uploadFileToS3(
   file: File,
   treeId: string
 ): Promise<[string, Date, PictureMetadata]> {
+  const { bucket, client } = getImageStorageConfig()
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
@@ -71,10 +101,10 @@ export async function uploadFileToS3(
   const uniqueId = randomUUID()
   const fileKey = `images/tree_${treeId}/${uniqueId}.jpg`
 
-  await s3.send(
+  await client.send(
     new PutObjectCommand({
-      Bucket: AMAZON_S3_BUCKET_NAME,
-      Key: `roots/${fileKey}`,
+      Bucket: bucket,
+      Key: toS3Key(fileKey),
       Body: compressedBuffer,
       ContentType: 'image/jpeg',
     })
@@ -88,10 +118,35 @@ export async function uploadFileToS3(
  * @param fileKey {string} - The file key to delete
  */
 export async function deleteFileFromS3(fileKey: string): Promise<void> {
-  await s3.send(
+  const config = getImageDeleteConfig()
+  if (!config) return
+
+  await config.client.send(
     new DeleteObjectCommand({
-      Bucket: AMAZON_S3_BUCKET_NAME,
-      Key: fileKey,
+      Bucket: config.bucket,
+      Key: toS3Key(fileKey),
+    })
+  )
+}
+
+export async function getFileFromS3(fileKey: string) {
+  const { bucket, client } = getImageStorageConfig()
+
+  return client.send(
+    new GetObjectCommand({
+      Bucket: bucket,
+      Key: toS3Key(fileKey),
+    })
+  )
+}
+
+export async function getFileInfoFromS3(fileKey: string) {
+  const { bucket, client } = getImageStorageConfig()
+
+  return client.send(
+    new HeadObjectCommand({
+      Bucket: bucket,
+      Key: toS3Key(fileKey),
     })
   )
 }

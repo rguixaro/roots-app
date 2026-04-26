@@ -2,9 +2,10 @@
 
 import React from 'react'
 import { useLocale } from 'next-intl'
-import { LoaderIcon, Maximize, Menu, X } from 'lucide-react'
+import { Download, LoaderIcon, Maximize, Menu, X } from 'lucide-react'
 
 import { Icon } from '@/components/trees/icon'
+import { getImageAssetUrl, publicImagesEnabled } from '@/config/images'
 
 import { Button, TypographyH5 } from '@/ui'
 
@@ -20,6 +21,7 @@ interface NodeGalleryContentProps {
   pictures: Picture[]
   loadingPictures: boolean
   loading: boolean
+  canExportGallery: boolean
   errorGalleryPicture: { [key: string]: boolean }
   tappedImageId: string | null
   isMobile: boolean
@@ -29,6 +31,7 @@ interface NodeGalleryContentProps {
   onPictureMenuOpen: (e: React.MouseEvent, picture: Picture) => void
   onPictureFullscreen: (picture: Picture) => void
   onGalleryPictureError: (pictureId: string) => void
+  galleryExportHref?: string
   onClose?: () => void
   t_trees: (key: string) => string
 }
@@ -39,6 +42,7 @@ export function NodeGalleryContent({
   pictures,
   loadingPictures,
   loading,
+  canExportGallery,
   errorGalleryPicture,
   tappedImageId,
   isMobile,
@@ -48,10 +52,13 @@ export function NodeGalleryContent({
   onPictureMenuOpen,
   onPictureFullscreen,
   onGalleryPictureError,
+  galleryExportHref,
   onClose,
   t_trees,
 }: NodeGalleryContentProps) {
   const locale = useLocale()
+  const canUploadPictures = publicImagesEnabled && !readonly
+  const canExportPictures = publicImagesEnabled && canExportGallery
 
   if (isMobile) {
     return (
@@ -59,21 +66,35 @@ export function NodeGalleryContent({
         className={cn('bg-ocean-400 text-pale-ocean shadow-center-sm h-full flex-col rounded-xl')}
       >
         <div className="styled-scrollbar flex w-full flex-1 flex-col overflow-y-auto px-6 pt-2 pb-6 text-start">
-          <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2">
+          <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2 text-center">
             <p>{t_trees('node-gallery-description')} </p>
-            {!readonly && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-                className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-              >
-                <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-              </Button>
-            )}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2 self-center">
+              {canUploadPictures && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
+                  className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+                >
+                  <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+                </Button>
+              )}
+              {canExportPictures && galleryExportHref && pictures.length > 0 && (
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+                >
+                  <a href={galleryExportHref}>
+                    <Download size={16} />
+                    <span className="text-sm font-bold">{t_trees('node-gallery-download')}</span>
+                  </a>
+                </Button>
+              )}
+            </div>
           </div>
-          {!readonly && (
+          {canUploadPictures && (
             <input
               ref={fileInputRef}
               type="file"
@@ -104,7 +125,7 @@ export function NodeGalleryContent({
                   }
                 >
                   <GalleryImage
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                    src={getImageAssetUrl(picture.fileKey)}
                     alt={`Picture ${idx + 1}`}
                     className="min-h-[124px] w-full"
                     hasError={errorGalleryPicture[picture.id]}
@@ -150,7 +171,9 @@ export function NodeGalleryContent({
                       tappedImageId === picture.id ? 'opacity-100' : 'opacity-0'
                     )}
                   >
-                    <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
+                    <span>
+                      {picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}
+                    </span>
                     <div className="flex items-center space-x-1">
                       <Icon size={12} type={treeType} className="stroke-ocean-400" />
                       <span>{picture.tags?.length}</span>
@@ -179,19 +202,33 @@ export function NodeGalleryContent({
           </button>
         </div>
         <p>{t_trees('node-gallery-description')} </p>
-        {!readonly && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={loading}
-            className="hover:text-ocean-50 bg-ocean-300 mt-5 cursor-pointer self-center"
-          >
-            <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
-          </Button>
-        )}
+        <div className="mt-5 flex flex-wrap items-center gap-2 self-center">
+          {canUploadPictures && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+            >
+              <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
+            </Button>
+          )}
+          {canExportPictures && galleryExportHref && pictures.length > 0 && (
+            <Button
+              asChild
+              variant="ghost"
+              className="hover:text-ocean-50 bg-ocean-300 cursor-pointer"
+            >
+              <a href={galleryExportHref}>
+                <Download size={16} />
+                <span className="text-sm font-bold">{t_trees('node-gallery-download')}</span>
+              </a>
+            </Button>
+          )}
+        </div>
       </div>
-      {!readonly && (
+      {canUploadPictures && (
         <input
           ref={fileInputRef}
           type="file"
@@ -219,7 +256,7 @@ export function NodeGalleryContent({
               )}
             >
               <GalleryImage
-                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                src={getImageAssetUrl(picture.fileKey)}
                 alt={`Picture ${idx + 1}`}
                 className="shadow-center-sm bg-ocean-300 mb-2 min-h-[124px] w-full"
                 hasError={errorGalleryPicture[picture.id]}
@@ -263,7 +300,9 @@ export function NodeGalleryContent({
                   'shadow-center-sm transition-opacity duration-300 group-hover:opacity-100'
                 )}
               >
-                <span>{picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}</span>
+                <span>
+                  {picture.date ? new Date(picture.date).toLocaleDateString(locale) : null}
+                </span>
                 <div className="flex items-center space-x-1">
                   <Icon size={12} type={treeType} className="stroke-ocean-400" />
                   <span>{picture.tags?.length}</span>

@@ -68,6 +68,40 @@ const isTreeWriteError = (error: unknown) => {
 
 type TreeWriteErrorMessage = (typeof TREE_WRITE_ERROR_MESSAGES)[number]
 
+type MemberLifeDates = { birthDate?: Date | null; deathDate?: Date | null }
+type UnionLifeDates = { marriedAt?: Date | null; divorcedAt?: Date | null }
+
+const sameDateValue = (a?: Date | null, b?: Date | null) =>
+  (a?.getTime() ?? null) === (b?.getTime() ?? null)
+
+function getUnionLifeDateError(
+  spouses: MemberLifeDates[],
+  dates: UnionLifeDates
+): string | undefined {
+  for (const spouse of spouses) {
+    if (
+      dates.marriedAt &&
+      spouse.birthDate &&
+      dates.marriedAt.getTime() <= spouse.birthDate.getTime()
+    )
+      return 'error-married-before-birth'
+
+    if (
+      dates.marriedAt &&
+      spouse.deathDate &&
+      dates.marriedAt.getTime() >= spouse.deathDate.getTime()
+    )
+      return 'error-married-after-death'
+
+    if (
+      dates.divorcedAt &&
+      spouse.deathDate &&
+      dates.divorcedAt.getTime() >= spouse.deathDate.getTime()
+    )
+      return 'error-divorced-after-death'
+  }
+}
+
 type TreeAdminRecipient = {
   user: { email: string | null; name: string | null; language?: 'CA' | 'ES' | 'EN' | null }
 }
@@ -720,6 +754,24 @@ export const updateTreeNode = async (
     })
     if (!prevNode) return { error: true, message: 'error-node-not-found' }
 
+    const lifeDatesChanged =
+      !sameDateValue(prevNode.birthDate, values.birthDate) ||
+      !sameDateValue(prevNode.deathDate, values.deathDate)
+
+    if (lifeDatesChanged) {
+      const unions = await db.union.findMany({
+        where: {
+          treeId: values.treeId,
+          OR: [{ spouseAId: values.id }, { spouseBId: values.id }],
+        },
+        select: { marriedAt: true, divorcedAt: true },
+      })
+      const lifeDateError = unions
+        .map((union) => getUnionLifeDateError([values], union))
+        .find(Boolean)
+      if (lifeDateError) return { error: true, message: lifeDateError }
+    }
+
     await db.treeNode.update({
       where: { id: prevNode.id },
       data: {
@@ -764,6 +816,41 @@ export const updateTreeNode = async (
 }
 
 /**
+ * Return true when any member already has the maximum number of couple unions.
+ * Single-parent unions do not count as marriages.
+ */
+async function hasReachedMarriageLimit(
+  treeId: string,
+  nodeIds: string[],
+  excludeUnionId?: string
+): Promise<boolean> {
+  const uniqueNodeIds = Array.from(new Set(nodeIds.filter(Boolean)))
+  if (uniqueNodeIds.length === 0) return false
+
+  const existingUnions = await db.union.findMany({
+    where: {
+      treeId,
+      OR: [
+        { spouseAId: { in: uniqueNodeIds } },
+        { spouseBId: { in: uniqueNodeIds } },
+      ],
+    },
+    select: { id: true, spouseAId: true, spouseBId: true },
+  })
+
+  const counts = new Map(uniqueNodeIds.map((id) => [id, 0]))
+  for (const union of existingUnions) {
+    if (excludeUnionId && union.id === excludeUnionId) continue
+    if (!union.spouseBId) continue
+
+    if (counts.has(union.spouseAId)) counts.set(union.spouseAId, counts.get(union.spouseAId)! + 1)
+    if (counts.has(union.spouseBId)) counts.set(union.spouseBId, counts.get(union.spouseBId)! + 1)
+  }
+
+  return Array.from(counts.values()).some((count) => count >= 2)
+}
+
+/**
  * Create new tree edge (relationship).
  * Auth required.
  * @param values {z.infer<typeof CreateTreeEdgeSchema>}
@@ -797,6 +884,12 @@ export const createTreeEdge = async (
       },
     })
     if (existingEdge) return { error: true, message: 'error-relationship-already-exists' }
+
+    if (
+      values.type === 'SPOUSE' &&
+      (await hasReachedMarriageLimit(values.treeId, [values.fromNodeId, values.toNodeId]))
+    )
+      return { error: true, message: 'error-member-has-max-marriages' }
 
     const newEdge = await db.treeEdge.create({
       data: {
@@ -1259,6 +1352,8 @@ export const createUnion = async (
     })
     if (spouses.length !== spouseIds.length)
       return { error: true, message: 'error-nodes-not-found' }
+    const lifeDateError = getUnionLifeDateError(spouses, values)
+    if (lifeDateError) return { error: true, message: lifeDateError }
 
     const [spouseAId, spouseBId] = values.spouseBId
       ? [values.spouseAId, values.spouseBId].sort()
@@ -1276,6 +1371,9 @@ export const createUnion = async (
       },
     })
     if (existing) return { error: false, unionId: existing.id }
+
+    if (spouseBId && (await hasReachedMarriageLimit(values.treeId, [spouseAId, spouseBId])))
+      return { error: true, message: 'error-member-has-max-marriages' }
 
     const union = await db.union.create({
       data: {
@@ -1351,6 +1449,22 @@ export const updateUnion = async (
       ? [values.spouseAId, values.spouseBId].sort()
       : [values.spouseAId, null]
 
+    const newSpouseIds = [spouseAId, spouseBId].filter(Boolean) as string[]
+    const newSpouses = await db.treeNode.findMany({
+      where: { id: { in: newSpouseIds }, treeId: values.treeId },
+      select: { id: true, fullName: true, birthDate: true, deathDate: true },
+    })
+    if (newSpouses.length !== newSpouseIds.length)
+      return { error: true, message: 'error-nodes-not-found' }
+    const lifeDateError = getUnionLifeDateError(newSpouses, values)
+    if (lifeDateError) return { error: true, message: lifeDateError }
+
+    if (
+      spouseBId &&
+      (await hasReachedMarriageLimit(values.treeId, [spouseAId, spouseBId], union.id))
+    )
+      return { error: true, message: 'error-member-has-max-marriages' }
+
     await db.union.update({
       where: { id: union.id },
       data: {
@@ -1362,11 +1476,6 @@ export const updateUnion = async (
       },
     })
 
-    const newSpouseIds = [spouseAId, spouseBId].filter(Boolean) as string[]
-    const newSpouses = await db.treeNode.findMany({
-      where: { id: { in: newSpouseIds }, treeId: values.treeId },
-      select: { id: true, fullName: true },
-    })
     const spouseAName = newSpouses.find((s) => s.id === spouseAId)?.fullName ?? null
     const spouseBName = spouseBId
       ? (newSpouses.find((s) => s.id === spouseBId)?.fullName ?? null)

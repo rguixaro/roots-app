@@ -46,7 +46,14 @@ vi.mock('@/server/db', () => ({
     user: { findUnique: vi.fn() },
     picture: { findMany: vi.fn(), deleteMany: vi.fn() },
     pictureTag: { deleteMany: vi.fn() },
-    union: { deleteMany: vi.fn() },
+    union: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
     treeNote: { deleteMany: vi.fn() },
     $transaction: vi.fn(),
   },
@@ -92,8 +99,10 @@ import {
   createTreeNode,
   updateTreeNode,
   createTreeEdge,
+  createUnion,
   deleteTreeNode,
   deleteTreeEdge,
+  updateUnion,
   getTreeNodes,
   getTimelineEvents,
   generateShareToken,
@@ -115,6 +124,7 @@ beforeEach(() => {
   mockAssertRole.mockResolvedValue(undefined)
   mockAssertTreeWritable.mockResolvedValue(undefined)
   mockDb.$transaction.mockImplementation(async (fn: any) => fn(mockDb))
+  mockDb.union.findMany.mockResolvedValue([])
 })
 
 describe('createTree', () => {
@@ -524,6 +534,25 @@ describe('updateTreeNode', () => {
     expect(result.error).toBe(false)
     expect(mockDb.treeNode.update).toHaveBeenCalled()
   })
+
+  it('rejects birth date changes that would put an existing marriage before birth', async () => {
+    const prevNode = {
+      id: 'n1',
+      fullName: 'John Doe',
+      gender: 'MALE',
+      birthDate: new Date('1980-01-01'),
+      deathDate: null,
+    }
+    mockDb.treeNode.findFirst.mockResolvedValue(prevNode)
+    mockDb.union.findMany.mockResolvedValue([
+      { marriedAt: new Date('2000-01-01'), divorcedAt: null },
+    ])
+
+    const result = await updateTreeNode({ ...values, birthDate: new Date('2001-01-01') })
+
+    expect(result).toEqual({ error: true, message: 'error-married-before-birth' })
+    expect(mockDb.treeNode.update).not.toHaveBeenCalled()
+  })
 })
 
 describe('createTreeEdge', () => {
@@ -568,6 +597,129 @@ describe('createTreeEdge', () => {
     expect(result.error).toBe(false)
     expect(mockDb.treeEdge.create).toHaveBeenCalled()
     expect(mockDb.activityLog.create).toHaveBeenCalled()
+  })
+
+  it('rejects spouse edge when either member already has two marriages', async () => {
+    mockDb.treeNode.findFirst
+      .mockResolvedValueOnce({ id: 'n1', fullName: 'A' })
+      .mockResolvedValueOnce({ id: 'n2', fullName: 'B' })
+    mockDb.treeEdge.findFirst.mockResolvedValue(null)
+    mockDb.union.findMany.mockResolvedValue([
+      { id: 'u1', spouseAId: 'n1', spouseBId: 'x1' },
+      { id: 'u2', spouseAId: 'x2', spouseBId: 'n1' },
+    ])
+
+    const result = await createTreeEdge({ ...values, type: 'SPOUSE' })
+
+    expect(result).toEqual({ error: true, message: 'error-member-has-max-marriages' })
+    expect(mockDb.treeEdge.create).not.toHaveBeenCalled()
+  })
+})
+
+describe('createUnion', () => {
+  const values = { treeId: 't1', spouseAId: 'n1', spouseBId: 'n2' }
+
+  it('rejects a third marriage for either spouse', async () => {
+    mockDb.treeNode.findMany.mockResolvedValue([
+      { id: 'n1', fullName: 'A' },
+      { id: 'n2', fullName: 'B' },
+    ])
+    mockDb.union.findFirst.mockResolvedValue(null)
+    mockDb.union.findMany.mockResolvedValue([
+      { id: 'u1', spouseAId: 'n1', spouseBId: 'x1' },
+      { id: 'u2', spouseAId: 'x2', spouseBId: 'n1' },
+    ])
+
+    const result = await createUnion(values)
+
+    expect(result).toEqual({ error: true, message: 'error-member-has-max-marriages' })
+    expect(mockDb.union.create).not.toHaveBeenCalled()
+  })
+
+  it('rejects marriage dates before a spouse birth date', async () => {
+    mockDb.treeNode.findMany.mockResolvedValue([
+      { id: 'n1', fullName: 'A', birthDate: new Date('1990-01-01'), deathDate: null },
+      { id: 'n2', fullName: 'B', birthDate: null, deathDate: null },
+    ])
+
+    const result = await createUnion({ ...values, marriedAt: new Date('1989-12-31') })
+
+    expect(result).toEqual({ error: true, message: 'error-married-before-birth' })
+    expect(mockDb.union.create).not.toHaveBeenCalled()
+  })
+
+  it('rejects marriage and divorce dates after a spouse death date', async () => {
+    mockDb.treeNode.findMany.mockResolvedValue([
+      { id: 'n1', fullName: 'A', birthDate: null, deathDate: new Date('2020-01-01') },
+      { id: 'n2', fullName: 'B', birthDate: null, deathDate: null },
+    ])
+
+    const marriedResult = await createUnion({ ...values, marriedAt: new Date('2020-01-01') })
+    const divorcedResult = await createUnion({ ...values, divorcedAt: new Date('2020-01-01') })
+
+    expect(marriedResult).toEqual({ error: true, message: 'error-married-after-death' })
+    expect(divorcedResult).toEqual({ error: true, message: 'error-divorced-after-death' })
+    expect(mockDb.union.create).not.toHaveBeenCalled()
+  })
+})
+
+describe('updateUnion', () => {
+  const values = {
+    id: 'u_current',
+    treeId: 't1',
+    spouseAId: 'n1',
+    spouseBId: 'n2',
+    marriedAt: null,
+    divorcedAt: null,
+    place: null,
+  }
+
+  it('rejects updates that would give either spouse a third marriage', async () => {
+    mockDb.union.findFirst.mockResolvedValue({
+      id: 'u_current',
+      spouseAId: 'old1',
+      spouseBId: 'old2',
+      spouseA: { fullName: 'Old 1' },
+      spouseB: { fullName: 'Old 2' },
+      marriedAt: null,
+      divorcedAt: null,
+      place: null,
+    })
+    mockDb.treeNode.findMany.mockResolvedValue([
+      { id: 'n1', fullName: 'A', birthDate: null, deathDate: null },
+      { id: 'n2', fullName: 'B', birthDate: null, deathDate: null },
+    ])
+    mockDb.union.findMany.mockResolvedValue([
+      { id: 'u1', spouseAId: 'n1', spouseBId: 'x1' },
+      { id: 'u2', spouseAId: 'x2', spouseBId: 'n1' },
+    ])
+
+    const result = await updateUnion(values)
+
+    expect(result).toEqual({ error: true, message: 'error-member-has-max-marriages' })
+    expect(mockDb.union.update).not.toHaveBeenCalled()
+  })
+
+  it('rejects updates with marriage dates outside spouse life dates', async () => {
+    mockDb.union.findFirst.mockResolvedValue({
+      id: 'u_current',
+      spouseAId: 'old1',
+      spouseBId: 'old2',
+      spouseA: { fullName: 'Old 1' },
+      spouseB: { fullName: 'Old 2' },
+      marriedAt: null,
+      divorcedAt: null,
+      place: null,
+    })
+    mockDb.treeNode.findMany.mockResolvedValue([
+      { id: 'n1', fullName: 'A', birthDate: new Date('1990-01-01'), deathDate: null },
+      { id: 'n2', fullName: 'B', birthDate: null, deathDate: null },
+    ])
+
+    const result = await updateUnion({ ...values, marriedAt: new Date('1980-01-01') })
+
+    expect(result).toEqual({ error: true, message: 'error-married-before-birth' })
+    expect(mockDb.union.update).not.toHaveBeenCalled()
   })
 })
 

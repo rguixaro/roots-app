@@ -87,12 +87,34 @@ export function UnionEditModal({
 
   const divorcedBeforeMarried =
     !!marriedAt && !!divorcedAt && new Date(divorcedAt) < new Date(marriedAt)
+  const selectedSpouses = [spouseA, spouseB]
+    .filter((id) => id && id !== SENTINEL_NONE)
+    .map((id) => nodes.find((node) => node.id === id))
+    .filter((node): node is TreeNode => !!node)
+  const marriedBeforeBirth =
+    !!marriedAt &&
+    selectedSpouses.some(
+      (spouse) => spouse.birthDate && new Date(marriedAt) <= new Date(spouse.birthDate)
+    )
+  const marriedAfterDeath =
+    !!marriedAt &&
+    selectedSpouses.some(
+      (spouse) => spouse.deathDate && new Date(marriedAt) >= new Date(spouse.deathDate)
+    )
+  const divorcedAfterDeath =
+    !!divorcedAt &&
+    selectedSpouses.some(
+      (spouse) => spouse.deathDate && new Date(divorcedAt) >= new Date(spouse.deathDate)
+    )
 
   const canSave =
     !!spouseA &&
     spouseA !== spouseB &&
     (spouseB === '' || spouseB !== spouseA) &&
-    !divorcedBeforeMarried
+    !divorcedBeforeMarried &&
+    !marriedBeforeBirth &&
+    !marriedAfterDeath &&
+    !divorcedAfterDeath
 
   const handleSave = async () => {
     if (!canSave || saving) return
@@ -153,6 +175,16 @@ export function UnionEditModal({
               onChange={(e) => setMarriedAt(e.target.value)}
               disabled={saving}
             />
+            {marriedBeforeBirth && (
+              <span className="text-destructive text-xs">
+                {t_errors('error-married-before-birth')}
+              </span>
+            )}
+            {marriedAfterDeath && (
+              <span className="text-destructive text-xs">
+                {t_errors('error-married-after-death')}
+              </span>
+            )}
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-ocean-300 font-medium">
@@ -168,6 +200,11 @@ export function UnionEditModal({
             {divorcedBeforeMarried && (
               <span className="text-destructive text-xs">
                 {t_errors('error-divorced-before-married')}
+              </span>
+            )}
+            {divorcedAfterDeath && (
+              <span className="text-destructive text-xs">
+                {t_errors('error-divorced-after-death')}
               </span>
             )}
           </label>

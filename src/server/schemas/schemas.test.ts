@@ -5,6 +5,8 @@ import {
   CreateTreeNodeSchema,
   UpdateTreeNodeSchema,
   CreateTreeEdgeSchema,
+  CreateUnionSchema,
+  UpdateUnionSchema,
 } from './index'
 
 const validTree = {
@@ -177,6 +179,15 @@ describe('CreateTreeNodeSchema', () => {
     })
     expect(result.success).toBe(true)
   })
+
+  it('rejects death dates that are not after birth dates', () => {
+    const result = CreateTreeNodeSchema.safeParse({
+      ...validTreeNode,
+      birthDate: '2000-01-01',
+      deathDate: '2000-01-01',
+    })
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('UpdateTreeNodeSchema', () => {
@@ -215,6 +226,38 @@ describe('UpdateTreeNodeSchema', () => {
       biography: null,
     })
     expect(result.success).toBe(true)
+  })
+
+  it('rejects death dates that are not after birth dates', () => {
+    const result = UpdateTreeNodeSchema.safeParse({
+      ...validUpdateTreeNode,
+      birthDate: '2000-01-02',
+      deathDate: '2000-01-01',
+    })
+    expect(result.success).toBe(false)
+  })
+})
+
+describe('Union schemas', () => {
+  const validCreateUnion = { treeId: 'tree-1', spouseAId: 'node-1', spouseBId: 'node-2' }
+  const validUpdateUnion = { id: 'union-1', ...validCreateUnion }
+
+  it('rejects divorce dates before marriage dates when creating', () => {
+    const result = CreateUnionSchema.safeParse({
+      ...validCreateUnion,
+      marriedAt: '2020-01-02',
+      divorcedAt: '2020-01-01',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects divorce dates before marriage dates when updating', () => {
+    const result = UpdateUnionSchema.safeParse({
+      ...validUpdateUnion,
+      marriedAt: '2020-01-02',
+      divorcedAt: '2020-01-01',
+    })
+    expect(result.success).toBe(false)
   })
 })
 

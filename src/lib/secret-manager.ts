@@ -2,13 +2,22 @@ import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-sec
 
 import { env } from '@/env.mjs'
 
-const secrets = new SecretsManagerClient({ region: env.AMAZON_REGION })
+let secrets: SecretsManagerClient | null = null
 
 /**
  * Get private key from AWS Secrets Manager
  * @returns {Promise<string>} Private key
  */
 export async function getPrivateKey(): Promise<string> {
+  if (!env.AMAZON_REGION) {
+    throw new Error('AMAZON_REGION is required for image cookies')
+  }
+  if (!env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME) {
+    throw new Error('AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME is required for image cookies')
+  }
+
+  secrets ??= new SecretsManagerClient({ region: env.AMAZON_REGION })
+
   const response = await secrets.send(
     new GetSecretValueCommand({
       SecretId: env.AMAZON_CLOUDFRONT_PRIVATE_KEY_SECRET_NAME,

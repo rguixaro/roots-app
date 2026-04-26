@@ -125,6 +125,7 @@
     "error-would-create-cycle": "Aquesta relació crearia un cicle familiar",
     "error-cannot-connect-siblings": "No es pot crear una relació pare-fill entre germans",
     "error-child-has-max-parents": "Un fill no pot tenir més de 2 pares",
+    "error-pictures-disabled": "Les imatges estan desactivades en aquest entorn",
     "error-picture-upload": "S'ha produït un error en pujar la imatge",
     "error-picture-too-large": "La imatge és massa gran. La mida màxima és de 20 MB",
     "error-picture-delete": "S'ha produït un error en eliminar la imatge",

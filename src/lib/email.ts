@@ -1,4 +1,4 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import { SESClient, SendEmailCommand, type SendEmailCommandInput } from '@aws-sdk/client-ses'
 import * as Sentry from '@sentry/nextjs'
 
 import { env } from '@/env.mjs'
@@ -11,9 +11,29 @@ import enMessages from '../../messages/en.json'
 import esMessages from '../../messages/es.json'
 import caMessages from '../../messages/ca.json'
 
-const { AMAZON_REGION, AMAZON_SES_FROM_EMAIL, AUTH_URL } = env
+const { AUTH_URL } = env
 
-const ses = new SESClient({ region: AMAZON_REGION })
+let ses: SESClient | null = null
+
+async function sendEmail(input: SendEmailCommandInput, action: string) {
+  if (!env.EMAILS_ENABLED) return false
+
+  if (!env.AMAZON_REGION || !env.AMAZON_SES_FROM_EMAIL) {
+    Sentry.captureException(new Error('Email support is enabled but AWS SES is not configured'), {
+      tags: { action },
+    })
+    return false
+  }
+
+  try {
+    ses ??= new SESClient({ region: env.AMAZON_REGION })
+    await ses.send(new SendEmailCommand(input))
+    return true
+  } catch (error) {
+    Sentry.captureException(error, { tags: { action } })
+    return false
+  }
+}
 
 interface WelcomeEmailParams {
   recipientEmail: string
@@ -242,9 +262,9 @@ ${t.emails.welcome.footer}
 ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
   `.trim()
 
-  try {
-    const command = new SendEmailCommand({
-      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+  return sendEmail(
+    {
+      Source: `Roots <${env.AMAZON_SES_FROM_EMAIL}>`,
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: {
@@ -256,14 +276,9 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
           Text: { Data: textBody, Charset: 'UTF-8' },
         },
       },
-    })
-
-    await ses.send(command)
-    return true
-  } catch (error) {
-    Sentry.captureException(error, { tags: { action: 'sendWelcomeEmail' } })
-    return false
-  }
+    },
+    'sendWelcomeEmail'
+  )
 }
 
 /**
@@ -293,6 +308,12 @@ export async function sendTreeInvitationEmail(params: TreeInvitationEmailParams)
     VIEWER: t.emails.invitation['role-viewer'],
   }
   const roleDescription = roleTranslations[role] || role
+  const permissionDescription =
+    role === 'VIEWER'
+      ? t.emails.invitation['permission-viewer']
+      : role === 'ADMIN'
+        ? t.emails.invitation['permission-admin']
+        : t.emails.invitation['permission-editor']
 
   const htmlBody = `
 <!DOCTYPE html>
@@ -328,7 +349,7 @@ export async function sendTreeInvitationEmail(params: TreeInvitationEmailParams)
               </p>
               
               <p style="margin: 0 0 32px; color: ${ocean[300]}; font-size: 14px; line-height: 1.6;">
-${t.emails.invitation['permission-base-1']}${role === 'VIEWER' ? t.emails.invitation['permission-viewer'] : role === 'ADMIN' ? t.emails.invitation['permission-admin'] : t.emails.invitation['permission-editor']}${t.emails.invitation['permission-base-2']}
+${t.emails.invitation['permission-base-1']}${permissionDescription}${t.emails.invitation['permission-base-2']}
               </p>
               
               <!-- CTA Button -->
@@ -377,7 +398,7 @@ ${replacePlaceholders(t.emails.invitation.greeting, { name: recipientName })}
 
 ${inviterName}${t.emails.invitation.intro} ${treeName}${t.emails.invitation.as} ${roleDescription}.
 
-${t.emails.invitation['permission-base-1']}${role === 'VIEWER' ? t.emails.invitation['permission-viewer'] : t.emails.invitation['permission-editor']}${t.emails.invitation['permission-base-2']}
+${t.emails.invitation['permission-base-1']}${permissionDescription}${t.emails.invitation['permission-base-2']}
 
 ${t.emails.invitation.cta}: ${treeUrl}
 
@@ -390,9 +411,9 @@ ${replacePlaceholders(t.emails.invitation.footer, { inviter: inviterName })}
 ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
   `.trim()
 
-  try {
-    const command = new SendEmailCommand({
-      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+  return sendEmail(
+    {
+      Source: `Roots <${env.AMAZON_SES_FROM_EMAIL}>`,
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: {
@@ -407,14 +428,9 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
           Text: { Data: textBody, Charset: 'UTF-8' },
         },
       },
-    })
-
-    await ses.send(command)
-    return true
-  } catch (error) {
-    Sentry.captureException(error, { tags: { action: 'sendTreeInvitationEmail' } })
-    return false
-  }
+    },
+    'sendTreeInvitationEmail'
+  )
 }
 
 export async function sendTreeDeletionRequestedEmail(
@@ -553,9 +569,9 @@ ${t.emails['tree-deletion-requested'].link}: ${settingsUrl}
 ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
   `.trim()
 
-  try {
-    const command = new SendEmailCommand({
-      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+  return sendEmail(
+    {
+      Source: `Roots <${env.AMAZON_SES_FROM_EMAIL}>`,
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: {
@@ -569,14 +585,9 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
           Text: { Data: textBody, Charset: 'UTF-8' },
         },
       },
-    })
-
-    await ses.send(command)
-    return true
-  } catch (error) {
-    Sentry.captureException(error, { tags: { action: 'sendTreeDeletionRequestedEmail' } })
-    return false
-  }
+    },
+    'sendTreeDeletionRequestedEmail'
+  )
 }
 
 export async function sendTreeDeletedEmail(params: TreeDeletedEmailParams): Promise<boolean> {
@@ -655,9 +666,9 @@ ${t.emails['tree-deleted'].footer}
 ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
   `.trim()
 
-  try {
-    const command = new SendEmailCommand({
-      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+  return sendEmail(
+    {
+      Source: `Roots <${env.AMAZON_SES_FROM_EMAIL}>`,
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: {
@@ -669,14 +680,9 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
           Text: { Data: textBody, Charset: 'UTF-8' },
         },
       },
-    })
-
-    await ses.send(command)
-    return true
-  } catch (error) {
-    Sentry.captureException(error, { tags: { action: 'sendTreeDeletedEmail' } })
-    return false
-  }
+    },
+    'sendTreeDeletedEmail'
+  )
 }
 
 /**
@@ -967,9 +973,9 @@ ${t.emails.newsletter.link}: ${profileUrl}
 ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
   `.trim()
 
-  try {
-    const command = new SendEmailCommand({
-      Source: `Roots <${AMAZON_SES_FROM_EMAIL}>`,
+  return sendEmail(
+    {
+      Source: `Roots <${env.AMAZON_SES_FROM_EMAIL}>`,
       Destination: { ToAddresses: [recipientEmail] },
       Message: {
         Subject: {
@@ -981,12 +987,7 @@ ${replacePlaceholders(t.emails.copyright, { year: new Date().getFullYear() })}
           Text: { Data: textBody, Charset: 'UTF-8' },
         },
       },
-    })
-
-    await ses.send(command)
-    return true
-  } catch (error) {
-    Sentry.captureException(error, { tags: { action: 'sendWeeklyNewsletter' } })
-    return false
-  }
+    },
+    'sendWeeklyNewsletter'
+  )
 }

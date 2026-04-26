@@ -5,6 +5,7 @@ import { FileJson, Images, Share2, Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { ShareDialog } from '@/components/trees/share'
+import { publicImagesEnabled } from '@/config/images'
 
 import { cn } from '@/utils'
 
@@ -72,7 +73,7 @@ export function TreeInfoShareDownload({
             </div>
           </a>
         )}
-        {canExportGallery && (
+        {publicImagesEnabled && canExportGallery && (
           <a
             href={`/api/trees/${slug}/export/gallery`}
             className={cn(

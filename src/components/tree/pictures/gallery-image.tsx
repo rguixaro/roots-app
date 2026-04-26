@@ -8,7 +8,7 @@ import { usePictureState } from '@/hooks'
 import { cn } from '@/utils'
 
 interface GalleryImageProps {
-  src: string
+  src: string | null
   alt: string
   className?: string
   iconSize?: number
@@ -33,7 +33,7 @@ export function GalleryImage({
 
   const showError = hasError || loadError
   const showPlaceholder = (!src || showError) && !isLoading
-  const showLoader = isLoading && src && !showError
+  const showLoader = isLoading && !!src && !showError
 
   const loader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
     return `/api/proxy?url=${encodeURIComponent(src)}&w=${width}${quality ? `&q=${quality}` : ''}`

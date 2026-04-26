@@ -6,7 +6,8 @@ import packageJson from './package.json'
 const withNextIntl = createNextIntlPlugin()
 
 const assetsUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN
-const assetsHostname = assetsUrl ? new URL(assetsUrl).hostname : undefined
+const publicImagesEnabled = process.env.NEXT_PUBLIC_IMAGES_ENABLED !== 'false'
+const assetsHostname = publicImagesEnabled && assetsUrl ? new URL(assetsUrl).hostname : undefined
 
 const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_APP_VERSION: packageJson.version },
@@ -18,7 +19,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: assetsHostname ? [{ protocol: 'https', hostname: assetsHostname }] : [],
-    localPatterns: [assetsHostname ? { pathname: `/assets/**` } : {}, { pathname: `/api/proxy` }],
+    localPatterns: assetsHostname ? [{ pathname: `/assets/**` }, { pathname: `/api/proxy` }] : [],
   },
   async headers() {
     return [
@@ -36,9 +37,9 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
-              `img-src 'self' data: blob: https://lh3.googleusercontent.com${assetsUrl ? ` ${assetsUrl}` : ''}`,
+              `img-src 'self' data: blob: https://lh3.googleusercontent.com${publicImagesEnabled && assetsUrl ? ` ${assetsUrl}` : ''}`,
               "font-src 'self'",
-              `connect-src 'self'${assetsUrl ? ` ${assetsUrl}` : ''} *.sentry.io${process.env.NODE_ENV === 'development' ? ' ws://127.0.0.1:* ws://localhost:*' : ''}`,
+              `connect-src 'self'${publicImagesEnabled && assetsUrl ? ` ${assetsUrl}` : ''} *.sentry.io${process.env.NODE_ENV === 'development' ? ' ws://127.0.0.1:* ws://localhost:*' : ''}`,
               "frame-ancestors 'none'",
             ].join('; '),
           },

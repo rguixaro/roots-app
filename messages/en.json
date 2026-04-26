@@ -125,6 +125,7 @@
     "error-would-create-cycle": "This relationship would create a family cycle",
     "error-cannot-connect-siblings": "Cannot create a parent-child relationship between siblings",
     "error-child-has-max-parents": "A child cannot have more than 2 parents",
+    "error-pictures-disabled": "Images are disabled in this environment",
     "error-picture-upload": "An error occurred while uploading the image",
     "error-picture-too-large": "The image file is too large. Maximum size is 20MB",
     "error-picture-delete": "An error occurred while deleting the image",

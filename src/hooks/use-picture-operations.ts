@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { getImageAssetUrl, publicImagesEnabled } from '@/config/images'
+
 import {
   createPicture,
   createPictureTag,
@@ -136,9 +138,12 @@ export function usePictureOperations({
   const onPictureDownload = useCallback(
     (fileKey: string) => {
       try {
+        const href = getImageAssetUrl(fileKey)
+        if (!href) return toast.error(t_errors('error-pictures-disabled'))
+
         const element = document.createElement('a')
         element.style.display = 'none'
-        element.href = `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${fileKey}`
+        element.href = href
         element.download = fileKey.split('/').pop() || 'image.jpg'
         element.target = '_blank'
         document.body.appendChild(element)
@@ -172,7 +177,7 @@ export function usePictureOperations({
         toast.error(t_errors('error'))
       }
     },
-    [node?.treeId, t_errors]
+    [node, t_errors]
   )
 
   /**
@@ -305,6 +310,10 @@ export function usePictureOperations({
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
+      if (!publicImagesEnabled) {
+        toast.error(t_errors('error-pictures-disabled'))
+        return
+      }
 
       setLoading(true)
       try {

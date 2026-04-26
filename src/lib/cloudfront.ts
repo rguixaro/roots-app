@@ -6,19 +6,36 @@ import { env } from '@/env.mjs'
 
 import { getPrivateKey } from './secret-manager'
 
+function getCloudFrontConfig() {
+  if (!env.IMAGES_ENABLED) return null
+
+  const { NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN, AMAZON_CLOUDFRONT_KEY_PAIR_ID } = env
+  if (!NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN || !AMAZON_CLOUDFRONT_KEY_PAIR_ID) {
+    throw new Error('CloudFront image configuration is incomplete')
+  }
+
+  return {
+    assetsDomain: NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN,
+    keyPairId: AMAZON_CLOUDFRONT_KEY_PAIR_ID,
+  }
+}
+
 /**
  * Generate CloudFront signed cookies and apply them to a response
  * @param response - NextResponse object to apply cookies to
  * @returns {Promise<{ expires: number }>} Expiration timestamp
  */
 export async function setCloudFrontCookies(response: NextResponse): Promise<{ expires: number }> {
+  const config = getCloudFrontConfig()
+  if (!config) return { expires: 0 }
+
   const privateKey = await getPrivateKey()
   const expires = Math.floor(Date.now() / 1000) + 60 * 60 * 6
 
   const policy = {
     Statement: [
       {
-        Resource: `${env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/*`,
+        Resource: `${config.assetsDomain}/*`,
         Condition: { DateLessThan: { 'AWS:EpochTime': expires } },
       },
     ],
@@ -26,7 +43,7 @@ export async function setCloudFrontCookies(response: NextResponse): Promise<{ ex
 
   const cookies = getSignedCookies({
     privateKey,
-    keyPairId: env.AMAZON_CLOUDFRONT_KEY_PAIR_ID,
+    keyPairId: config.keyPairId,
     policy: JSON.stringify(policy),
   })
 

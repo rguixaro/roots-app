@@ -46,7 +46,7 @@ export default auth(async (req) => {
   }
 
   /// CloudFront Cookies for authenticated users
-  if (isLoggedIn && !isSettingsRoute) {
+  if (process.env.IMAGES_ENABLED !== 'false' && isLoggedIn && !isSettingsRoute) {
     const hasCloudFrontCookies =
       req.cookies.has('CloudFront-Key-Pair-Id') &&
       req.cookies.has('CloudFront-Policy') &&

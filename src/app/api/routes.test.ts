@@ -14,6 +14,9 @@ vi.mock('@/env.mjs', () => ({
     CRON_SECRET: 'test-secret-32-chars-minimum-len',
     NODE_ENV: 'test',
     COOKIES_DOMAIN: '.example.com',
+    EMAILS_ENABLED: true,
+    IMAGES_ENABLED: true,
+    NEXT_PUBLIC_IMAGES_ENABLED: true,
     NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: 'https://assets.example.com',
   },
 }))
@@ -38,6 +41,7 @@ import { GET as proxyGET } from './proxy/route'
 
 import { db } from '@/server/db'
 import { auth } from '@/auth'
+import { env } from '@/env.mjs'
 import { setCloudFrontCookies } from '@/lib/cloudfront'
 import * as Sentry from '@sentry/nextjs'
 import { sendWeeklyNewsletters } from '@/server/actions/newsletter'
@@ -46,6 +50,12 @@ const mockAuth = auth as Mock
 const mockDbPing = db.$runCommandRaw as Mock
 const mockSetCFCookies = setCloudFrontCookies as Mock
 const mockSendNewsletters = sendWeeklyNewsletters as Mock
+const mockEnv = env as {
+  CRON_SECRET?: string
+  EMAILS_ENABLED: boolean
+  IMAGES_ENABLED: boolean
+  NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN: string
+}
 
 function authenticatedSession() {
   return { user: { id: 'user-1', name: 'Test', email: 'test@example.com' } }
@@ -54,6 +64,10 @@ function authenticatedSession() {
 describe('API Routes', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockEnv.CRON_SECRET = 'test-secret-32-chars-minimum-len'
+    mockEnv.EMAILS_ENABLED = true
+    mockEnv.IMAGES_ENABLED = true
+    mockEnv.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN = 'https://assets.example.com'
   })
 
   describe('GET /api/health', () => {
@@ -196,6 +210,28 @@ describe('API Routes', () => {
       expect(body.error).toBe('Unauthorized')
     })
 
+    it('returns 404 when cron secret is not configured', async () => {
+      mockEnv.CRON_SECRET = undefined
+
+      const res = await cronNewsletterPOST(cronRequest('test-secret-32-chars-minimum-len'))
+      const body = await res.json()
+
+      expect(res.status).toBe(404)
+      expect(body.error).toBe('Cron disabled')
+      expect(mockSendNewsletters).not.toHaveBeenCalled()
+    })
+
+    it('returns 404 when emails are disabled', async () => {
+      mockEnv.EMAILS_ENABLED = false
+
+      const res = await cronNewsletterPOST(cronRequest('test-secret-32-chars-minimum-len'))
+      const body = await res.json()
+
+      expect(res.status).toBe(404)
+      expect(body.error).toBe('Cron disabled')
+      expect(mockSendNewsletters).not.toHaveBeenCalled()
+    })
+
     it('returns 401 when secret is wrong', async () => {
       const res = await cronNewsletterPOST(cronRequest('wrong-secret'))
       const body = await res.json()
@@ -270,6 +306,17 @@ describe('API Routes', () => {
 
       expect(res.status).toBe(400)
       expect(body.error).toBe('Missing url parameter')
+    })
+
+    it('returns 404 when image fetching is disabled', async () => {
+      mockEnv.IMAGES_ENABLED = false
+
+      const req = new Request('http://localhost/api/proxy?url=https://assets.example.com/img.jpg')
+      const res = await proxyGET(req)
+      const body = await res.json()
+
+      expect(res.status).toBe(404)
+      expect(body.error).toBe('Image fetching is disabled')
     })
 
     it('returns 400 when host does not match allowed host', async () => {

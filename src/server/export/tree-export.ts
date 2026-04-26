@@ -1,4 +1,5 @@
 import { db } from '@/server/db'
+import { env } from '@/env.mjs'
 import { getFileFromS3 } from '@/lib/s3'
 import { createZipStream, ZipEntry } from '@/lib/zip'
 
@@ -574,6 +575,8 @@ export async function collectTreeGalleryExport(
   slug: string,
   userId: string
 ): Promise<GalleryExportResult> {
+  if (!env.IMAGES_ENABLED) return { error: true, status: 404, message: 'error-pictures-disabled' }
+
   const gallery = await collectTreeGallery(slug, userId)
   if (!gallery) return { error: true, status: 404, message: 'error-tree-not-found' }
   if ('forbidden' in gallery) return { error: true, status: 403, message: 'error-no-permission' }
@@ -590,6 +593,8 @@ export async function collectNodeGalleryExport(
   nodeId: string,
   userId: string
 ): Promise<GalleryExportResult> {
+  if (!env.IMAGES_ENABLED) return { error: true, status: 404, message: 'error-pictures-disabled' }
+
   const gallery = await collectNodeGallery(slug, nodeId, userId)
   if (!gallery) return { error: true, status: 404, message: 'error-tree-not-found' }
   if ('forbidden' in gallery) return { error: true, status: 403, message: 'error-no-permission' }

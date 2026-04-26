@@ -5,6 +5,7 @@ import { useLocale } from 'next-intl'
 import { Download, LoaderIcon, Maximize, Menu, X } from 'lucide-react'
 
 import { Icon } from '@/components/trees/icon'
+import { getImageAssetUrl, publicImagesEnabled } from '@/config/images'
 
 import { Button, TypographyH5 } from '@/ui'
 
@@ -56,6 +57,8 @@ export function NodeGalleryContent({
   t_trees,
 }: NodeGalleryContentProps) {
   const locale = useLocale()
+  const canUploadPictures = publicImagesEnabled && !readonly
+  const canExportPictures = publicImagesEnabled && canExportGallery
 
   if (isMobile) {
     return (
@@ -66,7 +69,7 @@ export function NodeGalleryContent({
           <div className="mt-4 mb-6 flex flex-col items-start gap-x-3 gap-y-2 text-center">
             <p>{t_trees('node-gallery-description')} </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2 self-center">
-              {!readonly && (
+              {canUploadPictures && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -77,7 +80,7 @@ export function NodeGalleryContent({
                   <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
                 </Button>
               )}
-              {canExportGallery && galleryExportHref && pictures.length > 0 && (
+              {canExportPictures && galleryExportHref && pictures.length > 0 && (
                 <Button
                   asChild
                   variant="ghost"
@@ -91,7 +94,7 @@ export function NodeGalleryContent({
               )}
             </div>
           </div>
-          {!readonly && (
+          {canUploadPictures && (
             <input
               ref={fileInputRef}
               type="file"
@@ -122,7 +125,7 @@ export function NodeGalleryContent({
                   }
                 >
                   <GalleryImage
-                    src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                    src={getImageAssetUrl(picture.fileKey)}
                     alt={`Picture ${idx + 1}`}
                     className="min-h-[124px] w-full"
                     hasError={errorGalleryPicture[picture.id]}
@@ -200,7 +203,7 @@ export function NodeGalleryContent({
         </div>
         <p>{t_trees('node-gallery-description')} </p>
         <div className="mt-5 flex flex-wrap items-center gap-2 self-center">
-          {!readonly && (
+          {canUploadPictures && (
             <Button
               type="button"
               variant="ghost"
@@ -211,7 +214,7 @@ export function NodeGalleryContent({
               <span className="text-sm font-bold">{t_trees('node-gallery-upload')}</span>
             </Button>
           )}
-          {canExportGallery && galleryExportHref && pictures.length > 0 && (
+          {canExportPictures && galleryExportHref && pictures.length > 0 && (
             <Button
               asChild
               variant="ghost"
@@ -225,7 +228,7 @@ export function NodeGalleryContent({
           )}
         </div>
       </div>
-      {!readonly && (
+      {canUploadPictures && (
         <input
           ref={fileInputRef}
           type="file"
@@ -253,7 +256,7 @@ export function NodeGalleryContent({
               )}
             >
               <GalleryImage
-                src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${picture.fileKey}`}
+                src={getImageAssetUrl(picture.fileKey)}
                 alt={`Picture ${idx + 1}`}
                 className="shadow-center-sm bg-ocean-300 mb-2 min-h-[124px] w-full"
                 hasError={errorGalleryPicture[picture.id]}

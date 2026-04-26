@@ -12,6 +12,9 @@ import { sendWeeklyNewsletters } from '@/server/actions/newsletter'
 export async function POST(request: NextRequest) {
   try {
     const cronSecret = env.CRON_SECRET
+    if (!cronSecret || !env.EMAILS_ENABLED) {
+      return NextResponse.json({ error: 'Cron disabled' }, { status: 404 })
+    }
 
     const hasValidSecret = request.headers.get('x-cron-secret') === cronSecret
     if (!hasValidSecret) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

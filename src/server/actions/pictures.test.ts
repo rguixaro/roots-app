@@ -20,6 +20,11 @@ vi.mock('@/server/db', () => ({
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('@sentry/nextjs', () => ({ captureException: vi.fn() }))
+vi.mock('@/env.mjs', () => ({
+  env: {
+    IMAGES_ENABLED: true,
+  },
+}))
 vi.mock('@/lib/s3', () => ({
   uploadFileToS3: vi.fn(),
   deleteFileFromS3: vi.fn(),
@@ -39,6 +44,7 @@ vi.mock('@/server/utils', () => ({
 }))
 
 import { db } from '@/server/db'
+import { env } from '@/env.mjs'
 import { assertAuthenticated, assertRole, assertTreeWritable } from '@/server/utils'
 import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
 import * as Sentry from '@sentry/nextjs'
@@ -57,9 +63,11 @@ const mockAssertRole = assertRole as ReturnType<typeof vi.fn>
 const mockAssertTreeWritable = assertTreeWritable as ReturnType<typeof vi.fn>
 const mockUpload = uploadFileToS3 as ReturnType<typeof vi.fn>
 const mockDeleteS3 = deleteFileFromS3 as ReturnType<typeof vi.fn>
+const mockEnv = env as { IMAGES_ENABLED: boolean }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockEnv.IMAGES_ENABLED = true
   mockAssertAuth.mockResolvedValue('user-1')
   mockAssertRole.mockResolvedValue(undefined)
   mockAssertTreeWritable.mockResolvedValue(undefined)
@@ -113,6 +121,15 @@ describe('getPictures', () => {
 
 describe('createPicture', () => {
   const mockFile = new File(['content'], 'photo.jpg', { type: 'image/jpeg' })
+
+  it('returns disabled error when images are disabled', async () => {
+    mockEnv.IMAGES_ENABLED = false
+
+    const result = await createPicture('n1', mockFile)
+
+    expect(result).toEqual({ error: true, message: 'error-pictures-disabled' })
+    expect(mockUpload).not.toHaveBeenCalled()
+  })
 
   it('rejects non-image file type', async () => {
     const txtFile = new File(['text'], 'doc.txt', { type: 'text/plain' })

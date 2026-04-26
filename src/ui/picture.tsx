@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { LoaderIcon, ImageIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
+import { getImageAssetUrl, publicImagesEnabled } from '@/config/images'
+
 import { usePictureState } from '@/hooks'
 
 import { cn } from '@/utils'
@@ -30,9 +32,7 @@ export const Picture: React.FC<PictureProps> = ({
 }) => {
   const [cachedImages, setCachedImages] = useState<Record<string, string>>({})
 
-  const src = fileKey
-    ? (cachedImages[fileKey] ?? `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${fileKey}`)
-    : null
+  const src = fileKey ? (cachedImages[fileKey] ?? getImageAssetUrl(fileKey)) : null
 
   const { isLoading, hasError, onLoad, onError } = usePictureState(src)
 
@@ -41,10 +41,10 @@ export const Picture: React.FC<PictureProps> = ({
 
   const handleLoad = () => {
     onLoad()
-    if (fileKey && !cachedImages[fileKey]) {
+    if (fileKey && src && !cachedImages[fileKey]) {
       setCachedImages((prev) => ({
         ...prev,
-        [fileKey]: `${process.env.NEXT_PUBLIC_CLOUDFRONT_ASSETS_DOMAIN}/${fileKey}`,
+        [fileKey]: src,
       }))
     }
   }
@@ -95,7 +95,7 @@ export const Picture: React.FC<PictureProps> = ({
           <ImageIcon size={iconSize} />
         </div>
       )}
-      {src && !hasError && (
+      {publicImagesEnabled && src && !hasError && (
         <div
           className={cn(
             'absolute inset-0 transition-all duration-500 ease-out',

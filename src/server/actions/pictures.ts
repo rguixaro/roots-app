@@ -7,6 +7,7 @@ import * as Sentry from '@sentry/nextjs'
 import { db } from '@/server/db'
 import { assertRole, assertAuthenticated, assertTreeWritable } from '@/server/utils'
 
+import { env } from '@/env.mjs'
 import { uploadFileToS3, deleteFileFromS3 } from '@/lib/s3'
 
 import { Picture, PictureMetadata, PictureTag } from '@/types'
@@ -74,6 +75,7 @@ export const createPicture = async (
 ): Promise<{ error: boolean; picture?: Picture; message?: string }> => {
   let fileKey: string | null = null
 
+  if (!env.IMAGES_ENABLED) return { error: true, message: 'error-pictures-disabled' }
   if (!file.type.startsWith('image/')) return { error: true, message: 'error-picture-upload' }
   if (file.size > 50 * 1024 * 1024) return { error: true, message: 'error-picture-too-large' }
 

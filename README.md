@@ -80,7 +80,7 @@ and intuitive way.
 
 ## Testing
 
-Unit and server tests run automatically on every push and PR to `main`/`dev`
+Unit and server tests run automatically on every push and PR to `main`/`stage`
 via [GitHub Actions](.github/workflows/test.yml).
 
 ```bash

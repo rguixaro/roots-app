@@ -19,6 +19,8 @@ interface PictureProps {
   disablePlaceholder?: boolean
   iconSize?: number
   animated?: boolean
+  sizes?: string
+  quality?: number
 }
 
 export const Picture: React.FC<PictureProps> = ({
@@ -29,6 +31,8 @@ export const Picture: React.FC<PictureProps> = ({
   disablePlaceholder = false,
   iconSize = 24,
   animated = true,
+  sizes = '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw',
+  quality,
 }) => {
   const [cachedImages, setCachedImages] = useState<Record<string, string>>({})
 
@@ -38,6 +42,7 @@ export const Picture: React.FC<PictureProps> = ({
 
   const showPlaceholder = !disablePlaceholder && (!src || hasError) && !isLoading
   const showLoader = isLoading && !hasError
+  const isLoaded = !!src && !isLoading && !hasError
 
   const handleLoad = () => {
     onLoad()
@@ -55,6 +60,7 @@ export const Picture: React.FC<PictureProps> = ({
 
   return (
     <motion.div
+      data-picture-loaded={isLoaded ? 'true' : undefined}
       className={cn(
         'border-ocean-50 relative overflow-hidden rounded-lg border-2',
         classNameContainer,
@@ -76,6 +82,7 @@ export const Picture: React.FC<PictureProps> = ({
     >
       {showLoader && (
         <div
+          data-picture-loader="true"
           className={cn(
             'bg-ocean-50 absolute inset-0 flex items-center justify-center',
             classNamePicture
@@ -97,6 +104,7 @@ export const Picture: React.FC<PictureProps> = ({
       )}
       {publicImagesEnabled && src && !hasError && (
         <div
+          data-picture-image="true"
           className={cn(
             'absolute inset-0 transition-all duration-500 ease-out',
             isLoading ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
@@ -110,7 +118,8 @@ export const Picture: React.FC<PictureProps> = ({
             loader={loader}
             onLoad={handleLoad}
             onError={onError}
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes={sizes}
+            quality={quality}
           />
         </div>
       )}

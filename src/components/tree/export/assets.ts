@@ -1,12 +1,13 @@
 'use client'
 
 const waitForFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms))
 
 const waitForImage = (image: HTMLImageElement) => {
   if (image.complete && image.naturalWidth > 0) return Promise.resolve()
 
   return new Promise<void>((resolve) => {
-    const timeout = window.setTimeout(resolve, 3_000)
+    const timeout = window.setTimeout(resolve, 10_000)
     const done = () => {
       window.clearTimeout(timeout)
       resolve()
@@ -30,6 +31,15 @@ const decodeImage = async (image: HTMLImageElement) => {
   }
 }
 
+async function waitForPictureLoaders(element: HTMLElement) {
+  const startedAt = performance.now()
+
+  while (element.querySelector("[data-picture-loader='true']")) {
+    if (performance.now() - startedAt > 5_000) return
+    await wait(100)
+  }
+}
+
 export async function waitForTreeExportAssets(element: HTMLElement): Promise<void> {
   await document.fonts?.ready
   await waitForFrame()
@@ -38,5 +48,6 @@ export async function waitForTreeExportAssets(element: HTMLElement): Promise<voi
   const images = Array.from(element.querySelectorAll('img'))
   await Promise.all(images.map(decodeImage))
 
+  await waitForPictureLoaders(element)
   await waitForFrame()
 }

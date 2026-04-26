@@ -264,10 +264,12 @@ export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>):
             'group-hover:bg-ocean-200 ',
             (isExpanded || isHighlighted) && 'bg-ocean-200 text-ocean-50'
           )}
+          sizes="48px"
+          quality={96}
         />
       </motion.div>
       <div className="flex min-w-0 flex-1 flex-col items-start px-2">
-        <span className="relative z-10 line-clamp-2 text-left text-sm leading-tight font-bold">
+        <span className="relative z-10 line-clamp-2 w-full min-w-0 pr-1 text-left text-sm leading-tight font-bold">
           {fullName}
         </span>
         {alias && (
@@ -297,7 +299,7 @@ export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>):
         position={Position.Right}
         isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'right-0! translate-x-1/2!',
           canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
@@ -310,7 +312,7 @@ export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>):
         position={Position.Left}
         isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'left-0! -translate-x-1/2!',
           canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
@@ -323,7 +325,7 @@ export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>):
         position={Position.Top}
         isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'top-0! -translate-y-1/2!',
           canConnect && (isExpanded || isHighlighted || isHovered)
             ? "pointer-events-auto before:absolute before:-inset-6 before:bg-transparent before:content-['']"
@@ -336,7 +338,7 @@ export function StyledNode({ data, isConnectable }: NodeProps<StyledNodeProps>):
         position={Position.Bottom}
         isConnectable={canConnect}
         className={cn(
-          'relative h-px! w-px! border-0! opacity-0!',
+          'absolute! h-px! w-px! border-0! opacity-0!',
           'bottom-0! translate-y-1/2!',
           canConnect && isHovered && !isExpanded
             ? "pointer-events-auto! before:absolute before:-inset-6 before:bg-transparent before:content-['']"

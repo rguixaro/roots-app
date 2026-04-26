@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import ReactFlow, { Background, ConnectionLineType } from 'reactflow'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { LoaderIcon } from 'lucide-react'
@@ -42,6 +42,16 @@ import { Tree, TreeEdge, TreeNode, Union } from '@/types'
 
 import { ocean } from '@/styles/colors'
 
+function getTimestampedTreeExportFilename(slug: string) {
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/\.\d{3}Z$/, '')
+    .replace(/[-:]/g, '')
+    .replace('T', '-')
+
+  return `${slug}-tree-${timestamp}.png`
+}
+
 interface StyledTreeProps {
   readonly: boolean
   canExportGallery: boolean
@@ -63,6 +73,7 @@ export default function StyledTree({
   const t_toasts = useTranslations('toasts')
   const t_treeInfo = useTranslations('tree-info')
   const t_errors = useTranslations('errors')
+  const locale = useLocale()
   const searchParams = useSearchParams()
   const treeContainerRef = useRef<HTMLDivElement | null>(null)
   const autoExportStarted = useRef(false)
@@ -87,10 +98,28 @@ export default function StyledTree({
     treeState.onSpouseUnionConfirmNeeded
   )
   const nodeOperations = useNodeOperations(tree, nodes)
+  const exportMetadata = useMemo(() => {
+    const generatedDate = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date())
+
+    return {
+      familyName: tree.name,
+      stats: [t_treeInfo('export-image-stat-members', { count: nodes.length })],
+      generatedLabel: t_treeInfo('export-image-generated', { date: generatedDate }),
+      footerLabel: t_treeInfo('export-image-footer'),
+      footerDomain: locale === 'ca' ? 'arrels.rguixaro.dev' : 'roots.rguixaro.dev',
+    }
+  }, [locale, nodes.length, t_treeInfo, tree.name])
   const { isExporting, exportTreeImage } = useTreeImageExport(
     treeContainerRef,
-    `${tree.slug}-tree.png`,
-    treeState.prepareExportView
+    getTimestampedTreeExportFilename(tree.slug),
+    {
+      prepare: treeState.prepareExportView,
+      metadata: exportMetadata,
+    }
   )
 
   const handleExportImage = useCallback(async () => {
@@ -132,7 +161,7 @@ export default function StyledTree({
             role="alertdialog"
             aria-modal="true"
             aria-busy="true"
-            className="bg-ocean-700/70 fixed inset-0 z-[9999] flex cursor-wait items-center justify-center p-4 backdrop-blur-md"
+            className="bg-ocean-700/70 fixed inset-0 z-9999 flex cursor-wait items-center justify-center p-4 backdrop-blur-md"
           >
             <div className="bg-pale-ocean text-ocean-400 shadow-center-lg ring-ocean-100/60 flex max-w-sm flex-col items-center rounded-xl p-6 text-center ring-1">
               <div className="bg-ocean-50 text-ocean-300 mb-4 flex h-12 w-12 items-center justify-center rounded-full">

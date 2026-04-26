@@ -20,11 +20,28 @@ const eventBgClass = (type: TimelineEvent['type']): string => {
     case 'birth':
       return 'bg-pale-ocean'
     case 'death':
-      return 'bg-ocean-100'
+      return 'bg-ocean-400'
     case 'marriage':
-      return 'bg-rose-100'
+      return 'bg-ocean-100'
     case 'divorce':
-      return 'bg-slate-200'
+      return 'bg-ocean-300'
+  }
+}
+
+const eventTextClass = (type: TimelineEvent['type'], main: boolean): string => {
+  switch (type) {
+    case 'birth':
+      return main
+        ? 'text-ocean-400 group-hover:text-pale-ocean'
+        : 'text-ocean-300 group-hover:text-ocean-50'
+    case 'death':
+      return main ? 'text-pale-ocean' : 'text-ocean-50'
+    case 'marriage':
+      return main
+        ? 'text-ocean-400 group-hover:text-pale-ocean'
+        : 'text-ocean-300 group-hover:text-ocean-50'
+    case 'divorce':
+      return main ? 'text-pale-ocean' : 'text-ocean-50'
   }
 }
 
@@ -158,7 +175,7 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                   <motion.div
                     className={cn(
                       'bg-ocean-100 absolute top-3.5 left-1/2 z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2',
-                      'border-ocean-400 transition-all duration-300',
+                      'transition-all duration-300',
                       isAbove
                         ? 'rounded-tl-md rounded-br-md border-b-4 group-hover:border-t-4 group-hover:border-b-0'
                         : 'rounded-tr-md rounded-bl-md border-t-4 group-hover:border-t-0 group-hover:border-b-4'
@@ -168,19 +185,34 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                     <div
                       className={cn(
                         'shadow-center-sm absolute bottom-1/2 left-1/2 mb-2 flex w-36 -translate-x-1/2 flex-col items-center px-2 py-2 text-center',
-                        'group-hover:bg-ocean-400 space-y-2 rounded-lg transition-all duration-300 select-none',
+                        'group-hover:bg-ocean-200 space-y-2 rounded-lg transition-all duration-300 select-none',
                         eventBgClass(event.item.type)
                       )}
                     >
-                      <div className="group-hover:text-ocean-50 text-ocean-400 self-start text-xs font-medium opacity-70 transition-colors">
+                      <div
+                        className={cn(
+                          'self-start text-xs font-medium transition-colors',
+                          eventTextClass(event.item.type, false)
+                        )}
+                      >
                         {t_trees(`timeline-event-${event.item.type}`)}
                       </div>
                       <div className="my-px flex w-full items-center justify-between space-x-2">
                         <div className="flex flex-col items-start">
-                          <div className="group-hover:text-ocean-50 text-left text-sm leading-3.5 font-semibold transition-colors">
+                          <div
+                            className={cn(
+                              'text-left text-sm leading-3.5 font-semibold transition-colors',
+                              eventTextClass(event.item.type, true)
+                            )}
+                          >
                             {event.item.name}
                           </div>
-                          <div className="group-hover:text-ocean-50 text-ocean-300 text-xs font-light transition-colors">
+                          <div
+                            className={cn(
+                              'text-xs font-light transition-colors',
+                              eventTextClass(event.item.type, false)
+                            )}
+                          >
                             {event.item.place}
                           </div>
                         </div>
@@ -188,7 +220,8 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                           <Picture
                             fileKey={event.item.picture}
                             classNameContainer={cn(
-                              'h-10 w-10 shadow-center-sm flex-shrink-0 duration-300 group-hover:border-ocean-50 rounded-md border-ocean-400'
+                              'h-10 w-10 shadow-center-sm transition-colors flex-shrink-0 rounded-md duration-300',
+                              eventTextClass(event.item.type, false).replaceAll('text-', 'border-')
                             )}
                           />
                         )}
@@ -198,19 +231,34 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                     <div
                       className={cn(
                         'shadow-center-sm absolute top-1/2 left-1/2 mt-8 flex w-36 -translate-x-1/2 flex-col items-center px-0 py-2 text-center',
-                        'group-hover:bg-ocean-400 space-y-0 rounded-lg px-2 transition-colors duration-300 select-none',
+                        'group-hover:bg-ocean-200 space-y-0 rounded-lg px-2 transition-colors duration-300 select-none',
                         eventBgClass(event.item.type)
                       )}
                     >
-                      <div className="group-hover:text-ocean-50 text-ocean-400 self-start text-xs font-medium opacity-70 transition-colors">
+                      <div
+                        className={cn(
+                          'self-start text-xs font-medium transition-colors',
+                          eventTextClass(event.item.type, false)
+                        )}
+                      >
                         {t_trees(`timeline-event-${event.item.type}`)}
                       </div>
                       <div className="my-px flex w-full items-center justify-between space-x-2">
                         <div className="flex flex-col items-start">
-                          <div className="group-hover:text-ocean-50 text-left text-sm leading-3.5 font-semibold transition-colors">
+                          <div
+                            className={cn(
+                              'text-left text-sm leading-3.5 font-semibold transition-colors',
+                              eventTextClass(event.item.type, true)
+                            )}
+                          >
                             {event.item.name}
                           </div>
-                          <div className="group-hover:text-ocean-50 text-ocean-300 text-xs font-light transition-colors">
+                          <div
+                            className={cn(
+                              'text-xs font-light transition-colors',
+                              eventTextClass(event.item.type, false)
+                            )}
+                          >
                             {event.item.place}
                           </div>
                         </div>
@@ -218,7 +266,8 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                           <Picture
                             fileKey={event.item.picture}
                             classNameContainer={cn(
-                              'h-10 w-10 shadow-center-sm flex-shrink-0 duration-300 group-hover:border-ocean-50 rounded-md border-ocean-400'
+                              'h-10 w-10 shadow-center-sm transition-colors flex-shrink-0 rounded-md duration-300',
+                              eventTextClass(event.item.type, false).replaceAll('text-', 'border-')
                             )}
                           />
                         )}
@@ -285,25 +334,37 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                   <div
                     className={cn(
                       'shadow-center-sm absolute top-1/2 flex w-44 -translate-y-1/2 flex-col items-start px-3 py-2 text-left',
-                      'group-hover:bg-ocean-400 space-y-1 rounded-lg transition-all duration-300 select-none',
+                      'group-hover:bg-ocean-200 space-y-1 rounded-lg transition-all duration-300 select-none',
                       eventBgClass(event.item.type),
                       isLeft ? 'right-6' : 'left-6'
                     )}
                   >
                     <div className="flex w-full items-center justify-between">
-                      <div className="group-hover:text-ocean-50 text-ocean-400 text-xs font-medium opacity-70 transition-colors">
+                      <div
+                        className={cn(
+                          'text-xs font-medium transition-colors',
+                          eventTextClass(event.item.type, false)
+                        )}
+                      >
                         {t_trees(`timeline-event-${event.item.type}`)}
-                      </div>
-                      <div className="group-hover:text-ocean-50 text-ocean-300 text-xs font-light transition-colors group-hover:font-bold">
-                        {new Date(event.item.date).toLocaleDateString(locale)}
                       </div>
                     </div>
                     <div className="my-px flex w-full items-center justify-between space-x-2">
                       <div className="flex flex-col items-start">
-                        <div className="group-hover:text-ocean-50 text-left text-sm leading-3.5 font-semibold transition-colors">
+                        <div
+                          className={cn(
+                            'text-left text-sm leading-3.5 font-semibold transition-colors',
+                            eventTextClass(event.item.type, true)
+                          )}
+                        >
                           {event.item.name}
                         </div>
-                        <div className="group-hover:text-ocean-50 text-ocean-300 text-xs font-light transition-colors">
+                        <div
+                          className={cn(
+                            'text-xs font-light transition-colors',
+                            eventTextClass(event.item.type, false)
+                          )}
+                        >
                           {event.item.place}
                         </div>
                       </div>
@@ -311,11 +372,20 @@ export function Timeline({ events, slug }: { events: TimelineEvent[]; slug: stri
                         <Picture
                           fileKey={event.item.picture}
                           classNameContainer={cn(
-                            'h-10 w-10 shadow-center-sm flex-shrink-0 duration-300 group-hover:border-ocean-50 rounded-md border-ocean-400'
+                            'h-10 w-10 shadow-center-sm transition-colors flex-shrink-0 rounded-md duration-300',
+                            eventTextClass(event.item.type, false).replaceAll('text-', 'border-')
                           )}
                         />
                       )}
                     </div>
+                  </div>
+                  <div
+                    className={cn(
+                      'absolute top-1/2 w-32 -translate-y-1/2 text-xs transition-all duration-300 select-none group-hover:font-bold',
+                      isLeft ? 'left-6 text-left' : 'right-6 text-right'
+                    )}
+                  >
+                    {new Date(event.item.date).toLocaleDateString(locale)}
                   </div>
                 </AnimatedEvent>
               )

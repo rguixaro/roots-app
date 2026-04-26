@@ -233,7 +233,7 @@ export default function StyledTree({
             if (edgeId.startsWith('ue:')) {
               const parts = edgeId.split(':')
               const kind = parts[2]
-              if (kind === 'a' || kind === 'b') {
+              if (kind === 'a' || kind === 'b' || kind === 's') {
                 const unionId = parts[1]
                 return () => {
                   treeState.closeEdgeContextMenu()
@@ -261,7 +261,7 @@ export default function StyledTree({
             if (edgeId.startsWith('ue:')) {
               const parts = edgeId.split(':')
               const kind = parts[2]
-              if (kind !== 'a' && kind !== 'b') return undefined
+              if (kind !== 'a' && kind !== 'b' && kind !== 's') return undefined
               const unionId = parts[1]
               return () => {
                 treeState.closeEdgeContextMenu()
@@ -326,7 +326,8 @@ export default function StyledTree({
           const dbEdge = edges.find((e) => e.id === edgeId)
 
           const isUnion =
-            (isCoupleLeg && (parts[2] === 'a' || parts[2] === 'b')) || dbEdge?.type === 'SPOUSE'
+            (isCoupleLeg && (parts[2] === 'a' || parts[2] === 'b' || parts[2] === 's')) ||
+            dbEdge?.type === 'SPOUSE'
 
           const unionId = isCoupleLeg
             ? parts[1]

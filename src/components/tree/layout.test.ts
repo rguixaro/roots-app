@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 
-import type { TreeEdge, TreeNode, Union } from '@/types'
+import type { Tree, TreeEdge, TreeNode, Union } from '@/types'
 
 import {
+  computedLayout,
   computeGenerations,
+  createTreeLayout,
   familyTreeLayout,
   inferChildOfUnionFromEdges,
   nodeHeight,
@@ -28,6 +30,16 @@ const union = (id: string, spouseAId: string, spouseBId: string | null): Union =
   marriedAt: null,
   divorcedAt: null,
   place: null,
+  createdAt: new Date(0),
+  updatedAt: new Date(0),
+})
+
+const tree = (): Tree => ({
+  id: 't1',
+  slug: 'tree',
+  name: 'Tree',
+  type: 'HUMAN',
+  newsletter: false,
   createdAt: new Date(0),
   updatedAt: new Date(0),
 })
@@ -65,11 +77,7 @@ describe('computeGenerations', () => {
   })
 
   it('pins both spouses to the same generation even when one has no parents', () => {
-    const persons = [
-      person('Root'),
-      person('Alice', { childOfUnionId: 'u_parent' }),
-      person('Bob'),
-    ]
+    const persons = [person('Root'), person('Alice', { childOfUnionId: 'u_parent' }), person('Bob')]
     const unions = [union('u_parent', 'Root', null), union('u_marriage', 'Alice', 'Bob')]
     const gens = computeGenerations(persons, [], unions)
     expect(gens.get('Alice')).toBe(1)
@@ -239,6 +247,19 @@ describe('familyTreeLayout', () => {
     expect(Math.abs(childACx - acCenterX)).toBeLessThan(nodeWidth * 1.5)
   })
 
+  it('places a 2-union owner between the two spouses so each spouse edge is direct', () => {
+    // with the owner on an end, the second spouse edge crosses the first
+    // spouse and the "+" buttons collapse onto the same horizontal gap.
+    const persons = [person('Alice'), person('Bob'), person('Charlie')]
+    const unions = [union('u1', 'Alice', 'Bob'), union('u2', 'Alice', 'Charlie')]
+    const { positions } = run(persons, unions)
+    const aliceX = positions.get('Alice')!.x
+    const bobX = positions.get('Bob')!.x
+    const charlieX = positions.get('Charlie')!.x
+    const sorted = [bobX, aliceX, charlieX].sort((a, b) => a - b)
+    expect(sorted[1]).toBe(aliceX)
+  })
+
   it('falls back to nodeWidth when a width is missing from the width map', () => {
     const persons = [person('A')]
     const gens = new Map<string, number>([['A', 0]])
@@ -379,6 +400,146 @@ describe('familyTreeLayout ownership edge case (regression)', () => {
   })
 })
 
+describe('computedLayout spouse edge routing', () => {
+  it('routes both spouse edges away from the shared married node', () => {
+    const nodes = [
+      {
+        id: 'Member 2',
+        type: 'DEFAULT',
+        data: { node: person('Member 2'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'Member 1',
+        type: 'DEFAULT',
+        data: { node: person('Member 1'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'Test 11',
+        type: 'DEFAULT',
+        data: { node: person('Test 11'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+    ]
+    const edges = [
+      {
+        id: 'e1',
+        source: 'Member 2',
+        target: 'Member 1',
+        data: { type: 'SPOUSE' },
+      },
+      {
+        id: 'e2',
+        source: 'Test 11',
+        target: 'Member 1',
+        data: { type: 'SPOUSE' },
+      },
+    ]
+
+    const { nodes: laidOutNodes, edges: laidOutEdges } = computedLayout(nodes, edges)
+    const member1 = laidOutNodes.find((node) => node.id === 'Member 1')!
+    const member2 = laidOutNodes.find((node) => node.id === 'Member 2')!
+    const test11 = laidOutNodes.find((node) => node.id === 'Test 11')!
+
+    expect(member1.position.x).toBeGreaterThan(member2.position.x)
+    expect(member1.position.x).toBeLessThan(test11.position.x)
+
+    expect(laidOutEdges).toContainEqual(
+      expect.objectContaining({
+        id: 'e1',
+        source: 'Member 2',
+        target: 'Member 1',
+        sourceHandle: 'right',
+        targetHandle: 'left',
+      })
+    )
+    expect(laidOutEdges).toContainEqual(
+      expect.objectContaining({
+        id: 'e2',
+        source: 'Member 1',
+        target: 'Test 11',
+        sourceHandle: 'right',
+        targetHandle: 'left',
+      })
+    )
+  })
+
+  it('moves the spouse menu button into a clear gap when the midpoint hits another node', () => {
+    const nodes = [
+      {
+        id: 'Member 2',
+        type: 'DEFAULT',
+        data: { node: person('Member 2'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'Member 1',
+        type: 'DEFAULT',
+        data: { node: person('Member 1'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+      {
+        id: 'Test 11',
+        type: 'DEFAULT',
+        data: { node: person('Test 11'), generation: 0 },
+        position: { x: 0, y: 0 },
+      },
+    ]
+    const edges = [
+      {
+        id: 'e_crossing',
+        source: 'Member 2',
+        target: 'Test 11',
+        data: { type: 'SPOUSE' },
+      },
+    ]
+
+    const { nodes: laidOutNodes, edges: laidOutEdges } = computedLayout(nodes, edges)
+    const member1 = laidOutNodes.find((node) => node.id === 'Member 1')!
+    const buttonX = laidOutEdges[0].data.buttonX
+
+    expect(laidOutEdges[0].data.showButton).toBe(true)
+    expect(buttonX < member1.position.x || buttonX > member1.position.x + nodeWidth).toBe(true)
+  })
+})
+
+describe('createTreeLayout union spouse edges', () => {
+  it('renders spouse edges from unions so every marriage has its own menu target', () => {
+    const persons = [person('Member 2'), person('Member 1'), person('Test 11')]
+    const unions = [union('u1', 'Member 2', 'Member 1'), union('u2', 'Member 1', 'Test 11')]
+    const edges = [
+      edge('e1', 'SPOUSE', 'Member 2', 'Member 1'),
+      edge('e2', 'SPOUSE', 'Member 2', 'Test 11'),
+    ]
+
+    const layout = createTreeLayout(
+      tree(),
+      persons,
+      edges,
+      unions,
+      null,
+      () => {},
+      () => {},
+      () => {},
+      false
+    )
+
+    expect(layout.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'ue:u1:s', source: 'Member 2', target: 'Member 1' }),
+        expect.objectContaining({ id: 'ue:u2:s', source: 'Member 1', target: 'Test 11' }),
+      ])
+    )
+    expect(layout.edges).not.toContainEqual(expect.objectContaining({ id: 'e1' }))
+    expect(layout.edges).not.toContainEqual(expect.objectContaining({ id: 'e2' }))
+
+    const computed = computedLayout(layout.nodes, layout.edges)
+    expect(computed.edges.find((edge) => edge.id === 'ue:u1:s')).toBeDefined()
+    expect(computed.edges.find((edge) => edge.id === 'ue:u2:s')).toBeDefined()
+  })
+})
+
 describe('inferChildOfUnionFromEdges', () => {
   it('returns an empty map when nothing needs inferring (no parent edges)', () => {
     const nodes = [person('A'), person('C', { childOfUnionId: 'u1' })]
@@ -389,10 +550,7 @@ describe('inferChildOfUnionFromEdges', () => {
   it('infers childOfUnionId when a node has PARENT edges to all spouses of a union', () => {
     const nodes = [person('Alice'), person('Bob'), person('Carol')]
     const unions = [union('u1', 'Alice', 'Bob')]
-    const edges = [
-      edge('e1', 'PARENT', 'Alice', 'Carol'),
-      edge('e2', 'PARENT', 'Bob', 'Carol'),
-    ]
+    const edges = [edge('e1', 'PARENT', 'Alice', 'Carol'), edge('e2', 'PARENT', 'Bob', 'Carol')]
     const result = inferChildOfUnionFromEdges(nodes, edges, unions)
     expect(result.get('Carol')).toBe('u1')
   })
@@ -457,16 +615,9 @@ describe('inferChildOfUnionFromEdges', () => {
   })
 
   it('overrides childOfUnionId when a stronger match exists (regression)', () => {
-    const nodes = [
-      person('Alice'),
-      person('Bob'),
-      person('Carol', { childOfUnionId: 'u_single' }),
-    ]
+    const nodes = [person('Alice'), person('Bob'), person('Carol', { childOfUnionId: 'u_single' })]
     const unions = [union('u_couple', 'Alice', 'Bob'), union('u_single', 'Alice', null)]
-    const edges = [
-      edge('e1', 'PARENT', 'Alice', 'Carol'),
-      edge('e2', 'PARENT', 'Bob', 'Carol'),
-    ]
+    const edges = [edge('e1', 'PARENT', 'Alice', 'Carol'), edge('e2', 'PARENT', 'Bob', 'Carol')]
     const result = inferChildOfUnionFromEdges(nodes, edges, unions)
     expect(result.get('Carol')).toBe('u_couple')
   })

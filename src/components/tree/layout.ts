@@ -23,6 +23,8 @@ const makeCoupleId = (unionId: string) => `${COUPLE_ID_PREFIX}${unionId}`
 
 const isCoupleId = (id: string) => id.startsWith(COUPLE_ID_PREFIX)
 
+const spousePairKey = (a: string, b: string) => [a, b].sort().join(':')
+
 function getNodeWidth(node: Node): number {
   if (isCoupleId(node.id) || node.type === 'COUPLE') return coupleNodeWidth
 
@@ -369,10 +371,8 @@ export function familyTreeLayout(
     }
     const aNode = personById.get(u.spouseAId)
     const bNode = personById.get(u.spouseBId)
-    const aHasParents =
-      !!aNode?.childOfUnionId && unionIds.has(aNode.childOfUnionId)
-    const bHasParents =
-      !!bNode?.childOfUnionId && unionIds.has(bNode.childOfUnionId)
+    const aHasParents = !!aNode?.childOfUnionId && unionIds.has(aNode.childOfUnionId)
+    const bHasParents = !!bNode?.childOfUnionId && unionIds.has(bNode.childOfUnionId)
 
     // prefer the spouse whose family root is in this tree; a rootless
     // outsider would drag the subtree to the forest tail. must come before
@@ -590,8 +590,7 @@ export function familyTreeLayout(
           const otherRoot = rootAncestorOf(other)
           const ownerRootIdx = ownerRoot ? (rootSortIndex.get(ownerRoot) ?? -1) : -1
           const otherRootIdx = otherRoot ? (rootSortIndex.get(otherRoot) ?? -1) : -1
-          if (ownerRootIdx !== otherRootIdx && otherRootIdx < ownerRootIdx)
-            flipIndex = 0
+          if (ownerRootIdx !== otherRootIdx && otherRootIdx < ownerRootIdx) flipIndex = 0
         }
       }
     }
@@ -602,6 +601,24 @@ export function familyTreeLayout(
       const other = u.spouseAId === personId ? u.spouseBId : u.spouseAId
       if (other) topEntries.push({ id: other, width: widthForPerson(other), unionIdx: 0 })
       topEntries.push({ id: personId, width: myW, unionIdx: null })
+    } else if (myUnions.length === 2) {
+      // multi-marriage: place owner between the two spouses so both
+      // spouse edges are direct. with the owner on an end, the second
+      // edge crosses the first spouse and chooseButtonX collapses both
+      // "+" buttons onto the same gap.
+      const u0 = unionById.get(myUnions[0])!
+      const u1 = unionById.get(myUnions[1])!
+      const other0 = u0.spouseAId === personId ? u0.spouseBId : u0.spouseAId
+      const other1 = u1.spouseAId === personId ? u1.spouseBId : u1.spouseAId
+      if (other0 && other1) {
+        topEntries.push({ id: other0, width: widthForPerson(other0), unionIdx: 0 })
+        topEntries.push({ id: personId, width: myW, unionIdx: null })
+        topEntries.push({ id: other1, width: widthForPerson(other1), unionIdx: 1 })
+      } else {
+        topEntries.push({ id: personId, width: myW, unionIdx: null })
+        if (other0) topEntries.push({ id: other0, width: widthForPerson(other0), unionIdx: 0 })
+        if (other1) topEntries.push({ id: other1, width: widthForPerson(other1), unionIdx: 1 })
+      }
     } else {
       topEntries.push({ id: personId, width: myW, unionIdx: null })
       myUnions.forEach((uid, idx) => {
@@ -695,10 +712,7 @@ export function familyTreeLayout(
  * Compute final node positions and edge styling. Uses the custom
  * family-tree layout; dagre is no longer involved.
  */
-export function computedLayout(
-  nodes: Node[],
-  edges: Edge[]
-): { nodes: Node[]; edges: Edge[] } {
+export function computedLayout(nodes: Node[], edges: Edge[]): { nodes: Node[]; edges: Edge[] } {
   const treeNodes: Node[] = []
   const coupleNodes: Node[] = []
   for (const n of nodes) {
@@ -760,6 +774,68 @@ export function computedLayout(
   })
 
   const nodePositionById = new Map<string, Node>(positionedNodes.map((n) => [n.id, n]))
+  const memberBounds = positionedNodes
+    .filter((node) => node.type !== 'COUPLE' && !isCoupleId(node.id))
+    .map((node) => {
+      const width = getNodeWidth(node)
+      return {
+        id: node.id,
+        left: node.position.x,
+        right: node.position.x + width,
+        top: node.position.y,
+        bottom: node.position.y + nodeHeight,
+      }
+    })
+
+  const chooseButtonX = (
+    source: string,
+    target: string,
+    sourceRight: number | null,
+    targetLeft: number | null,
+    buttonY: number | undefined
+  ): number | undefined => {
+    if (sourceRight == null || targetLeft == null) return undefined
+
+    const fallback = sourceRight + (targetLeft - sourceRight) / 2
+    if (buttonY == null) return fallback
+
+    const buttonHalfWidth = 28
+    const buttonHalfHeight = 14
+    const start = sourceRight + buttonHalfWidth
+    const end = targetLeft - buttonHalfWidth
+    if (start > end) return fallback
+
+    let segments = [{ start, end }]
+    const blockers = memberBounds
+      .filter(
+        (bounds) =>
+          bounds.id !== source &&
+          bounds.id !== target &&
+          buttonY >= bounds.top - buttonHalfHeight &&
+          buttonY <= bounds.bottom + buttonHalfHeight
+      )
+      .map((bounds) => ({
+        start: bounds.left - buttonHalfWidth,
+        end: bounds.right + buttonHalfWidth,
+      }))
+      .sort((a, b) => a.start - b.start)
+
+    for (const blocker of blockers) {
+      const next: typeof segments = []
+      for (const segment of segments) {
+        if (blocker.end <= segment.start || blocker.start >= segment.end) {
+          next.push(segment)
+          continue
+        }
+        if (blocker.start > segment.start) next.push({ start: segment.start, end: blocker.start })
+        if (blocker.end < segment.end) next.push({ start: blocker.end, end: segment.end })
+      }
+      segments = next
+    }
+
+    const best = segments.sort((a, b) => b.end - b.start - (a.end - a.start))[0]
+    return best ? best.start + (best.end - best.start) / 2 : fallback
+  }
 
   const computedEdges: Edge[] = edges.map((e) => {
     const isSpouse = e.data?.type === 'SPOUSE' || e.type === 'SPOUSE'
@@ -770,22 +846,40 @@ export function computedLayout(
       const src = nodePositionById.get(e.source)
       const tgt = nodePositionById.get(e.target)
       const shouldSwap = !!(src && tgt && src.position.x > tgt.position.x)
+      const source = shouldSwap ? e.target : e.source
+      const target = shouldSwap ? e.source : e.target
+      const sourceNode = nodePositionById.get(source)
+      const targetNode = nodePositionById.get(target)
+      const sourceWidth = sourceNode ? getNodeWidth(sourceNode) : nodeWidth
+      const sourceRight = sourceNode ? sourceNode.position.x + sourceWidth : null
+      const targetLeft = targetNode ? targetNode.position.x : null
+      const edgeGap = sourceRight != null && targetLeft != null ? targetLeft - sourceRight : null
+      const buttonY =
+        sourceNode && targetNode
+          ? (sourceNode.position.y + nodeHeight / 2 + targetNode.position.y + nodeHeight / 2) / 2
+          : undefined
+      const buttonX = chooseButtonX(source, target, sourceRight, targetLeft, buttonY)
       return {
         ...e,
         type: 'SPOUSE',
-        source: shouldSwap ? e.target : e.source,
-        target: shouldSwap ? e.source : e.target,
+        source,
+        target,
         sourceHandle: 'right',
         targetHandle: 'left',
         // selectable: false drops the .selectable class so the dashed line
         // doesn't show a pointer cursor (the pill button keeps its own).
         selectable: false,
+        data: {
+          ...e.data,
+          buttonX,
+          buttonY,
+          showButton: e.data?.unionId ? true : edgeGap == null || edgeGap >= 56,
+        },
         style: { stroke: ocean[100], strokeWidth: 5, strokeDasharray: '8 8' },
       }
     }
 
-    const isCoupleChildEdge =
-      typeof e.id === 'string' && /^ue:[^:]+:c:/.test(e.id)
+    const isCoupleChildEdge = typeof e.id === 'string' && /^ue:[^:]+:c:/.test(e.id)
     const isStandaloneChildEdge = e.type === 'CHILD'
 
     let type: string = 'smoothstep'
@@ -884,6 +978,11 @@ export function createTreeLayout(
 
   const coupleNodes: Node[] = []
   const coupleEdges: Edge[] = []
+  const unionSpousePairs = new Set(
+    unions
+      .filter((union): union is Union & { spouseBId: string } => !!union.spouseBId)
+      .map((union) => spousePairKey(union.spouseAId, union.spouseBId))
+  )
 
   for (const union of unions) {
     const unionChildren = effectiveNodes.filter((n) => n.childOfUnionId === union.id)
@@ -903,6 +1002,15 @@ export function createTreeLayout(
       },
       position: { x: 0, y: 0 },
     })
+
+    if (union.spouseBId) {
+      coupleEdges.push({
+        id: `ue:${union.id}:s`,
+        source: union.spouseAId,
+        target: union.spouseBId,
+        data: { type: 'SPOUSE', unionId: union.id },
+      })
+    }
 
     if (hasChildren) {
       coupleEdges.push({
@@ -931,6 +1039,9 @@ export function createTreeLayout(
   const keptTreeEdges: Edge[] = []
   for (const edge of edges) {
     if (edge.type === 'SPOUSE') {
+      if (unions.length > 0 || unionSpousePairs.has(spousePairKey(edge.fromNodeId, edge.toNodeId)))
+        continue
+
       // static dashes; the scrolling dasharray repainted every frame and
       // also fought the menu button portal for z-stacking
       keptTreeEdges.push({

@@ -5,22 +5,24 @@ import { useEdgeMenu } from './edge-menu-context'
 import { cn } from '@/utils'
 
 export function SpouseEdge(props: EdgeProps) {
-  const { id, sourceX, sourceY, targetX, targetY, style, markerStart, markerEnd } = props
+  const { id, sourceX, sourceY, targetX, targetY, style, markerStart, markerEnd, data } = props
   const openEdgeMenu = useEdgeMenu()
 
   const path = `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`
-  const midX = (sourceX + targetX) / 2
-  const midY = (sourceY + targetY) / 2
+  const buttonX = typeof data?.buttonX === 'number' ? data.buttonX : (sourceX + targetX) / 2
+  const buttonY = typeof data?.buttonY === 'number' ? data.buttonY : (sourceY + targetY) / 2
+  const showButton =
+    typeof data?.showButton === 'boolean' ? data.showButton : Math.abs(targetX - sourceX) >= 56
 
   return (
     <>
       <BaseEdge path={path} style={style} markerStart={markerStart} markerEnd={markerEnd} />
-      {openEdgeMenu && (
+      {openEdgeMenu && showButton && (
         <EdgeLabelRenderer>
           <div
             className="absolute"
             style={{
-              transform: `translate(-50%, -50%) translate(${midX}px, ${midY}px)`,
+              transform: `translate(-50%, -50%) translate(${buttonX}px, ${buttonY}px)`,
               pointerEvents: 'auto',
               zIndex: 1000,
               willChange: 'transform',

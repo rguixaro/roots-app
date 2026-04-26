@@ -580,7 +580,7 @@ export function useTreeState(
             stroke: isHighlighted ? ocean[200] : ocean[100],
             strokeWidth: isSpouse ? 6 : isHighlighted ? 5 : 3,
           },
-          zIndex: isHighlighted ? 1000 : 1,
+          zIndex: isHighlighted ? 1000 : undefined,
           data: { ...edge.data, isHighlighted },
         }
       })

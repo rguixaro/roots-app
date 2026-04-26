@@ -36,11 +36,7 @@ export function useEdgeOperations(
   nodes: TreeNode[],
   treeEdges: Edge[],
   setEdges: (edges: Edge[] | ((edges: Edge[]) => Edge[])) => void,
-  onUnionPickNeeded?: (req: {
-    parentId: string
-    childId: string
-    candidates: Union[]
-  }) => void,
+  onUnionPickNeeded?: (req: { parentId: string; childId: string; candidates: Union[] }) => void,
   onSpouseUnionConfirmNeeded?: (req: { spouseAId: string; spouseBId: string }) => void
 ) {
   const t_toasts = useTranslations('toasts')
@@ -208,13 +204,33 @@ export function useEdgeOperations(
   const deleteEdge = useCallback(
     async (edgeId: string, closeContextMenu: () => void) => {
       try {
-        // synthetic couple-bus edge ids: `ue:<unionId>:a|b|c:<childId>`
         if (edgeId.startsWith('ue:')) {
           const parts = edgeId.split(':')
           const unionId = parts[1]
           const kind = parts[2]
 
-          if (kind === 'a' || kind === 'b') {
+          if (kind === 'a' || kind === 'b' || kind === 's') {
+            if (kind === 's') {
+              const union = unions.find((u) => u.id === unionId)
+              const spouseEdge = union?.spouseBId
+                ? edges.find(
+                    (edge) =>
+                      edge.type === 'SPOUSE' &&
+                      ((edge.fromNodeId === union.spouseAId && edge.toNodeId === union.spouseBId) ||
+                        (edge.fromNodeId === union.spouseBId && edge.toNodeId === union.spouseAId))
+                  )
+                : undefined
+
+              if (spouseEdge) {
+                const { error, message } = await deleteTreeEdge(spouseEdge.id, tree.id)
+                if (error) {
+                  toast.error(t_errors(message || 'error'))
+                  closeContextMenu()
+                  return
+                }
+              }
+            }
+
             const { error, message } = await deleteUnion(unionId, tree.id)
             if (error) toast.error(t_errors(message || 'error'))
             else {

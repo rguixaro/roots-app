@@ -125,7 +125,7 @@ export async function getMilestones(): Promise<MilestonesResponse> {
             .filter((n): n is string => !!n)
 
           memories.push({
-            id: node.id,
+            id: pic.fileKey,
             name: allNames && allNames.length > 0 ? allNames.join(', ') : node.fullName,
             treeName: tree.name,
             treeSlug: tree.slug,
